@@ -1,0 +1,14 @@
+39e447f33ef68d878ed737489798b1ec *DESCRIPTION
+0877b5067b9c4409c0bc73045618bc3c *NAMESPACE
+26753ffabc54f80ad5507127a57b4f6c *R/afex-package.R
+78abd89cddc66ab43543cd4f57ce7972 *R/aov.car.R
+882f3a5d7188b4721652e2b82ad17a6e *R/mixed.R
+b0fb23cd2318a8e71f91d077bfdf7487 *R/nice.anova.R
+15afe3a4dcb927fe7608bfecc7ac1f44 *R/obk.long-data.R
+978d21107618850b98390f0f96ae7001 *R/zzz.R
+1a31420ce1e7436e88bc82bb69782cbc *data/obk.long.rda
+a46fb8eea19b6175ccd7b8b5c140bef7 *man/afex-package.Rd
+fe68e904e1fd21b6da5508c202157bd1 *man/aov.car.Rd
+79834394f2afb820feb252427203489e *man/mixed.Rd
+a8fc19f35aa10e4911d19029dcd96fe9 *man/nice.anova.Rd
+ee3447ea8ea90fab511bb3b4e07ff4bd *man/obk.long.Rd

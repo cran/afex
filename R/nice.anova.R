@@ -1,0 +1,109 @@
+#' Make nice ANOVA table for printing.
+#'
+#' These functions produce a nice ANOVA table best for prointing. \code{nice.anova} takes an object from \code{\link[car]{Anova}} possible created by the convenience functions \code{\link{ez.glm}} or \code{\link{aov.car}}. When within-subject factors are present, either sphericity corrected or uncorrected degrees of freedom can be reported.
+#' 
+#' @usage nice.anova(object, es = NULL, correction = c("GG", "HF", "none"), sig.symbols = c(" +", " *", " **", " ***"), MSE = TRUE)
+#'
+#' @param object An object of class \code{"Anova.mlm"} or \code{"anova"} as returned from \code{\link[car]{Anova}},  \code{\link{ez.glm}}, or \code{\link{aov.car}}.
+#' @param es Effect Size to be reported. Currently none implemented.
+#' @param correction Character. Which sphericity correction on the degrees of freedom should be reported for the within-subject factors. The default \code{c("GG", "HF", "none")} corresponds to the Greenhouse-Geisser correction.
+#' @param sig.symbols Character. What should be the symbols designating significance? When entering an vector with \code{length(sig.symbol) < 4} only those elements of the default (\code{c(" +", " *", " **", " ***")}) will be replaced. \code{sig.symbols = ""} will display the stars but not the \code{+}, \code{sig.symbols = rep("", 4)} will display no symbols.
+#' @param MSE logical. Should the column containing the Mean Sqaured Error (MSE) be displayed? Default is \code{TRUE}.
+#'
+#' @return A \code{data.frame} with the ANOVA table consisting of characters. The columns that are always present are: \code{Effect}, \code{df} (degrees of freedom), \code{F}, and \code{p}.
+#'
+#' @details The returned \code{data.frame} is print-ready when adding to a document with proper methods. I recommend \pkg{ascii} and \pkg{xtable}. \pkg{ascii} provides conversion to \href{http://www.methods.co.nz/asciidoc/}{AsciiDoc} but most notably to \href{http://orgmode.org/}{org-mode} (see \code{\link[ascii]{ascii}} and \code{\link[ascii]{print-ascii}}). \pkg{xtable} converts a \code{data.frame} into LaTeX code with many possible options (e.g., allowing for \code{"longtable"} or \code{"sidewaystable"}), see \code{\link[xtable]{xtable}} and \code{\link[xtable]{print.xtable}}. See Examples.
+#'
+#' Conversion functions to other formats (such as HTML, ODF, or Word) can be found at the \href{http://cran.r-project.org/web/views/ReproducibleResearch.html}{Reproducible Research Task View}.
+#'
+#' Effect sizes are the next thing to implement!
+#'
+#' @seealso \code{\link{ez.glm}} and \code{\link{aov.car}} are the convenience functions to create the object appropriate for \code{nice.anova}.
+#' 
+#' @name nice.anova
+#' @export nice.anova
+#'
+#' @examples
+#'
+#' # exampel using obk.long (see ?obk.long), a long version of the OBrienKaiser dataset from car.
+#' 
+#' data(obk.long)
+#' 
+#' # run univariate mixed ANCOVA for the full design:
+#' nice.anova(aov.car(value ~ treatment * gender + age + Error(id/phase*hour), data = obk.long))
+#' 
+#' nice.anova(ez.glm("id", "value", obk.long, c("treatment", "gender"), c("phase", "hour"), "age"))
+#' 
+#' # no between
+#' nice.anova(ez.glm("id", "value", obk.long, NULL, c("phase", "hour")))
+#' 
+#' # no within
+#' nice.anova(ez.glm("id", "value", obk.long, c("treatment", "gender")))
+#' 
+#' nice.anova(ez.glm("id", "value", obk.long, c("treatment", "gender")), sig.symbol = rep("", 4))
+#' 
+#' \dontrun{
+#' # use package ascii or xtable for formatting of tables ready for printing.
+#' 
+#' full <- nice.anova(ez.glm("id", "value", obk.long, c("treatment", "gender"), c("phase", "hour"), "age"))
+#' 
+#' require(ascii)
+#' print(ascii(full, include.rownames = FALSE, caption = "ANOVA 1"), type = "org")
+#' 
+#' require(xtable)
+#' print.xtable(xtable(full, caption = "ANOVA 2"), include.rownames = FALSE)
+#' }
+#' 
+#' 
+
+nice.anova <- function(object, es = NULL, correction = c("GG", "HF", "none"), sig.symbols = c(" +", " *", " **", " ***"), MSE = TRUE) {
+	is.wholenumber <- function(x, tol = .Machine$double.eps^0.5)  abs(x - round(x)) < tol
+	round.ps <- function(x) {
+		as.character(ifelse(x < 0.001, "<.001", substr(ifelse(x < 0.01, formatC(x, digits = 3, format = "f"), ifelse(round(x, 2) == 1, " >.99", formatC(x, digits = 2, format = "f"))), 2, 5)))
+	}
+	make.fs <- function(anova, symbols) {
+		ifelse(anova[["Pr(>F)"]] < 0.001, str_c(formatC(anova[["F"]], digits = 2, format = "f"), symbols[4]), 
+		ifelse(anova[["Pr(>F)"]] < 0.01, str_c(formatC(anova[["F"]], digits = 2, format = "f"), symbols[3]), 
+		ifelse(anova[["Pr(>F)"]] < 0.05, str_c(formatC(anova[["F"]], digits = 2, format = "f"), symbols[2]), 
+		ifelse(anova[["Pr(>F)"]] < 0.1, str_c(formatC(anova[["F"]], digits = 2, format = "f"), symbols[1]), formatC(anova[["F"]], digits = 2, format = "f")))))
+	}
+	if (class(object)[1] == "Anova.mlm") {
+		tmp <- suppressWarnings(univariate(object))
+		t.out <- tmp[["anova"]]
+		if (correction[1] == "GG") {
+			t.out[row.names(tmp[["sphericity.correction"]]), "num Df"] <- t.out[row.names(tmp[["sphericity.correction"]]), "num Df"] * tmp[["sphericity.correction"]][,"GG eps"]
+			t.out[row.names(tmp[["sphericity.correction"]]), "den Df"] <- t.out[row.names(tmp[["sphericity.correction"]]), "den Df"] * tmp[["sphericity.correction"]][,"GG eps"]
+			t.out[row.names(tmp[["sphericity.correction"]]), "Pr(>F)"] <- tmp[["sphericity.correction"]][,"Pr(>F[GG])"]
+		} else {
+			if (correction[1] == "HF") {
+				if (any(tmp[["sphericity.correction"]][,"HF eps"] > 1)) warning("HF eps > 1 treated as 1")
+				t.out[row.names(tmp[["sphericity.correction"]]), "num Df"] <- t.out[row.names(tmp[["sphericity.correction"]]), "num Df"] * pmin(1, tmp[["sphericity.correction"]][,"HF eps"])
+				t.out[row.names(tmp[["sphericity.correction"]]), "den Df"] <- t.out[row.names(tmp[["sphericity.correction"]]), "den Df"] * pmin(1, tmp[["sphericity.correction"]][,"HF eps"])
+				t.out[row.names(tmp[["sphericity.correction"]]), "Pr(>F)"] <- tmp[["sphericity.correction"]][,"Pr(>F[HF])"]
+			} else {
+				if (correction[1] == "none") {
+					TRUE
+				} else stop("None supported argument to correction.")
+			}
+		}
+		tmp.df <- t.out		
+	} else {
+		if (class(object)[1] == "anova") {
+			#browser()
+			#class(object) <- "data.frame"
+			tmp.df <- cbind(object[-nrow(object),], data.frame("Error SS" = object[nrow(object), "Sum Sq"], "den Df" = object[nrow(object), "Df"], check.names = FALSE))
+			colnames(tmp.df)[1:3] <- c("SS", "num Df", "F")
+		} else stop("Non-supported object passed. Object must be of class 'Anova.mlm' or 'anova'.")
+	}
+	#browser()
+	if (row.names(tmp.df)[1] == "(Intercept)")	tmp2 <- as.data.frame(tmp.df[-1,])
+	else tmp2 <- tmp.df
+	tmp2[,"df"] <- paste(ifelse(is.wholenumber(tmp2[,"num Df"]),tmp2[,"num Df"], round(tmp2[,"num Df"], 2)),  ifelse(is.wholenumber(tmp2[,"den Df"]),tmp2[,"den Df"], round(tmp2[,"den Df"], 2)), sep = ", ")
+	tmp2[,"MSE"] <- tmp2[,"Error SS"]/tmp2[,"den Df"]
+	symbols.use <-  c(" +", " *", " **", " ***")
+	symbols.use[seq_along(sig.symbols)] <- sig.symbols
+	df.out <- data.frame(Effect = row.names(tmp2), df = tmp2[,"df"], stringsAsFactors = FALSE)
+	if (MSE) df.out <- cbind(df.out, data.frame(MSE = formatC(tmp2[,"MSE"], digits = 2, format = "f"), stringsAsFactors = FALSE))
+	cbind(df.out, data.frame(F = make.fs(tmp2, symbols.use), p = round.ps(tmp2[,"Pr(>F)"]), stringsAsFactors = FALSE))
+}
+

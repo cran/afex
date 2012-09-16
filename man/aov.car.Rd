@@ -1,17 +1,17 @@
 \name{aov.car}
 \alias{aov.car}
 \alias{ez.glm}
-\alias{univariate}
+\alias{univ}
 \title{Convenience wrappers for car::Anova using either a formula or factor based interface.}
 \usage{
   aov.car(formula, data, fun.aggregate = NULL, type = 3,
-    ...)
+    return = "Anova", ...)
 
   ez.glm(id, dv, data, between = NULL, within = NULL,
-    covariate = NULL, fun.aggregate = NULL, type = 3, ...,
-    print.formula = FALSE)
+    covariate = NULL, fun.aggregate = NULL, type = 3,
+    return = "Anova", ..., print.formula = FALSE)
 
-  univariate(object)
+  univ(object)
 }
 \arguments{
   \item{formula}{A formula specifying the ANOVA model
@@ -62,6 +62,11 @@
   the formula in the call to \code{car.aov} should be
   printed.}
 
+  \item{return}{What should be returned? If \code{"Anova"}
+  (the default) will return the object returned by
+  \code{car::Anova}, anything else will return a list (see
+  section Value).}
+
   \item{...}{Further arguments passed to
   \code{fun.aggregate}.}
 
@@ -70,25 +75,36 @@
   \code{\link[car]{Anova}}.}
 }
 \value{
-  \code{aov.car} and \code{ez.glm} are wrappers and
-  therfore return the same as \code{\link[car]{Anova}}.
-  Usually an object of class \code{"Anova.mlm"} (with
-  within-subjects factors) or of class \code{c("anova",
-  "data.frame")}.
+  \code{aov.car} and \code{ez.glm} are wrappers to
+  \code{\link[car]{Anova}}. When argument \code{return} is
+  \code{"Anova"} (the default) they return the same as
+  \code{\link[car]{Anova}}. Usually an object of class
+  \code{"Anova.mlm"} (with within-subjects factors) or of
+  class \code{c("anova", "data.frame")}. If \code{return}
+  is something different they return a \code{list} with the
+  following elements:
 
-  \code{univariate} returns a \code{list} of
-  \code{data.frame}s containing the univariate results
-  (i.e., the classical ANOVA results) from an object of
-  class \code{"Anova.mlm"}. This is essentially the output
-  from \code{summary.Anova.mlm} with \code{multivariate =
+  \describe{ \item{"Anova"}{the object returned by
+  \code{Anova}} \item{"lm"}{the object fitted with
+  \code{lm} and passed to \code{Anova} (i.e., an object of
+  class \code{"lm"} or \code{"mlm"}).} \item{"data"}{the
+  data used to fit the \code{lm} object.} \item{"idata"}{if
+  within-subject factors are present, the \code{idata}
+  argument passed to \code{Anova}.} }
+
+  \code{univ} returns a \code{list} of \code{data.frame}s
+  containing the univariate results (i.e., the classical
+  ANOVA results) from an object of class
+  \code{"Anova.mlm"}. This is essentially the output from
+  \code{summary.Anova.mlm} with \code{multivariate =
   FALSE}, e.g. \code{summary(aov.car(...), multivriate =
   FALSE)}, as a list instead of printed to the console.\cr
   For objects of class \code{"anova"} (i.e., the object
   returned by \code{car::Anova} for a purely
   between-subjects ANOVA) the object is returned unaltered.
 
-  The elements of the list returned by \code{univariate}
-  are: \code{anova}, \code{mauchly}, and
+  The elements of the list returned by \code{univ} are:
+  \code{anova}, \code{mauchly}, and
   \code{spehricity.correction} (containing both,
   Greenhouse-Geisser and Hyundt-Feldt correction).
 }
@@ -164,14 +180,21 @@
 
   Contrasts attached to a factor as an attribute are
   probably not preserved and not supported.
+
+  Function \code{univ} was called \code{univariate} in
+  prior versions, but there was a function with similar
+  name in package \pkg{multcomp} leading to bugs and
+  unexpected behavior.
 }
 \examples{
+
 # exampel using obk.long (see ?obk.long), a long version of the OBrienKaiser dataset from car.
-data(obk.long)
+
+data(obk.long, package = "afex")
 
 # run univariate mixed ANCOVA for the full design:
-univariate(aov.car(value ~ treatment * gender + age + Error(id/phase*hour), data = obk.long))
-univariate(ez.glm("id", "value", obk.long, c("treatment", "gender"), c("phase", "hour"), "age"))
+univ(aov.car(value ~ treatment * gender + age + Error(id/phase*hour), data = obk.long))
+univ(ez.glm("id", "value", obk.long, c("treatment", "gender"), c("phase", "hour"), "age"))
 
 # both calls return the same:
 
@@ -197,7 +220,7 @@ univariate(ez.glm("id", "value", obk.long, c("treatment", "gender"), c("phase", 
 ## gender:phase:hour              8.851396      8  88.62706     72   0.8988515 5.222336e-01
 ## age:phase:hour                 7.539611      8  88.62706     72   0.7656409 6.339004e-01
 ## treatment:gender:phase:hour   12.822199     16  88.62706     72   0.6510416 8.307936e-01
-##
+## 
 ## $mauchly
 ##                             Test statistic    p-value
 ## phase                         0.8217571566 0.45600959
@@ -215,7 +238,7 @@ univariate(ez.glm("id", "value", obk.long, c("treatment", "gender"), c("phase", 
 ## gender:phase:hour             0.0002379741 0.08651564
 ## age:phase:hour                0.0002379741 0.08651564
 ## treatment:gender:phase:hour   0.0002379741 0.08651564
-##
+## 
 ## $sphericity.correction
 ##                                GG eps   Pr(>F[GG])    HF eps   Pr(>F[HF])
 ## phase                       0.8487215 8.383485e-05 1.0252867 2.448505e-05
@@ -233,12 +256,12 @@ univariate(ez.glm("id", "value", obk.long, c("treatment", "gender"), c("phase", 
 ## gender:phase:hour           0.4355822 4.651930e-01 0.7444364 5.020890e-01
 ## age:phase:hour              0.4355822 5.395151e-01 0.7444364 5.992844e-01
 ## treatment:gender:phase:hour 0.4355822 7.100921e-01 0.7444364 7.878433e-01
-##
+## 
 ## Warning message:
 ## In univariate(aov.car(value ~ treatment * gender + age + Error(id/phase *  :
 ##   HF eps > 1 treated as 1
 
-# To get a nicer ANOVA table use function nice.anova (see ?noce.anova):
+# To get a nicer ANOVA table use function nice.anova (see ?nice.anova):
 nice.anova(ez.glm("id", "value", obk.long, c("treatment", "gender"), c("phase", "hour"), "age"))
 
 ##                         Effect          df   MSE         F     p
@@ -262,6 +285,7 @@ nice.anova(ez.glm("id", "value", obk.long, c("treatment", "gender"), c("phase", 
 ## 18              age:phase:hour 3.48, 31.36  2.83      0.77   .54
 ## 19 treatment:gender:phase:hour 6.97, 31.36  2.83      0.65   .71
 
+
 # replicating ?Anova using aov.car:
 aov.car(value ~ treatment * gender + Error(id/phase*hour), data = obk.long, type = 2)
 # in contrast to aov you do not need the within-subject factors outside Error()
@@ -271,25 +295,25 @@ ez.glm("id", "value", obk.long, c("treatment", "gender"), c("phase", "hour"), ty
 
 #both return:
 ## Type II Repeated Measures MANOVA Tests: Pillai test statistic
-##                             Df test stat approx F num Df den Df       Pr(>F)
+##                             Df test stat approx F num Df den Df       Pr(>F)    
 ## (Intercept)                  1     0.970      318      1     10 0.0000000065 ***
-## treatment                    2     0.481        5      2     10      0.03769 *
-## gender                       1     0.204        3      1     10      0.14097
-## treatment:gender             2     0.364        3      2     10      0.10447
+## treatment                    2     0.481        5      2     10      0.03769 *  
+## gender                       1     0.204        3      1     10      0.14097    
+## treatment:gender             2     0.364        3      2     10      0.10447    
 ## phase                        1     0.851       26      2      9      0.00019 ***
-## treatment:phase              2     0.685        3      4     20      0.06674 .
-## gender:phase                 1     0.043        0      2      9      0.82000
-## treatment:gender:phase       2     0.311        1      4     20      0.47215
+## treatment:phase              2     0.685        3      4     20      0.06674 .  
+## gender:phase                 1     0.043        0      2      9      0.82000    
+## treatment:gender:phase       2     0.311        1      4     20      0.47215    
 ## hour                         1     0.935       25      4      7      0.00030 ***
-## treatment:hour               2     0.301        0      8     16      0.92952
-## gender:hour                  1     0.293        1      4      7      0.60237
-## treatment:gender:hour        2     0.570        1      8     16      0.61319
-## phase:hour                   1     0.550        0      8      3      0.83245
-## treatment:phase:hour         2     0.664        0     16      8      0.99144
-## gender:phase:hour            1     0.695        1      8      3      0.62021
-## treatment:gender:phase:hour  2     0.793        0     16      8      0.97237
+## treatment:hour               2     0.301        0      8     16      0.92952    
+## gender:hour                  1     0.293        1      4      7      0.60237    
+## treatment:gender:hour        2     0.570        1      8     16      0.61319    
+## phase:hour                   1     0.550        0      8      3      0.83245    
+## treatment:phase:hour         2     0.664        0     16      8      0.99144    
+## gender:phase:hour            1     0.695        1      8      3      0.62021    
+## treatment:gender:phase:hour  2     0.793        0     16      8      0.97237    
 ## ---
-## Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
 
 # aggregating over one within-subjects factor (phase) with warning:
@@ -314,12 +338,25 @@ ez.glm("id", "value", obk.long, c("treatment", "gender"), within = NULL, type = 
 
 # only within
 
-univariate(aov.car(value ~ Error(id/phase*hour), data = obk.long, type = 2))
+univ(aov.car(value ~ Error(id/phase*hour), data = obk.long, type = 2))
 
-univariate(ez.glm("id", "value", obk.long,  NULL, c("phase", "hour"), type = 2, print.formula = TRUE))
+univ(ez.glm("id", "value", obk.long,  NULL, c("phase", "hour"), type = 2, print.formula = TRUE))
+
+# using the return argument:
+
+str(aov.car(value ~ Error(id/phase*hour), data = obk.long, return = ""), 1)
+
+## List of 4
+##  $ Anova:List of 14
+##   ..- attr(*, "class")= chr "Anova.mlm"
+##  $ lm   :List of 11
+##   ..- attr(*, "class")= chr [1:2] "mlm" "lm"
+##  $ data :'data.frame':  16 obs. of  16 variables:
+##  $ idata:'data.frame':  15 obs. of  2 variables:
+
 }
 \author{
-  \code{univariate} is basically a copy of
+  \code{univ} is basically a copy of
   \code{\link[car]{summary.Anova.mlm}} written by John
   Fox.\cr The other functions were written by Henrik
   Singmann.

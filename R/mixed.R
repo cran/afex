@@ -1,14 +1,14 @@
 #' Obtain p-values for a mixed-model from lmer().
 #'
-#' Fits and calculates p-values for all effects in a mixed model fitted with \code{\link[lme4]{lmer}}. The default behavior (currently the only behavior implemented) calculates type 3 like p-values using the Kenward-Rogers approximation for degrees-of-freedom implemented in \code{\link[pbkrtest]{KRmodcomp}}. \code{print}, \code{summary}, and \code{anova} methods for the returned object of class \code{"mixed"} are available (all return the same data.frame).
+#' Fits and calculates p-values for all effects in a mixed model fitted with \code{\link[lme4]{lmer}}. The default behavior calculates type 3 like p-values using the Kenward-Rogers approximation for degrees-of-freedom implemented in \code{\link[pbkrtest]{KRmodcomp}}. \code{print}, \code{summary}, and \code{anova} methods for the returned object of class \code{"mixed"} are available (all return the same data.frame).
 #'
 #' @usage mixed(formula, data, type = 3, method = c("KR", "PB"), ...)
 #'
 #' @param formula a formula describing the full mixed-model to be fitted. As this formula is passed to \code{lmer}, it needs at least one random term.
 #' @param data data.frame containing the data. Should have all the variables present in \code{fixed}, \code{random}, and \code{dv} as columns.
-#' @param type type of sums of squares on which effects are based. Currently only type 3 (\code{3} or \code{"III"}) is implemented.
+#' @param type type of test on which effects are based. Currently only type 3 tests (\code{3} or \code{"III"}) are correctly implemented (see Details).
 #' @param method character vector indicating which methods for obtaining p-values should be used. Currently only \code{"KR"} is implemented corresponding to the Kenward-Rogers approximation for degrees of freedom.
-#' @param ... further arguments passed to \code{lmer}.
+#' @param ... further arguments (such as \code{weights}) passed to \code{\link{lmer}}.
 #'
 #' @return An object of class \code{"mixed"} (i.e., a list) with the following elements:
 #'
@@ -21,15 +21,18 @@
 #' \item \code{method} The \code{method} argument used when calling this function.
 #' }
 #'
-#' The following methods exist for objects of class \code{"mixed"}: \code{print}, \code{summary}, and \code{anova} (all return the same data.frame, and \code{print} uses rounding).
+#' The following methods exist for objects of class \code{"mixed"}: \code{print} (which uses rounding and only returns the results wiuth \code{F.scaling = 1}), \code{summary}, and \code{anova} (the latter two return the same data.frame).
 #'
-#' @details Type 3 sums of squares are obtained by fitting a model in which only the corresponding effect is missing.
+#' @details Type 3 tests are obtained by comparing a model in which only the corresponding effect is missing with the full model (containing all effects). This corresponds to the (type 3) Wald tests given by \code{car::Anova} for \code{"mer"} models (from version 2.0-13).
 #'
-#' For an introduction to mixed-modeling for experimental designs using p-values see Judd, Westfall, and Kenny (2012). Further introductions to mixed-modeling for experimental designs are given by Baayen and colleagues (Baaye, 2008; Baayen, Davidson & Bates, 2008; Baayen & Milin, 2010). 
+#' Type 2 tests are obtained by comparing a model in which the corresponding effect and all higher oder effect (e.g., all three-way interactions for a two-way interaction) are missing with a model in which all effects of the relevant order are present and all higher order effects absent. Consequently, the results for lower order effects are identical of wether or not higher order effects are part of the model or not, which is rather dubious (but \href{https://stat.ethz.ch/pipermail/r-sig-mixed-models/2012q3/018992.html}{I didn't find a better way} of implementing the Type 2 tests). This \strong{does not} correspond to the (type 2) Wald Test reported by \code{car::Anova}. If you want type 2 tests, use \code{car::Anova} with \code{test = "F"} (from version 2.0-13) instead of this function.
 #'
-#' @note This function is not thoroughly tested so please report all bugs to henrik.singmann (at) psychologie.uni-freiburg.de
+#' For an introduction to mixed-modeling for experimental designs using p-values see Judd, Westfall, and Kenny (2012). Further introductions to mixed-modeling for experimental designs are given by Baayen and colleagues (Baayen, 2008; Baayen, Davidson & Bates, 2008; Baayen & Milin, 2010). 
 #'
-#' This functions may take some time especially with complex random structures.
+#' @note This function is not thoroughly tested so please report all bugs to henrik.singmann (at) psychologie.uni-freiburg.de \cr
+#' There might be problems with rather big models when constructing the model matrix to fit the \code{lmer} models (potentially problematic with Type 2 sums of squares). If you find any such bug, please send an example including code and data!
+#'
+#' This functions needs a lot of RAM and rather long time especially with complex random structures. The RAM demand is a problem especially on 32 bit Windows which only supports up to 2 or 3GB RAM (see \href{http://cran.r-project.org/bin/windows/base/rw-FAQ.html}{R Windows FAQ}).
 #'
 #' This function calls \code{lme4:::nobars} for dealing with the formula. So any significant changes to \pkg{lme4} or \code{lme4:::nobars} may disrupt its functionality.
 #'
@@ -78,44 +81,79 @@ mixed <- function(formula, data, type = 3, method = c("KR", "PB"), ...) {
 	if ((type == 3 | type == "III") & options("contrasts")[[1]][1] != "contr.sum") warning(str_c("Calculating Type 3 sums with contrasts = ", options("contrasts")[[1]][1], ".\n  Use options(contrasts=c('contr.sum','contr.poly')) instead"))
 	# browser()
 	# prepare fitting
+	mc <- match.call()
 	formula.f <- as.formula(formula)
 	dv <- as.character(formula.f)[[2]]
 	all.terms <- attr(terms(formula.f), "term.labels")
+	effect.order <- attr(terms(formula.f), "order")
+	effect.order <- effect.order[!grepl("\\|", all.terms)]
+	max.effect.order <- max(effect.order)
 	random <- str_c(str_c("(", all.terms[grepl("\\|", all.terms)], ")"), collapse = " + ")
 	rh2 <- lme4:::nobars(formula.f)
 	rh2[[2]] <- NULL
 	m.matrix <- model.matrix(rh2, data = data)
 	fixed.effects <- attr(terms(rh2, data = data), "term.labels")
-	if (attr(terms(rh2, data = data), "intercept") == 1) fixed.effects <- c("(Intercept)", fixed.effects)
 	mapping <- attr(m.matrix, "assign")
 	# obtain the lmer fits
-	#browser()
-	cat(str_c("Fitting ", length(fixed.effects) + 1, " lmer() models:\n["))
+	#browser() 
+	mf <- mc[!names(mc) %in% c("type", "method")]
+	mf[[1]] <- as.name("lmer")
 	if (type == 3 | type == "III") {
-		full.model <- lmer(formula.f, data = data, ...)
+		if (attr(terms(rh2, data = data), "intercept") == 1) fixed.effects <- c("(Intercept)", fixed.effects)
+		# prepare lmer call:
+		cat(str_c("Fitting ", length(fixed.effects) + 1, " lmer() models:\n["))
+		full.model <- eval(mf)	
 		cat(".")
 		fits <- vector("list", length(fixed.effects))
-		for (c in c(seq_along(fixed.effects))) {
+		for (c in seq_along(fixed.effects)) {
 			tmp.columns <- str_c(deparse(-which(mapping == (c-1))), collapse = "")
-			fits[[c]] <- lmer(as.formula(str_c(dv, "~ 0 + m.matrix[,", tmp.columns, "] +", random)), data = data, ...)
+			mf[[2]] <- as.formula(str_c(dv, "~ 0 + m.matrix[,", tmp.columns, "] +", random))
+			fits[[c]] <- eval(mf)
 			cat(".")
 		}
 		cat("]\n")
-	} else stop('Only type 3 tests currently implemented.')
-	names(fits) <- fixed.effects
+		names(fits) <- fixed.effects
+	} else if (type == 2 | type == "II") {
+		cat(str_c("Fitting ", length(fixed.effects) + max.effect.order, " lmer() models:\n["))
+		full.model <- vector("list", max.effect.order)
+		fits <- vector("list", length(fixed.effects))
+		full.model[[length(full.model)]] <- eval(mf)
+		cat(".")
+		for (c in seq_len(max.effect.order)) {
+			if (c == max.effect.order) next 
+			tmp.columns <- str_c(deparse(-which(mapping == which(effect.order > c))), collapse = "")
+			mf[[2]] <- as.formula(str_c(dv, "~ 0 + m.matrix[,", tmp.columns, "] +", random))
+			full.model[[c]] <-  eval(mf)
+			cat(".")
+		}
+		for (c in seq_along(fixed.effects)) {
+			order.c <- effect.order[c]
+			tmp.columns <- str_c(deparse(-which(mapping == (c) | mapping == if (order.c == max.effect.order) -1 else which(effect.order > order.c))), collapse = "")
+			mf[[2]] <- as.formula(str_c(dv, "~ 0 + m.matrix[,", tmp.columns, "] +", random))
+			fits[[c]] <- eval(mf)
+			cat(".")
+		}
+		cat("]\n")
+		names(fits) <- fixed.effects
+	} else stop('Only type 3 and type 2 tests implemented.')
 	# obtain p-values:
 	cat(str_c("Obtaining ", length(fixed.effects), " p-values:\n["))
 	if (method[1] == "KR") {
-		tests <- lapply(fits, function(x) {
-			tmp <- KRmodcomp(full.model, x)
+		tests <- vector("list", length(fixed.effects))
+		for (c in seq_along(fixed.effects)) {
+			if (type == 3 | type == "III") tests[[c]] <- KRmodcomp(full.model, fits[[c]])
+			else if (type == 2 | type == "II") tests[[c]] <- KRmodcomp(full.model[[order.c]], fits[[c]])
 			cat(".")
-			tmp
-			})
+		}
 		cat("]\n")
 		names(tests) <- fixed.effects
 		df.out <- data.frame(Effect = fixed.effects, stringsAsFactors = FALSE)
-		df.out <- cbind(df.out, t(vapply(tests, "[[", tests[[1]][[1]], i =1)))
+		df.out <- cbind(df.out, t(vapply(tests, function(x) unlist(x[["test"]][1,]), unlist(tests[[1]][["test"]][1,]))))
+		FtestU <- vapply(tests, function(x) unlist(x[["test"]][2,]), unlist(tests[[1]][["test"]][2,]))
+		row.names(FtestU) <- str_c(row.names(FtestU), ".U")
+		df.out <- cbind(df.out, t(FtestU))
 		rownames(df.out) <- NULL
+		#browser()
 	} else stop('Only method "KR" currently implemented.')
 	#prepare output object
 	list.out <- list(anova.table = df.out, full.model = full.model, restricted.models = fits, tests = tests, type = type, method = method[[1]])
@@ -129,8 +167,8 @@ print.mixed <- function(x, ...) {
 	print(tmp)
 }
 
-summary.mixed <- function(object, ...) object[[1]][,1:5]
+summary.mixed <- function(object, ...) object[[1]]
 
-anova.mixed <- function(object, ...) object[[1]][,1:5]
+anova.mixed <- function(object, ...) object[[1]]
 
 # is.mixed <- function(x) inherits(x, "mixed")

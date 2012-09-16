@@ -68,7 +68,7 @@ nice.anova <- function(object, es = NULL, correction = c("GG", "HF", "none"), si
 		ifelse(anova[["Pr(>F)"]] < 0.1, str_c(formatC(anova[["F"]], digits = 2, format = "f"), symbols[1]), formatC(anova[["F"]], digits = 2, format = "f")))))
 	}
 	if (class(object)[1] == "Anova.mlm") {
-		tmp <- suppressWarnings(univariate(object))
+		tmp <- suppressWarnings(univ(object))
 		t.out <- tmp[["anova"]]
 		if (correction[1] == "GG") {
 			t.out[row.names(tmp[["sphericity.correction"]]), "num Df"] <- t.out[row.names(tmp[["sphericity.correction"]]), "num Df"] * tmp[["sphericity.correction"]][,"GG eps"]

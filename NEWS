@@ -1,0 +1,38 @@
+                    ************************
+                    ** afex VERSION 0.3-x **
+                    ************************
+                    
+                    Changes in afex Version 0.3-x
+                    Released August/September 2012
+
+    Significant User Visible Changes and New Features
+    o   added function compare.2.vectors().
+    
+    o   Name of function univariate() changed to univ(), as
+        a function with this name is part of package multcomp.
+        This may leed to problems. Thanks to Florent Duyme for
+        spotting this.
+    
+    o   added return argument to aov.car() and ez.glm().
+    
+    o   added rather dubious Type 2 tests to mixed().
+    
+    o   aov.car checks if each id is only present in one
+        cell of the between subjects design.
+    
+    Bugfixes
+    
+    o   aov.car now uses do.call when calling lm() to avoid local
+        variables in the call to lm() which could led to problems when
+        working with the lm model.
+    
+    o   mixed() now passes ... (further arguments to lmer) correctly.
+        (Now mixed uses match.call and eval on the call instead of 
+        invoking lmer directly.)
+    
+    o   corrected bug that was introduced by pbkrtest v3.2 when 
+        invoking the print method to an object of class mixed 
+        (again thanks to Florent Duyme for spotting this).
+    
+    o   removed bug when factor levels of within-subject factors
+        were non-legal names (solution uses make.names).

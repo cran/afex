@@ -2,17 +2,25 @@
 \alias{nice.anova}
 \title{Make nice ANOVA table for printing.}
 \usage{
-  nice.anova(object, es = NULL, correction = c("GG", "HF",
-    "none"), sig.symbols = c(" +", " *", " **", " ***"),
-    MSE = TRUE)
+  nice.anova(object, es = "ges", observed = NULL,
+    correction = c("GG", "HF", "none"), MSE = TRUE,
+    sig.symbols = c(" +", " *", " **", " ***"))
 }
 \arguments{
   \item{object}{An object of class \code{"Anova.mlm"} or
   \code{"anova"} as returned from \code{\link[car]{Anova}},
   \code{\link{ez.glm}}, or \code{\link{aov.car}}.}
 
-  \item{es}{Effect Size to be reported. Currently none
-  implemented.}
+  \item{es}{Effect Size to be reported. Default is
+  \code{"ges"}, which reports generalized eta-squared (see
+  details). Also supported is partial eta-squared
+  (\code{"pes"}) or \code{"none"}.}
+
+  \item{observed}{character vector referring to the
+  observed (i.e., non manipulated) variables/effects in the
+  design. Important for calculation of generalized
+  eta-squared (ignored if \code{es} is not \code{"ges"}),
+  see details.}
 
   \item{correction}{Character. Which sphericity correction
   on the degrees of freedom should be reported for the
@@ -66,30 +74,30 @@
   \href{http://cran.r-project.org/web/views/ReproducibleResearch.html}{Reproducible
   Research Task View}.
 
-  Effect sizes are the next thing to implement!
+  The default reports generalized eta squared (Olejnik &
+  Algina, 2003), the "recommended effect size for repeated
+  measured designs" (Bakeman, 2005). Note that it is
+  important that all measured variables (as opposed to
+  experimentally manipulated variables), such as e.g., age,
+  gender, weight, ..., must be declared via \code{observed}
+  to obtain the correct effect size estimate. Partial eta
+  squared (\code{"pes"}) does not require this.
 }
 \examples{
 # exampel using obk.long (see ?obk.long), a long version of the OBrienKaiser dataset from car.
 
 data(obk.long)
+# create object of class Anova:
+tmp.aov <- aov.car(value ~ treatment * gender + age + Error(id/phase*hour), data = obk.long, return = "Anova")
 
-# run univariate mixed ANCOVA for the full design:
-nice.anova(aov.car(value ~ treatment * gender + age + Error(id/phase*hour), data = obk.long))
+nice.anova(tmp.aov, observed = c("age", "gender"))
 
-nice.anova(ez.glm("id", "value", obk.long, c("treatment", "gender"), c("phase", "hour"), "age"))
-
-# no between
-nice.anova(ez.glm("id", "value", obk.long, NULL, c("phase", "hour")))
-
-# no within
-nice.anova(ez.glm("id", "value", obk.long, c("treatment", "gender")))
-
-nice.anova(ez.glm("id", "value", obk.long, c("treatment", "gender")), sig.symbol = rep("", 4))
+nice.anova(tmp.aov, observed = c("age", "gender"), sig.symbol = rep("", 4))
 
 \dontrun{
 # use package ascii or xtable for formatting of tables ready for printing.
 
-full <- nice.anova(ez.glm("id", "value", obk.long, c("treatment", "gender"), c("phase", "hour"), "age"))
+full <- nice.anova(tmp.aov, observed = c("age", "gender"))
 
 require(ascii)
 print(ascii(full, include.rownames = FALSE, caption = "ANOVA 1"), type = "org")
@@ -97,6 +105,21 @@ print(ascii(full, include.rownames = FALSE, caption = "ANOVA 1"), type = "org")
 require(xtable)
 print.xtable(xtable(full, caption = "ANOVA 2"), include.rownames = FALSE)
 }
+}
+\author{
+  The code for calculating generalized eta-squared was
+  written by Mike Lawrence.\cr Everything else was written
+  by Henrik Singmann.
+}
+\references{
+  Bakeman, R. (2005). Recommended effect size statistics
+  for repeated measures designs. \emph{Behavior Research
+  Methods}, 37(3), 379-384. doi:10.3758/BF03192707
+
+  Olejnik, S., & Algina, J. (2003). Generalized Eta and
+  Omega Squared Statistics: Measures of Effect Size for
+  Some Common Research Designs. \emph{Psychological
+  Methods}, 8(4), 434-447. doi:10.1037/1082-989X.8.4.434
 }
 \seealso{
   \code{\link{ez.glm}} and \code{\link{aov.car}} are the

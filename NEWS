@@ -1,4 +1,50 @@
                     ************************
+                    ** afex VERSION 0.4-x **
+                    ************************
+                    
+                    Changes in afex Version 0.4-x
+                    Released February 2013
+
+    Significant User Visible Changes and New Features
+
+    o   added generalized and partial eta-squared effect
+        sizes to nice.anova (this also included adding
+        observed arguments to aov.car, ez.glm, nice.anova)        
+    
+    o   added new return arguments to aov.car and ez.glm
+        (nice, lm, data).
+    
+    o   changed default return value of aov.car and ez.glm
+        to "nice" which now returns a nice ANOVA table
+        (nice.anova)
+    
+    o   mixed has method = "PB" for obtaining parametric
+        bootstrapped p-values (e.g., for GLMMs)
+        
+    o   added alternative argument to compare.2.vectors.
+    
+    o   aov.car (and ez.glm) now give a warning if 
+        observations are missing on within-subject factors.
+        (As before, cases with missing values are simply
+        excluded from the analysis)
+    
+    o   had to disable saving of the previous contrasts and
+        resetting those after detaching afex due to 
+        CRAN policies (no assignment in global environment).
+    
+    Bugfixes
+    
+    o   Bug when running mixed() inside a function and
+        handing the data.frame over as an argument fixed
+        (thanks, again, to Florent Duyme). See
+        bugs/eval.scoping.bug.R
+    
+    o   nice.anova did not work with a model with only one 
+        within-subjects factor.
+    
+
+
+                    ************************
                     ** afex VERSION 0.3-x **
                     ************************
                     
@@ -6,6 +52,7 @@
                     Released August/September 2012
 
     Significant User Visible Changes and New Features
+    
     o   added function compare.2.vectors().
     
     o   Name of function univariate() changed to univ(), as
@@ -36,3 +83,4 @@
     
     o   removed bug when factor levels of within-subject factors
         were non-legal names (solution uses make.names).
+    

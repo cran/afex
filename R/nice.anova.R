@@ -2,10 +2,11 @@
 #'
 #' These functions produce a nice ANOVA table best for prointing. \code{nice.anova} takes an object from \code{\link[car]{Anova}} possible created by the convenience functions \code{\link{ez.glm}} or \code{\link{aov.car}}. When within-subject factors are present, either sphericity corrected or uncorrected degrees of freedom can be reported.
 #' 
-#' @usage nice.anova(object, es = NULL, correction = c("GG", "HF", "none"), sig.symbols = c(" +", " *", " **", " ***"), MSE = TRUE)
+#' @usage nice.anova(object, es = "ges", observed = NULL, correction = c("GG", "HF", "none"), MSE = TRUE, sig.symbols = c(" +", " *", " **", " ***"))
 #'
 #' @param object An object of class \code{"Anova.mlm"} or \code{"anova"} as returned from \code{\link[car]{Anova}},  \code{\link{ez.glm}}, or \code{\link{aov.car}}.
-#' @param es Effect Size to be reported. Currently none implemented.
+#' @param es Effect Size to be reported. Default is \code{"ges"}, which reports generalized eta-squared (see details). Also supported is partial eta-squared (\code{"pes"}) or \code{"none"}.
+#' @param observed character vector referring to the observed (i.e., non manipulated) variables/effects in the design. Important for calculation of generalized eta-squared (ignored if \code{es} is not \code{"ges"}), see details.
 #' @param correction Character. Which sphericity correction on the degrees of freedom should be reported for the within-subject factors. The default \code{c("GG", "HF", "none")} corresponds to the Greenhouse-Geisser correction.
 #' @param sig.symbols Character. What should be the symbols designating significance? When entering an vector with \code{length(sig.symbol) < 4} only those elements of the default (\code{c(" +", " *", " **", " ***")}) will be replaced. \code{sig.symbols = ""} will display the stars but not the \code{+}, \code{sig.symbols = rep("", 4)} will display no symbols.
 #' @param MSE logical. Should the column containing the Mean Sqaured Error (MSE) be displayed? Default is \code{TRUE}.
@@ -16,9 +17,16 @@
 #'
 #' Conversion functions to other formats (such as HTML, ODF, or Word) can be found at the \href{http://cran.r-project.org/web/views/ReproducibleResearch.html}{Reproducible Research Task View}.
 #'
-#' Effect sizes are the next thing to implement!
+#' The default reports generalized eta squared (Olejnik & Algina, 2003), the "recommended effect size for repeated measured designs" (Bakeman, 2005). Note that it is important that all measured variables (as opposed to experimentally manipulated variables), such as e.g., age, gender, weight, ..., must be declared via \code{observed} to obtain the correct effect size estimate. Partial eta squared (\code{"pes"}) does not require this.
 #'
 #' @seealso \code{\link{ez.glm}} and \code{\link{aov.car}} are the convenience functions to create the object appropriate for \code{nice.anova}.
+#'
+#' @author The code for calculating generalized eta-squared was written by Mike Lawrence.\cr Everything else was written by Henrik Singmann.
+#'
+#' @references Bakeman, R. (2005). Recommended effect size statistics for repeated measures designs. \emph{Behavior Research Methods}, 37(3), 379-384. doi:10.3758/BF03192707
+
+#'
+#' Olejnik, S., & Algina, J. (2003). Generalized Eta and Omega Squared Statistics: Measures of Effect Size for Some Common Research Designs. \emph{Psychological Methods}, 8(4), 434-447. doi:10.1037/1082-989X.8.4.434
 #' 
 #' @name nice.anova
 #' @export nice.anova
@@ -28,24 +36,17 @@
 #' # exampel using obk.long (see ?obk.long), a long version of the OBrienKaiser dataset from car.
 #' 
 #' data(obk.long)
+#' # create object of class Anova:
+#' tmp.aov <- aov.car(value ~ treatment * gender + age + Error(id/phase*hour), data = obk.long, return = "Anova")
 #' 
-#' # run univariate mixed ANCOVA for the full design:
-#' nice.anova(aov.car(value ~ treatment * gender + age + Error(id/phase*hour), data = obk.long))
+#' nice.anova(tmp.aov, observed = c("age", "gender"))
 #' 
-#' nice.anova(ez.glm("id", "value", obk.long, c("treatment", "gender"), c("phase", "hour"), "age"))
-#' 
-#' # no between
-#' nice.anova(ez.glm("id", "value", obk.long, NULL, c("phase", "hour")))
-#' 
-#' # no within
-#' nice.anova(ez.glm("id", "value", obk.long, c("treatment", "gender")))
-#' 
-#' nice.anova(ez.glm("id", "value", obk.long, c("treatment", "gender")), sig.symbol = rep("", 4))
+#' nice.anova(tmp.aov, observed = c("age", "gender"), sig.symbol = rep("", 4))
 #' 
 #' \dontrun{
 #' # use package ascii or xtable for formatting of tables ready for printing.
 #' 
-#' full <- nice.anova(ez.glm("id", "value", obk.long, c("treatment", "gender"), c("phase", "hour"), "age"))
+#' full <- nice.anova(tmp.aov, observed = c("age", "gender"))
 #' 
 #' require(ascii)
 #' print(ascii(full, include.rownames = FALSE, caption = "ANOVA 1"), type = "org")
@@ -56,7 +57,8 @@
 #' 
 #' 
 
-nice.anova <- function(object, es = NULL, correction = c("GG", "HF", "none"), sig.symbols = c(" +", " *", " **", " ***"), MSE = TRUE) {
+nice.anova <- function(object, es = "ges", observed = NULL, correction = c("GG", "HF", "none"), MSE = TRUE, sig.symbols = c(" +", " *", " **", " ***")) {
+    # internal functions:
 	is.wholenumber <- function(x, tol = .Machine$double.eps^0.5)  abs(x - round(x)) < tol
 	round.ps <- function(x) {
 		as.character(ifelse(x < 0.001, "<.001", substr(ifelse(x < 0.01, formatC(x, digits = 3, format = "f"), ifelse(round(x, 2) == 1, " >.99", formatC(x, digits = 2, format = "f"))), 2, 5)))
@@ -67,6 +69,9 @@ nice.anova <- function(object, es = NULL, correction = c("GG", "HF", "none"), si
 		ifelse(anova[["Pr(>F)"]] < 0.05, str_c(formatC(anova[["F"]], digits = 2, format = "f"), symbols[2]), 
 		ifelse(anova[["Pr(>F)"]] < 0.1, str_c(formatC(anova[["F"]], digits = 2, format = "f"), symbols[1]), formatC(anova[["F"]], digits = 2, format = "f")))))
 	}
+    # check arguments
+    es <- match.arg(es, c("none", "ges", "pes"), several.ok = TRUE)
+    #browser()
 	if (class(object)[1] == "Anova.mlm") {
 		tmp <- suppressWarnings(univ(object))
 		t.out <- tmp[["anova"]]
@@ -95,8 +100,7 @@ nice.anova <- function(object, es = NULL, correction = c("GG", "HF", "none"), si
 			colnames(tmp.df)[1:3] <- c("SS", "num Df", "F")
 		} else stop("Non-supported object passed. Object must be of class 'Anova.mlm' or 'anova'.")
 	}
-	#browser()
-	if (row.names(tmp.df)[1] == "(Intercept)")	tmp2 <- as.data.frame(tmp.df[-1,])
+	if (row.names(tmp.df)[1] == "(Intercept)")	tmp2 <- as.data.frame(tmp.df[-1,, drop = FALSE])
 	else tmp2 <- tmp.df
 	tmp2[,"df"] <- paste(ifelse(is.wholenumber(tmp2[,"num Df"]),tmp2[,"num Df"], round(tmp2[,"num Df"], 2)),  ifelse(is.wholenumber(tmp2[,"den Df"]),tmp2[,"den Df"], round(tmp2[,"den Df"], 2)), sep = ", ")
 	tmp2[,"MSE"] <- tmp2[,"Error SS"]/tmp2[,"den Df"]
@@ -104,6 +108,26 @@ nice.anova <- function(object, es = NULL, correction = c("GG", "HF", "none"), si
 	symbols.use[seq_along(sig.symbols)] <- sig.symbols
 	df.out <- data.frame(Effect = row.names(tmp2), df = tmp2[,"df"], stringsAsFactors = FALSE)
 	if (MSE) df.out <- cbind(df.out, data.frame(MSE = formatC(tmp2[,"MSE"], digits = 2, format = "f"), stringsAsFactors = FALSE))
-	cbind(df.out, data.frame(F = make.fs(tmp2, symbols.use), p = round.ps(tmp2[,"Pr(>F)"]), stringsAsFactors = FALSE))
+    df.out <- cbind(df.out, data.frame(F = make.fs(tmp2, symbols.use), stringsAsFactors = FALSE))
+    # calculate es
+    if ("pes" %in% es) {
+        df.out <- cbind(df.out, pes = round.ps(tmp2$SS/(tmp2$SS + tmp2[,"Error SS"])), stringsAsFactors = FALSE)
+    }
+    if ("ges" %in% es) {
+        # This code is basically a copy from ezANOVA by Mike Lawrence!
+        if(!is.null(observed)){
+			obs <- rep(FALSE,nrow(tmp2))
+			for(i in observed){
+				obs <- obs | str_detect(rownames(tmp2),i)
+			}
+			obs_SSn1 <- sum(tmp2$SS*obs)
+			obs_SSn2 <- tmp2$SS*obs
+		}else{
+			obs_SSn1 <- 0
+			obs_SSn2 <- 0
+		}
+        df.out <- cbind(df.out, ges = round.ps(tmp2$SS/(tmp2$SS+sum(unique(tmp2[,"Error SS"]))+obs_SSn1-obs_SSn2)), stringsAsFactors = FALSE)
+    }
+    cbind(df.out, p = round.ps(tmp2[,"Pr(>F)"]), stringsAsFactors = FALSE)
 }
 

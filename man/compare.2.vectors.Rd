@@ -4,8 +4,9 @@
 \usage{
   compare.2.vectors(x, y, paired = FALSE, na.rm = FALSE,
     tests = c("parametric", "nonparametric"), coin = TRUE,
-    perm.distribution = approximate(100000), wilcox.exact =
-    NULL, wilcox.correct = TRUE)
+    alternative = "two.sided", perm.distribution =
+    approximate(100000), wilcox.exact = NULL,
+    wilcox.correct = TRUE)
 }
 \arguments{
   \item{x}{a (non-empty) numeric vector of data values.}
@@ -22,6 +23,11 @@
   nonparamteric? The default \code{c("parametric",
   "nonparametric")} reports both. See details. (Arguments
   may be abbreviated).}
+
+  \item{alternative}{a character, the alternative
+  hypothesis must be one of \code{"two.sided"} (default),
+  \code{"greater"} or \code{"less"}. You can specify just
+  the initial letter, will be passed to all functions.}
 
   \item{coin}{logical or character. Should (permutation)
   tests from the \pkg{coin} package be reported? Default is
@@ -95,7 +101,10 @@ with(sleep, compare.2.vectors(extra[group == 1], extra[group == 2]))
 ## 3  coin::Wilcoxon              Z     -1.854      NA 0.06487
 ## 4          median              Z      1.744      NA 0.17867
 
+# compare with:
+with(sleep, compare.2.vectors(extra[group == 1], extra[group == 2], alternative = "less"))
 
+with(sleep, compare.2.vectors(extra[group == 1], extra[group == 2], alternative = "greater"))
 
 # doesn't make much sense as the data is not paired, but whatever:
 with(sleep, compare.2.vectors(extra[group == 1], extra[group == 2], paired = TRUE))

@@ -3,15 +3,15 @@
 #' \tabular{ll}{
 #' Package: \tab afex\cr
 #' Type: \tab Package\cr
-#' Version: \tab 0.3-42\cr
-#' Date: \tab 2012-09-16\cr
-#' Depends: \tab R (>= 2.14.0), car, lme4, pbkrtest (>= 0.3-2), reshape2, stringr, coin\cr
+#' Version: \tab 0.4-57\cr
+#' Date: \tab 2013-02-11\cr
+#' Depends: \tab R (>= 2.14.0), coin, car, lme4, pbkrtest (>= 0.3-2), reshape2, stringr\cr
 #' Encoding: \tab UTF-8\cr
 #' License: \tab GPL (>=3)\cr
 #' URL: \tab http://www.psychologie.uni-freiburg.de/Members/singmann/R/afex\cr
 #' }
 #'
-#' Provides convenience functions for analyzing factorial experiments using ANOVA or mixed-models. Functions ez.glm() and aov.car() allow convenient specification of pure-between, pure-within (i.e., repeated-measures), and mixed between-within (i.e., split-plot) ANOVAs and ANCOVAs with type 2 and type 3 sums of squares for data in the long format (i.e., one observation per row) wrapping car::Anova() (aggregating more then one observation per individual and cell of the design). Function nice.anova() produces publication ready ANOVA tables. Function mixed() fits a mixed model using lme4::lmer() and computes p-values for all effects in the model (using the Kenward-Rogers approximation of degrees of freedom). afex uses type 3 sums of squares as default (imitating commercial statistical software) and sets the default contrasts to contr.sum.
+#' Provides convenience functions for analyzing factorial experiments using ANOVA or mixed-models. ez.glm() and aov.car() allow convenient calculation of between, within (i.e., repeated-measures), or mixed between-within (i.e., split-plot) ANOVAs for data in the long format (i.e., one observation per row) wrapping car::Anova() (aggregating more then one observation per individual and cell of the design), per default returning a print ready ANOVA table. Function mixed() fits a mixed model using lme4::lmer() and computes p-values for all effects in the model using either the Kenward-Rogers approximation of degrees of freedom (LMM only) or parametric bootstrap (LMMs and GLMMs). afex uses type 3 sums of squares as default (imitating commercial statistical software) and sets the default contrasts to contr.sum. Furthermore, compare.2.vectors conveniently compares two vectors using different statistical tests.
 #'
 #' @aliases afex-package afex
 #' @name afex-package

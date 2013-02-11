@@ -3,7 +3,7 @@
 \title{Obtain p-values for a mixed-model from lmer().}
 \usage{
   mixed(formula, data, type = 3, method = c("KR", "PB"),
-    ...)
+    args.test = list(), ...)
 }
 \arguments{
   \item{formula}{a formula describing the full mixed-model
@@ -14,14 +14,19 @@
   all the variables present in \code{fixed}, \code{random},
   and \code{dv} as columns.}
 
-  \item{type}{type of test on which effects are based.
-  Currently only type 3 tests (\code{3} or \code{"III"})
-  are correctly implemented (see Details).}
+  \item{type}{type of test on which effects are based. Only
+  type 3 tests (\code{3} or \code{"III"}) are correctly
+  implemented (see Details).}
 
   \item{method}{character vector indicating which methods
-  for obtaining p-values should be used. Currently only
-  \code{"KR"} is implemented corresponding to the
-  Kenward-Rogers approximation for degrees of freedom.}
+  for obtaining p-values should be used. \code{"KR"} (the
+  default) corresponds to the Kenward-Rogers approximation
+  for degrees of freedom (only working with linear mixed
+  models). \code{"PB"} calculates p-values based on
+  parametric bootstrap.}
+
+  \item{args.test}{\code{list} of arguments passed to the
+  function calculating the p-values. See details.}
 
   \item{...}{further arguments (such as \code{weights})
   passed to \code{\link{lmer}}.}
@@ -39,15 +44,13 @@
   from fitting the restricted models (i.e., each model
   lacks the corresponding effect) \item \code{tests} a list
   of objects returned by the function for obtaining the
-  p-values (objects are of class \code{"KRmodcomp"} when
-  \code{method = "KR"}). \item \code{type} The \code{type}
-  argument used when calling this function. \item
-  \code{method} The \code{method} argument used when
-  calling this function. }
+  p-values. \item \code{type} The \code{type} argument used
+  when calling this function. \item \code{method} The
+  \code{method} argument used when calling this function. }
 
   The following methods exist for objects of class
   \code{"mixed"}: \code{print} (which uses rounding and
-  only returns the results wiuth \code{F.scaling = 1}),
+  only returns the results with \code{F.scaling = 1}),
   \code{summary}, and \code{anova} (the latter two return
   the same data.frame).
 }
@@ -56,7 +59,9 @@
   model fitted with \code{\link[lme4]{lmer}}. The default
   behavior calculates type 3 like p-values using the
   Kenward-Rogers approximation for degrees-of-freedom
-  implemented in \code{\link[pbkrtest]{KRmodcomp}}.
+  implemented in \code{\link[pbkrtest]{KRmodcomp}} (for
+  LMMs only), but also allows for parametric bootstrap
+  (\code{method = "PB"}) (for LMMs and GLMMs).
   \code{print}, \code{summary}, and \code{anova} methods
   for the returned object of class \code{"mixed"} are
   available (all return the same data.frame).
@@ -90,6 +95,27 @@
   experimental designs are given by Baayen and colleagues
   (Baayen, 2008; Baayen, Davidson & Bates, 2008; Baayen &
   Milin, 2010).
+
+  p-values are calculated via methods from \pkg{pbkrtest}.
+  When \code{method = "KR"}, the Kenward-Rogers
+  approximation for degrees-of-freedom is calculated using
+  \code{\link[pbkrtest]{KRmodcomp}}, which is only
+  applicable to linear-mixed models. The possible argument
+  to \code{pbkrtest} via \code{args.test} is
+  \code{details}.
+
+  \code{method = "PB"} calculates p-values using parametric
+  bootstrap using \code{\link[pbkrtest]{PBmodcomp}}. This
+  can be used for linear and also generalized linear mixed
+  models (GLMM) by specifiying a
+  \code{\link[stats]{family}} argument to \code{mixed}.
+  Note that you should specify further arguments to
+  \code{PBmodcomp} via \code{args.test}, especially
+  \code{nsim} (the number of simulations to form the
+  reference distribution. For other arguments see
+  \code{\link[pbkrtest]{PBmodcomp}}. Note that \code{REML}
+  (argument to \code{lmer}) will be set to \code{FALSE} if
+  method is \code{PB}.
 }
 \note{
   This function is not thoroughly tested so please report
@@ -97,8 +123,8 @@
   psychologie.uni-freiburg.de \cr There might be problems
   with rather big models when constructing the model matrix
   to fit the \code{lmer} models (potentially problematic
-  with Type 2 sums of squares). If you find any such bug,
-  please send an example including code and data!
+  with Type 2 tests). If you find any such bug, please send
+  an example including code and data!
 
   This functions needs a lot of RAM and rather long time
   especially with complex random structures. The RAM demand
@@ -118,7 +144,8 @@
 data(lexdec, package = "languageR")
 
 # using the simplest model
-m1 <- mixed(RT ~ Correct + Trial + PrevType * meanWeight + Frequency + NativeLanguage * Length + (1|Subject) + (1|Word), data = lexdec)
+m1 <- mixed(RT ~ Correct + Trial + PrevType * meanWeight +
+    Frequency + NativeLanguage * Length + (1|Subject) + (1|Word), data = lexdec)
 
 m1
 # gives:
@@ -133,6 +160,12 @@ m1
 ## 8                 Length   1   75.8259     8.6959  0.0042
 ## 9    PrevType:meanWeight   1 1601.1850     6.1823  0.0130
 ## 10 NativeLanguage:Length   1 1555.4858    14.2445  0.0002
+
+# Fitting a GLMM using parametric bootstrap:
+require("mlmRev") # for the data, see ?Contraception
+
+gm1 <- mixed(use ~ age + I(age^2) + urban + livch + (1 | district),
+ family = binomial, data = Contraception, args.test = list(nsim = 10), method = "PB")
 }
 }
 \author{
@@ -158,7 +191,7 @@ m1
   Treating stimuli as a random factor in social psychology:
   A new and comprehensive solution to a pervasive but
   largely ignored problem. \emph{Journal of Personality and
-  Social Psychology}, 103(1), 54–69. doi:10.1037/a0028347
+  Social Psychology}, 103(1), 54-69. doi:10.1037/a0028347
 }
 \seealso{
   \code{\link{ez.glm}} and \code{\link{aov.car}} for

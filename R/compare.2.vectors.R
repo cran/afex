@@ -2,13 +2,14 @@
 #'
 #' Compares two vectors \code{x} and \code{y} using t-test, Welch-test (also known as Satterthwaite), Wilcoxon-test, and a permutation test implemented in \pkg{coin}.
 #'
-#' @usage compare.2.vectors(x, y, paired = FALSE, na.rm = FALSE, tests = c("parametric", "nonparametric"), coin = TRUE, perm.distribution = approximate(100000), wilcox.exact = NULL, wilcox.correct = TRUE)
+#' @usage compare.2.vectors(x, y, paired = FALSE, na.rm = FALSE, tests = c("parametric", "nonparametric"), coin = TRUE, alternative = "two.sided", perm.distribution = approximate(100000), wilcox.exact = NULL, wilcox.correct = TRUE)
 #'
 #' @param x a (non-empty) numeric vector of data values.
 #' @param y a (non-empty) numeric vector of data values.
 #' @param paired a logical whether the data is paired. Default is \code{FALSE}.
 #' @param na.rm logical. Should \code{NA} be removed?  Default is \code{FALSE}.
 #' @param tests Which tests to report, parametric or nonparamteric? The default \code{c("parametric", "nonparametric")} reports both. See details. (Arguments may be abbreviated).
+#' @param alternative a character, the alternative hypothesis must be one of \code{"two.sided"} (default), \code{"greater"} or \code{"less"}. You can specify just the initial letter, will be passed to all functions.
 #' @param coin logical or character. Should (permutation) tests from the \pkg{coin} package be reported? Default is \code{TRUE} corresponding to all implemented tests. \code{FALSE} calculates no tests from \pkg{coin}. A character vector may include any of the following (potentially abbreviated) implemented tests (see also Details): \code{c("permutation", "Wilcoxon", "median")}
 #' @param perm.distribution \code{distribution} argument to \pkg{coin}, see \code{\link[coin]{Distribution}} or , \code{\link[coin]{IndependenceTest}}. Defaults to \code{approximate(100000)} indicating an approximation of the excat conditional distribution with 100.000 Monte Carlo samples. One can use \code{"exact"} for small samples and if \code{paired = FALSE}.
 #' @param wilcox.exact \code{exact} argument to \code{\link{wilcox.test}}.
@@ -31,7 +32,7 @@
 #' @example examples/examples.compare.R
 #'
 
-compare.2.vectors <- function(x, y, paired = FALSE, na.rm = FALSE, tests = c("parametric", "nonparametric"), coin = TRUE, perm.distribution = approximate(100000), wilcox.exact = NULL, wilcox.correct = TRUE) {
+compare.2.vectors <- function(x, y, paired = FALSE, na.rm = FALSE, tests = c("parametric", "nonparametric"), coin = TRUE, alternative = "two.sided", perm.distribution = approximate(100000), wilcox.exact = NULL, wilcox.correct = TRUE) {
 	#browser()
 	tests <- match.arg(tests, c("parametric", "nonparametric"), several.ok = TRUE)
 	if (na.rm) {
@@ -41,10 +42,10 @@ compare.2.vectors <- function(x, y, paired = FALSE, na.rm = FALSE, tests = c("pa
 	out <- list()
 	if (paired) if (!length(x) == length(y)) stop("length(x) needs to be equal to length(y) when paired is TRUE!")
 	if ("parametric" %in% tests) {
-		res.t <- t.test(x, y, paired = paired, var.equal = TRUE)
+		res.t <- t.test(x, y, paired = paired, var.equal = TRUE, alternative = alternative)
 		parametric <- data.frame(test = "t", test.statistic = "t", test.value = res.t[["statistic"]], test.df = res.t[["parameter"]], p = res.t[["p.value"]], stringsAsFactors = FALSE)
 		if (!paired) {
-			res.welch <- t.test(x, y, paired = paired, var.equal = FALSE)
+			res.welch <- t.test(x, y, paired = paired, var.equal = FALSE, alternative = alternative)
 			parametric <- rbind(parametric, data.frame(test = "Welch", test.statistic = "t", test.value = res.welch[["statistic"]], test.df = res.welch[["parameter"]], p = res.welch[["p.value"]], stringsAsFactors = FALSE))
 		}
 		rownames(parametric) <- NULL
@@ -52,7 +53,7 @@ compare.2.vectors <- function(x, y, paired = FALSE, na.rm = FALSE, tests = c("pa
 	}
 	if ("nonparametric" %in% tests) {
 		implemented.tests <- c("permutation", "Wilcoxon", "median")
-		res.wilcox <- wilcox.test(x, y, paired = paired, exact = wilcox.exact, correct = wilcox.correct)
+		res.wilcox <- wilcox.test(x, y, paired = paired, exact = wilcox.exact, correct = wilcox.correct, alternative = alternative)
 		nonparametric <- data.frame(test = "stats::Wilcoxon", test.statistic = if (paired) "V" else "W", test.value = res.wilcox[["statistic"]], test.df = NA, p = res.wilcox[["p.value"]], stringsAsFactors = FALSE)
 		if (!(coin == FALSE)) {
 			dv <- c(x, y)
@@ -64,15 +65,15 @@ compare.2.vectors <- function(x, y, paired = FALSE, na.rm = FALSE, tests = c("pa
 			if (isTRUE(coin)) coin <- implemented.tests
 			else coin <- match.arg(coin, implemented.tests, several.ok = TRUE)
 			if ("permutation" %in% coin) {
-				res.perm <- oneway_test(formula.coin, distribution=perm.distribution)
+				res.perm <- oneway_test(formula.coin, distribution=perm.distribution, alternative = alternative)
 				nonparametric <- rbind(nonparametric, data.frame(test = "permutation", test.statistic = "Z", test.value = statistic(res.perm), test.df = NA, p = pvalue(res.perm)[1], stringsAsFactors = FALSE))
 			}
 			if ("Wilcoxon" %in% coin) {
-				res.coin.wilcox <- wilcox_test(formula.coin, distribution=perm.distribution)
+				res.coin.wilcox <- wilcox_test(formula.coin, distribution=perm.distribution, alternative = alternative)
 				nonparametric <- rbind(nonparametric, data.frame(test = "coin::Wilcoxon", test.statistic = "Z", test.value = statistic(res.coin.wilcox), test.df = NA, p = pvalue(res.coin.wilcox)[1], stringsAsFactors = FALSE))
 			}
 			if ("median" %in% coin) {
-				res.median <- median_test(formula.coin, distribution=perm.distribution)
+				res.median <- median_test(formula.coin, distribution=perm.distribution, alternative = alternative)
 				nonparametric <- rbind(nonparametric, data.frame(test = "median", test.statistic = "Z", test.value = statistic(res.median), test.df = NA, p = pvalue(res.median)[1], stringsAsFactors = FALSE))
 			}
 			

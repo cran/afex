@@ -21,7 +21,7 @@ Description: Provides convenience functions for analyzing factorial
         bootstrap (LMMs and GLMMs). afex uses type 3 sums of squares as
         default (imitating commercial statistical software) and sets
         the default contrasts to contr.sum. Furthermore,
-        compare.2.vectors conveniently compares two vectors using
+        compare.2.vectors() conveniently compares two vectors using
         different statistical tests.
 URL: http://www.psychologie.uni-freiburg.de/Members/singmann/R/afex
 License: GPL (>= 3)
@@ -29,13 +29,14 @@ Encoding: UTF-8
 Authors@R: c(person(given="Henrik", family="Singmann",
         email="henrik.singmann@psychologie.uni-freiburg.de",
         role=c("aut", "cre")))
-Version: 0.4-57
-Date: 2013-02-11
+Version: 0.5-71
+Date: 2013-05-29
 Collate: 'afex-package.R' 'aov.car.R' 'compare.2.vectors.R' 'mixed.R'
         'nice.anova.R' 'obk.long-data.R' 'zzz.R'
 Repository: CRAN
 Repository/R-Forge/Project: afe
-Repository/R-Forge/Revision: 57
-Repository/R-Forge/DateTimeStamp: 2013-02-11 10:22:41
-Date/Publication: 2013-02-11 14:22:50
-Packaged: 2013-02-11 11:17:02 UTC; rforge
+Repository/R-Forge/Revision: 71
+Repository/R-Forge/DateTimeStamp: 2013-05-29 08:23:11
+Date/Publication: 2013-05-29 17:33:27
+Packaged: 2013-05-29 10:15:35 UTC; rforge
+NeedsCompilation: no

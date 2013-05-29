@@ -45,6 +45,10 @@
   characters. The columns that are always present are:
   \code{Effect}, \code{df} (degrees of freedom), \code{F},
   and \code{p}.
+
+  \code{ges} contains the generalized eta-squared effect
+  size measure (Bakeman, 2005), \code{pes} contains partial
+  eta-squared (if requested).
 }
 \description{
   These functions produce a nice ANOVA table best for
@@ -88,16 +92,17 @@
 
 data(obk.long)
 # create object of class Anova:
-tmp.aov <- aov.car(value ~ treatment * gender + age + Error(id/phase*hour), data = obk.long, return = "Anova")
+tmp.aov <- aov.car(value ~ treatment * gender + Error(id/phase*hour),
+             data = obk.long, return = "Anova")
 
-nice.anova(tmp.aov, observed = c("age", "gender"))
+nice.anova(tmp.aov, observed = "gender")
 
-nice.anova(tmp.aov, observed = c("age", "gender"), sig.symbol = rep("", 4))
+nice.anova(tmp.aov, observed = "gender", sig.symbol = rep("", 4))
 
 \dontrun{
 # use package ascii or xtable for formatting of tables ready for printing.
 
-full <- nice.anova(tmp.aov, observed = c("age", "gender"))
+full <- nice.anova(tmp.aov, observed = "gender")
 
 require(ascii)
 print(ascii(full, include.rownames = FALSE, caption = "ANOVA 1"), type = "org")

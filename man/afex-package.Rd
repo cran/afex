@@ -2,13 +2,13 @@
 \name{afex-package}
 \alias{afex}
 \alias{afex-package}
-\title{Analysis of Factorial Experiments.}
+\title{The afex Package}
 \description{
   Analysis of Factorial Experiments.
 }
 \details{
   \tabular{ll}{ Package: \tab afex\cr Type: \tab Package\cr
-  Version: \tab 0.4-57\cr Date: \tab 2013-02-11\cr Depends:
+  Version: \tab 0.5-71\cr Date: \tab 2013-05-29\cr Depends:
   \tab R (>= 2.14.0), coin, car, lme4, pbkrtest (>= 0.3-2),
   reshape2, stringr\cr Encoding: \tab UTF-8\cr License:
   \tab GPL (>=3)\cr URL: \tab
@@ -30,8 +30,8 @@
   GLMMs). afex uses type 3 sums of squares as default
   (imitating commercial statistical software) and sets the
   default contrasts to contr.sum. Furthermore,
-  compare.2.vectors conveniently compares two vectors using
-  different statistical tests.
+  compare.2.vectors() conveniently compares two vectors
+  using different statistical tests.
 }
 \author{
   Henrik Singmann

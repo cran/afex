@@ -1,4 +1,40 @@
                     ************************
+                    ** afex VERSION 0.5-x **
+                    ************************
+                    
+                    Changes in afex Version 0.5-x
+                    Released May 2013
+
+    Significant User Visible Changes and New Features
+
+    o   added argument factorize (default: TRUE) to aov.car and ez.glm:
+		all variables are now factorized per default. (now it is 
+		necessary to set factorize=FALSE for ANCOVAs!)
+    
+    o   added argument per.parameter to mixed() which allows to specify
+		variables for which each parameter is tested (not only the 
+		overall effect). Can be useful to test for ordered factors. 
+		(only implemented for "Type 3" tests)
+	
+	o	added more informative startup message (thanks to Robert Volcic 
+		and Lars Konieczny)
+		
+	o	mixed, ez.glm and aov.car now check for correct contrasts and set 
+		factors to contr.sum if other contrasts are found (can be tunred 
+		off via check.contrasts argument). Resetting the default contrast
+		to contr.treatment should therefore not interfere with afex.
+        (this is not intensly tested, so please report anything)
+	
+	o	mixed checks numeric variables if they are centered on 0 (and
+		gives warning if not).
+    
+    Bugfixes
+    
+    o   checks if observed variable is in the data and throws
+        an error if not (nice.anova)
+
+
+                    ************************
                     ** afex VERSION 0.4-x **
                     ************************
                     

@@ -13,6 +13,8 @@
 #'
 #' @return A \code{data.frame} with the ANOVA table consisting of characters. The columns that are always present are: \code{Effect}, \code{df} (degrees of freedom), \code{F}, and \code{p}.
 #'
+#' \code{ges} contains the generalized eta-squared effect size measure (Bakeman, 2005), \code{pes} contains partial eta-squared (if requested).
+#'
 #' @details The returned \code{data.frame} is print-ready when adding to a document with proper methods. I recommend \pkg{ascii} and \pkg{xtable}. \pkg{ascii} provides conversion to \href{http://www.methods.co.nz/asciidoc/}{AsciiDoc} but most notably to \href{http://orgmode.org/}{org-mode} (see \code{\link[ascii]{ascii}} and \code{\link[ascii]{print-ascii}}). \pkg{xtable} converts a \code{data.frame} into LaTeX code with many possible options (e.g., allowing for \code{"longtable"} or \code{"sidewaystable"}), see \code{\link[xtable]{xtable}} and \code{\link[xtable]{print.xtable}}. See Examples.
 #'
 #' Conversion functions to other formats (such as HTML, ODF, or Word) can be found at the \href{http://cran.r-project.org/web/views/ReproducibleResearch.html}{Reproducible Research Task View}.
@@ -37,16 +39,17 @@
 #' 
 #' data(obk.long)
 #' # create object of class Anova:
-#' tmp.aov <- aov.car(value ~ treatment * gender + age + Error(id/phase*hour), data = obk.long, return = "Anova")
+#' tmp.aov <- aov.car(value ~ treatment * gender + Error(id/phase*hour), 
+#'              data = obk.long, return = "Anova")
 #' 
-#' nice.anova(tmp.aov, observed = c("age", "gender"))
+#' nice.anova(tmp.aov, observed = "gender")
 #' 
-#' nice.anova(tmp.aov, observed = c("age", "gender"), sig.symbol = rep("", 4))
+#' nice.anova(tmp.aov, observed = "gender", sig.symbol = rep("", 4))
 #' 
 #' \dontrun{
 #' # use package ascii or xtable for formatting of tables ready for printing.
 #' 
-#' full <- nice.anova(tmp.aov, observed = c("age", "gender"))
+#' full <- nice.anova(tmp.aov, observed = "gender")
 #' 
 #' require(ascii)
 #' print(ascii(full, include.rownames = FALSE, caption = "ANOVA 1"), type = "org")
@@ -102,7 +105,7 @@ nice.anova <- function(object, es = "ges", observed = NULL, correction = c("GG",
 	}
 	if (row.names(tmp.df)[1] == "(Intercept)")	tmp2 <- as.data.frame(tmp.df[-1,, drop = FALSE])
 	else tmp2 <- tmp.df
-	tmp2[,"df"] <- paste(ifelse(is.wholenumber(tmp2[,"num Df"]),tmp2[,"num Df"], round(tmp2[,"num Df"], 2)),  ifelse(is.wholenumber(tmp2[,"den Df"]),tmp2[,"den Df"], round(tmp2[,"den Df"], 2)), sep = ", ")
+	tmp2[,"df"] <- paste(ifelse(is.wholenumber(tmp2[,"num Df"]),tmp2[,"num Df"], formatC(tmp2[,"num Df"], digits = 2, format = "f")),  ifelse(is.wholenumber(tmp2[,"den Df"]),tmp2[,"den Df"], formatC(tmp2[,"den Df"], digits = 2, format = "f")), sep = ", ")
 	tmp2[,"MSE"] <- tmp2[,"Error SS"]/tmp2[,"den Df"]
 	symbols.use <-  c(" +", " *", " **", " ***")
 	symbols.use[seq_along(sig.symbols)] <- sig.symbols
@@ -118,7 +121,8 @@ nice.anova <- function(object, es = "ges", observed = NULL, correction = c("GG",
         if(!is.null(observed)){
 			obs <- rep(FALSE,nrow(tmp2))
 			for(i in observed){
-				obs <- obs | str_detect(rownames(tmp2),i)
+                if (!any(str_detect(rownames(tmp2),str_c("\\<",i,"\\>")))) stop(str_c("Observed variable not in data: ", i))
+				obs <- obs | str_detect(rownames(tmp2),str_c("\\<",i,"\\>"))
 			}
 			obs_SSn1 <- sum(tmp2$SS*obs)
 			obs_SSn2 <- tmp2$SS*obs

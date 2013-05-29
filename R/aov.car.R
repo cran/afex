@@ -2,9 +2,9 @@
 #'
 #' These functions allow convenient access to \code{\link[car]{Anova}} (from the \pkg{car} package) for data in the \strong{long} format (i.e., one observation per row), possibly aggregating the data if there is more than one obersvation per individuum and cell. Hence, mixed between-within ANOVAs can be calculated conveniently without using the rather unhandy format of \code{car::Anova}. \code{aov.car} can be called using a formula similar to \code{\link{aov}} specifying an error strata for the within-subject factor(s). \code{ez.glm} is called specifying the factors as character vectors.
 #'
-#' @usage aov.car(formula, data, fun.aggregate = NULL, type = 3, return = "nice", observed = NULL, args.return = list(), ...)
+#' @usage aov.car(formula, data, fun.aggregate = NULL, type = 3, factorize = TRUE, check.contrasts = TRUE, return = "nice", observed = NULL, args.return = list(), ...)
 #'
-#' ez.glm(id, dv, data, between = NULL, within = NULL, covariate = NULL, observed = NULL, fun.aggregate = NULL, type = 3, return = "nice", args.return = list(), ..., print.formula = FALSE)
+#' ez.glm(id, dv, data, between = NULL, within = NULL, covariate = NULL, observed = NULL, fun.aggregate = NULL, type = 3, factorize = TRUE, check.contrasts = TRUE, return = "nice", args.return = list(), ..., print.formula = FALSE)
 #' 
 #' univ(object)
 #'
@@ -18,13 +18,17 @@
 #' @param data A \code{data.frame} containing the data. Mandatory.
 #' @param fun.aggregate The function for aggregating the data before running the ANOVA if there is more than one obervation per individuum and cell of the design. The default \code{NULL} issues a warning if aggregation is necessary and uses \code{\link{mean}}.
 #' @param type The type of sums of squares for the ANOVA. \strong{Defaults to 3}. Passed to \code{\link[car]{Anova}}. Possible values are \code{"II"}, \code{"III"}, \code{2}, or \code{3}.
+#' @param factorize logical. Should between subject factors be factorized (with note) before running the analysis. Default is \code{TRUE}. If one wants to run an ANCOVA, needs to be set to \code{FALSE} (in which case centering on 0 is checked on numeric variables).
+#' @param check.contrasts \code{logical}. Should contrasts for between-subject factors be checked and (if necessary) changed to be \code{"contr.sum"}. See details.
 #' @param print.formula \code{ez.glm} is a wrapper for \code{aov.car}. This boolean argument indicates whether the formula in the call to \code{car.aov} should be printed. 
 #' @param return What should be returned? If \code{"nice"} (the default) will return a nice ANOVA table (produced by \code{\link{nice.anova}}. Possible values are \code{c("Anova", "lm", "data", "nice", "full", "all", "univariate")} (possibly abbreviated).
 #' @param args.return \code{list} of further arguments passed to the function which produces the return value. Currently only supports \code{return = "nice"} (the default) which then passes arguments to \code{\link{nice.anova}} (see examples).
 #' @param ... Further arguments passed to \code{fun.aggregate}.
 #' @param object An object of class \code{Anova.mlm} as returned by \code{aov.car}, \code{ez.glm}, or \code{\link[car]{Anova}}.
 #'
-#' @return \code{aov.car} and \code{ez.glm} are wrappers to \code{\link[car]{Anova}}, the return value is dependent on the \code{return} argument. When argument \code{return} is \code{"nice"} (the default) a nice ANOVA table is returnd (\code{\link{nice.anova}}). If \code{return = "full"} or \code{return = "all"} a list \code{list} with the following elements:
+#' @return \code{aov.car} and \code{ez.glm} are wrappers to \code{\link[car]{Anova}}, the return value is dependent on the \code{return} argument. When argument \code{return} is \code{"nice"} (the default) a nice ANOVA table is returnd (\code{\link{nice.anova}}) with the following columns: \code{Effect}, \code{df}, \code{MSE} (mean-squared errors), \code{F} (potentially with significant symbols), \code{ges} (generalized eta-squared), \code{p}.
+#'
+#' If \code{return = "full"} or \code{return = "all"} a list \code{list} with the following elements:
 #'
 #' \describe{
 #'   \item{"Anova"}{the same as \code{\link[car]{Anova}}. Usually an object of class \code{"Anova.mlm"} (with within-subjects factors) or of class \code{c("anova", "data.frame")}. Also returned if \code{return = "Anova"}.}
@@ -52,7 +56,11 @@
 #'
 #' \code{ez.glm} will concatante all between-subject factors using \code{*} (i.e., producing all main effects and interactions) and all covariates by \code{+} (i.e., adding only the main effects to the existing between-subject factors). The within-subject factors do fully interact with all between-subject factors and covariates. This is essentially identical to the behavior of SPSS's \code{glm} function.
 #'
-#' Note that the default behavior is to return a \code{\link{nice.anova}} \code{data.frame}. This includes calculation of generalized eta squared for which \strong{all non manipluated (i.e., observed)} variables need to be specified via the \code{observed} argument. Changing the effect size to \code{"pes"} (partial eta-squared) via \code{args.return} or the return value via \code{return} removes this necessity. 
+#' To run an ANCOVA you need to set \code{factorize = FALSE} and make sure that all variables have the correct type (i.e., factors are factors and numeric variables are numeric and centered).
+#'
+#' Note that the default behavior is to return a \code{\link{nice.anova}} \code{data.frame}. This includes calculation of generalized eta squared for which \strong{all non manipluated (i.e., observed)} variables need to be specified via the \code{observed} argument. Changing the effect size to \code{"pes"} (partial eta-squared) via \code{args.return} or the return value via \code{return} removes this necessity.
+#' 
+#' If \code{check.contrasts = TRUE}, contrasts will be set to \code{"contr.sum"} for all between-subject factors if default contrasts are not equal to \code{"contr.sum"} or \code{attrib(factor, "contrasts") != "contr.sum"}. (within-subject factors are hard-coded \code{"contr.sum"}.)
 #'
 #' @author \code{univ} is basically a copy of \code{\link[car]{summary.Anova.mlm}} written by John Fox.\cr The other functions were written by Henrik Singmann.
 #'
@@ -78,98 +86,136 @@
 #' @example examples/examples.aov.car.R
 #'
 
-aov.car <- function(formula, data, fun.aggregate = NULL, type = 3, return = "nice", observed = NULL, args.return = list(), ...) {
-	#browser()
-    return <- match.arg(return, c("Anova", "lm", "data", "nice", "full", "all", "univariate"))
-	# stuff copied from aov:
-	Terms <- terms(formula, "Error", data = data)
-    indError <- attr(Terms, "specials")$Error
-    if (length(indError) > 1L) 
-        stop(sprintf(ngettext(length(indError), "there are %d Error terms: only 1 is allowed", 
-            "there are %d Error terms: only 1 is allowed"), length(indError)), 
-            domain = NA)
-	# from here, code by Henrik Singmann:
-	vars <- all.vars(formula)
-	dv <- vars[1]
-	vars <- vars[-1]
-	parts <- attr(terms(formula, "Error", data = data), "term.labels")
-	error.term <- parts[str_detect(parts, "^Error\\(")]
-	id <- all.vars(parse(text = error.term))[1]
-	within <- all.vars(parse(text = error.term))[-1]
-	between <- vars[!(vars %in% c(id, within))]
-	effect.parts <- parts[!str_detect(parts, "^Error\\(")]
-	effect.parts.no.within <- effect.parts[!str_detect(effect.parts, str_c("\\<",within,"\\>", collapse = "|"))]
-	rh2 <- if (length(between) > 0) str_c(effect.parts.no.within, collapse = "+") else "1"
-	lh1 <- str_c(id, if (length(between) > 0) str_c(between, collapse = "+") else NULL, sep = "+")
-	rh1 <- str_c(within, collapse = "+")
-	rh3 <- str_c(within, collapse = "*")
-	# converting all within subject factors to factors and adding a leading charcter (x) if starting with a digit.
-	for (within.factor in within) {
-		data[,within.factor] <- factor(make.names(as.character(data[,within.factor])))
-	}
-    # Check if each id is in only one between subjects cell.
-    if (length(between) > 0) {
-        split.data <- split(data, lapply(between, function(x) data[,x]))
-        ids.per.condition <- lapply(split.data, function(x) unique(as.character(x[,id])))
-        ids.in.more.condition <- unique(unlist(lapply(seq_along(ids.per.condition), function(x) unique(unlist(lapply(ids.per.condition[-x], function(y, z = ids.per.condition[[x]]) intersect(z, y)))))))
-        if (length(ids.in.more.condition) > 0) stop(str_c("Following ids are in more than one between subjects condition:\n", str_c(ids.in.more.condition, collapse = ", ")))
+aov.car <- function(formula, data, fun.aggregate = NULL, type = 3, factorize = TRUE, check.contrasts = TRUE, return = "nice", observed = NULL, args.return = list(), ...) {
+  #browser()
+  return <- match.arg(return, c("Anova", "lm", "data", "nice", "full", "all", "univariate"))
+  # stuff copied from aov:
+  Terms <- terms(formula, "Error", data = data)
+  indError <- attr(Terms, "specials")$Error
+  if (length(indError) > 1L) 
+    stop(sprintf(ngettext(length(indError), "there are %d Error terms: only 1 is allowed", 
+                          "there are %d Error terms: only 1 is allowed"), length(indError)), 
+         domain = NA)
+  # from here, code by Henrik Singmann:
+  vars <- all.vars(formula)
+  dv <- vars[1]
+  vars <- vars[-1]
+  parts <- attr(terms(formula, "Error", data = data), "term.labels")
+  error.term <- parts[str_detect(parts, "^Error\\(")]
+  id <- all.vars(parse(text = error.term))[1]
+  within <- all.vars(parse(text = error.term))[-1]
+  between <- vars[!(vars %in% c(id, within))]
+  effect.parts <- parts[!str_detect(parts, "^Error\\(")]
+  effect.parts.no.within <- effect.parts[!str_detect(effect.parts, str_c("\\<",within,"\\>", collapse = "|"))]
+  # factorize if necessary
+  if (factorize) {
+    if (any(!vapply(data[, between, drop = FALSE], is.factor, TRUE))) {
+      to.factor <- between[!vapply(data[,between, drop = FALSE], is.factor, TRUE)]
+      message(str_c("Converting to factor: ", str_c(to.factor, collapse = ", ")))
+      for (tmp.c in to.factor) {
+        data[,tmp.c] <- factor(data[,tmp.c])
+      }
     }
-	# Is fun.aggregate NULL and aggregation necessary?
-	if (is.null(fun.aggregate)) {
-		if (any(xtabs(as.formula(str_c("~", id, if (length(within) > 0) "+", rh1)), data = data) > 1)) {
-			warning("More than one observation per cell, aggregating the data using mean (i.e, fun.aggregate = mean)!")
-			fun.aggregate <- mean
-		}
-	}
-	# Is Type = 3 and contrasts not contr.sum?
-	if ((type == 3 | type == "III") & options("contrasts")[[1]][1] != "contr.sum") warning(str_c("Calculating Type 3 sums with contrasts = ", options("contrasts")[[1]][1], ".\n  You should use options(contrasts=c('contr.sum','contr.poly')) instead"))
-	# prepare the data:
-	tmp.dat <- dcast(data, formula = as.formula(str_c(lh1, if (length(within) > 0) rh1 else ".", sep = "~")), fun.aggregate = fun.aggregate, ..., value.var = dv)
-	#browser()
-    if (any(is.na(tmp.dat))) {
-        missing.values <- apply(tmp.dat, 1, function(x) any(is.na(x)))
-        warning(str_c("Missing values for following ID(s):\n", str_c(tmp.dat[missing.values,1], collapse = ", "), "\nRemoving those cases from the analysis."))        
+  } else {
+    # check if numeric variables are centered.
+    c.ns <- between[vapply(data[, between, drop = FALSE], is.numeric, TRUE)]
+    if (length(c.ns) > 0) {
+      non.null <- c.ns[!abs(vapply(data[, c.ns, drop = FALSE], mean, 0)) < .Machine$double.eps ^ 0.5]
+      if (length(non.null) > 0) warning(str_c("Numerical variables NOT centered on 0 (i.e., likely bogus results): ", str_c(non.null, collapse = ", ")))
     }
-	data.l <- list(data = tmp.dat)
-    if (return == "data") return(tmp.dat)
-	# branching based on type of ANOVA
-	if (length(within) > 0) {  # if within-subject factors are present:
-		# make idata argument
-		if (length(within) > 1) {
-			within.levels <- lapply(lapply(data[,within], levels), factor)
-			idata <- rev(expand.grid(rev(within.levels)))
-		} else {
-			idata <- data.frame(levels(data[,within]))
-			colnames(idata) <- within
-		}
-		# print(as.formula(str_c("cbind(",str_c(colnames(tmp.dat[-(seq_along(c(id, between)))]), collapse = ", "), ") ~ ", rh2)))
-		# browser()
-		tmp.lm <- do.call("lm", list(formula = as.formula(str_c("cbind(",str_c(colnames(tmp.dat[-(seq_along(c(id, between)))]), collapse = ", "), ") ~ ", rh2)), data = tmp.dat))
-        if (return == "lm") return(tmp.lm)
-		Anova.out <- Anova(tmp.lm, idata = idata, idesign = as.formula(str_c("~", rh3)), type = type)
-		data.l <- c(data.l, idata = list(idata))
-	} else { # if NO within-subjetc factors are present (i.e., purley between ANOVA):
-		colnames(tmp.dat)[ncol(tmp.dat)] <- "dv"
-		tmp.lm <- do.call("lm", list(formula = as.formula(str_c("dv ~ ", rh2)), data = tmp.dat))
-		Anova.out <- Anova(tmp.lm, type = type)
-	}
-	if (return == "Anova") return(Anova.out)
-	else if ((return == "full")  | (return == "all")) return(c("Anova" = list(Anova.out), "lm" = list(tmp.lm), data.l))
-    else if (return == "univariate") return(univ(Anova.out))
-    else if (return == "nice") return(do.call("nice.anova", args = c(object = list(Anova.out), observed = list(observed), args.return)))
+  }
+  # make formulas
+  rh2 <- if (length(between) > 0) str_c(effect.parts.no.within, collapse = "+") else "1"
+  lh1 <- str_c(id, if (length(between) > 0) str_c(between, collapse = "+") else NULL, sep = "+")
+  rh1 <- str_c(within, collapse = "+")
+  rh3 <- str_c(within, collapse = "*")
+  # converting all within subject factors to factors and adding a leading charcter (x) if starting with a digit.
+  for (within.factor in within) {
+    data[,within.factor] <- factor(make.names(as.character(data[,within.factor])))
+  }
+  # Check if each id is in only one between subjects cell.
+  if (length(between) > 0) {
+    split.data <- split(data, lapply(between, function(x) data[,x]))
+    ids.per.condition <- lapply(split.data, function(x) unique(as.character(x[,id])))
+    ids.in.more.condition <- unique(unlist(lapply(seq_along(ids.per.condition), function(x) unique(unlist(lapply(ids.per.condition[-x], function(y, z = ids.per.condition[[x]]) intersect(z, y)))))))
+    if (length(ids.in.more.condition) > 0) stop(str_c("Following ids are in more than one between subjects condition:\n", str_c(ids.in.more.condition, collapse = ", ")))
+  }
+  # Is fun.aggregate NULL and aggregation necessary?
+  if (is.null(fun.aggregate)) {
+    if (any(xtabs(as.formula(str_c("~", id, if (length(within) > 0) "+", rh1)), data = data) > 1)) {
+      warning("More than one observation per cell, aggregating the data using mean (i.e, fun.aggregate = mean)!")
+      fun.aggregate <- mean
+    }
+  }
+  # Is Type == 3 and contrasts != contr.sum and check.contrasts == FALSE?
+  if ((type == 3 | type == "III") & options("contrasts")[[1]][1] != "contr.sum" & !check.contrasts) warning(str_c("Calculating Type 3 sums with contrasts = ", options("contrasts")[[1]][1], "\n  Results likely bogus or not interpretable!\n  You should use check.contrasts = TRUE or options(contrasts=c('contr.sum','contr.poly'))"))
+  # prepare the data:
+  tmp.dat <- dcast(data, formula = as.formula(str_c(lh1, if (length(within) > 0) rh1 else ".", sep = "~")), fun.aggregate = fun.aggregate, ..., value.var = dv)
+  #browser()
+  # check for missing values:
+  if (any(is.na(tmp.dat))) {
+    missing.values <- apply(tmp.dat, 1, function(x) any(is.na(x)))
+    warning(str_c("Missing values for following ID(s):\n", str_c(tmp.dat[missing.values,1], collapse = ", "), "\nRemoving those cases from the analysis."))        
+  }
+  if (length(between) > 0) {
+    if (check.contrasts) {
+      resetted <- NULL
+      for (i in between) {
+        if (is.factor(tmp.dat[,i])) {
+          if (is.null(attr(tmp.dat[,i], "contrasts")) & (options("contrasts")[[1]][1] != "contr.sum")) {
+            contrasts(tmp.dat[,i]) <- "contr.sum"
+            resetted  <- c(resetted, i)
+          }
+          else if (!is.null(attr(tmp.dat[,i], "contrasts")) && attr(tmp.dat[,i], "contrasts") != "contr.sum") {
+            contrasts(tmp.dat[,i]) <- "contr.sum"
+            resetted  <- c(resetted, i)
+          }
+        }
+      }
+    if (!is.null(resetted)) message(str_c("Contrasts set to contr.sum for the following variables: ", str_c(resetted, collapse=", ")))
+    }
+  }
+  data.l <- list(data = tmp.dat)
+  if (return == "data") return(tmp.dat)
+  # branching based on type of ANOVA
+  if (length(within) > 0) {  # if within-subject factors are present:
+    # make idata argument
+    if (length(within) > 1) {
+      within.levels <- lapply(lapply(data[,within], levels), factor)
+      idata <- rev(expand.grid(rev(within.levels)))
+    } else {
+      idata <- data.frame(levels(data[,within]))
+      colnames(idata) <- within
+    }
+    # print(as.formula(str_c("cbind(",str_c(colnames(tmp.dat[-(seq_along(c(id, between)))]), collapse = ", "), ") ~ ", rh2)))
+    # browser()
+    tmp.lm <- do.call("lm", list(formula = as.formula(str_c("cbind(",str_c(colnames(tmp.dat[-(seq_along(c(id, between)))]), collapse = ", "), ") ~ ", rh2)), data = tmp.dat))
+    if (return == "lm") return(tmp.lm)
+    Anova.out <- Anova(tmp.lm, idata = idata, idesign = as.formula(str_c("~", rh3)), type = type)
+    data.l <- c(data.l, idata = list(idata))
+  } else { # if NO within-subjetc factors are present (i.e., purley between ANOVA):
+    colnames(tmp.dat)[ncol(tmp.dat)] <- "dv"
+    tmp.lm <- do.call("lm", list(formula = as.formula(str_c("dv ~ ", rh2)), data = tmp.dat))
+    if (return == "lm") return(tmp.lm)
+    Anova.out <- Anova(tmp.lm, type = type)
+  }
+  if (return == "Anova") return(Anova.out)
+  else if ((return == "full")  | (return == "all")) return(c("Anova" = list(Anova.out), "lm" = list(tmp.lm), data.l))
+  else if (return == "univariate") return(univ(Anova.out))
+  else if (return == "nice") return(do.call("nice.anova", args = c(object = list(Anova.out), observed = list(observed), args.return)))
 }
 
 
 
-ez.glm <- function(id, dv, data, between = NULL, within = NULL, covariate = NULL, observed = NULL, fun.aggregate = NULL, type = 3, return = "nice", args.return = list(), ..., print.formula = FALSE) {
-	if (is.null(between) & is.null(within)) stop("Either between or within need to be non-NULL!")
-	if (!is.null(covariate)) covariate <- str_c(covariate, collapse = "+")
-	#browser()
-	rh <- if (!is.null(between) || !is.null(covariate)) str_c(if (!is.null(between)) str_c(between, collapse = " * ") else NULL, covariate, sep = " + ") else "1"
-	error <- str_c(" + Error(", id, if (!is.null(within)) "/" else "", str_c(within, collapse = " * "), ")")
-	formula <- str_c(dv, " ~ ", rh, error)
-	if (print.formula) message(str_c("Formula send to aov.car: ", formula))
-	aov.car(formula = as.formula(formula), data = data, fun.aggregate = fun.aggregate, type = type, return = return, observed = observed, args.return = args.return, ...)
+ez.glm <- function(id, dv, data, between = NULL, within = NULL, covariate = NULL, observed = NULL, fun.aggregate = NULL, type = 3, factorize = TRUE, check.contrasts = TRUE, return = "nice", args.return = list(), ..., print.formula = FALSE) {
+  if (is.null(between) & is.null(within)) stop("Either between or within need to be non-NULL!")
+  if (!is.null(covariate)) covariate <- str_c(covariate, collapse = "+")
+  #browser()
+  rh <- if (!is.null(between) || !is.null(covariate)) str_c(if (!is.null(between)) str_c(between, collapse = " * ") else NULL, covariate, sep = " + ") else "1"
+  error <- str_c(" + Error(", id, if (!is.null(within)) "/" else "", str_c(within, collapse = " * "), ")")
+  formula <- str_c(dv, " ~ ", rh, error)
+  if (print.formula) message(str_c("Formula send to aov.car: ", formula))
+  aov.car(formula = as.formula(formula), data = data, fun.aggregate = fun.aggregate, type = type, return = return, factorize = factorize, check.contrasts = check.contrasts, observed = observed, args.return = args.return, ...)
 }
 
 

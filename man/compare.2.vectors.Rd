@@ -108,5 +108,9 @@ with(sleep, compare.2.vectors(extra[group == 1], extra[group == 2], alternative 
 
 # doesn't make much sense as the data is not paired, but whatever:
 with(sleep, compare.2.vectors(extra[group == 1], extra[group == 2], paired = TRUE))
+
+# from ?t.test:
+compare.2.vectors(1:10,y=c(7:20, 200))
+
 }
 

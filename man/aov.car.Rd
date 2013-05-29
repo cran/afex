@@ -5,13 +5,14 @@
 \title{Convenience wrappers for car::Anova using either a formula or factor based interface.}
 \usage{
   aov.car(formula, data, fun.aggregate = NULL, type = 3,
-    return = "nice", observed = NULL, args.return = list(),
-    ...)
+    factorize = TRUE, check.contrasts = TRUE, return =
+    "nice", observed = NULL, args.return = list(), ...)
 
   ez.glm(id, dv, data, between = NULL, within = NULL,
     covariate = NULL, observed = NULL, fun.aggregate =
-    NULL, type = 3, return = "nice", args.return = list(),
-    ..., print.formula = FALSE)
+    NULL, type = 3, factorize = TRUE, check.contrasts =
+    TRUE, return = "nice", args.return = list(), ...,
+    print.formula = FALSE)
 
   univ(object)
 }
@@ -66,6 +67,16 @@
   \code{\link[car]{Anova}}. Possible values are
   \code{"II"}, \code{"III"}, \code{2}, or \code{3}.}
 
+  \item{factorize}{logical. Should between subject factors
+  be factorized (with note) before running the analysis.
+  Default is \code{TRUE}. If one wants to run an ANCOVA,
+  needs to be set to \code{FALSE} (in which case centering
+  on 0 is checked on numeric variables).}
+
+  \item{check.contrasts}{\code{logical}. Should contrasts
+  for between-subject factors be checked and (if necessary)
+  changed to be \code{"contr.sum"}. See details.}
+
   \item{print.formula}{\code{ez.glm} is a wrapper for
   \code{aov.car}. This boolean argument indicates whether
   the formula in the call to \code{car.aov} should be
@@ -95,8 +106,13 @@
   \code{\link[car]{Anova}}, the return value is dependent
   on the \code{return} argument. When argument
   \code{return} is \code{"nice"} (the default) a nice ANOVA
-  table is returnd (\code{\link{nice.anova}}). If
-  \code{return = "full"} or \code{return = "all"} a list
+  table is returnd (\code{\link{nice.anova}}) with the
+  following columns: \code{Effect}, \code{df}, \code{MSE}
+  (mean-squared errors), \code{F} (potentially with
+  significant symbols), \code{ges} (generalized
+  eta-squared), \code{p}.
+
+  If \code{return = "full"} or \code{return = "all"} a list
   \code{list} with the following elements:
 
   \describe{ \item{"Anova"}{the same as
@@ -196,6 +212,11 @@
   covariates. This is essentially identical to the behavior
   of SPSS's \code{glm} function.
 
+  To run an ANCOVA you need to set \code{factorize = FALSE}
+  and make sure that all variables have the correct type
+  (i.e., factors are factors and numeric variables are
+  numeric and centered).
+
   Note that the default behavior is to return a
   \code{\link{nice.anova}} \code{data.frame}. This includes
   calculation of generalized eta squared for which
@@ -204,6 +225,13 @@
   Changing the effect size to \code{"pes"} (partial
   eta-squared) via \code{args.return} or the return value
   via \code{return} removes this necessity.
+
+  If \code{check.contrasts = TRUE}, contrasts will be set
+  to \code{"contr.sum"} for all between-subject factors if
+  default contrasts are not equal to \code{"contr.sum"} or
+  \code{attrib(factor, "contrasts") != "contr.sum"}.
+  (within-subject factors are hard-coded
+  \code{"contr.sum"}.)
 }
 \note{
   Variables entered as within-subjects (i.e., repeated
@@ -224,39 +252,40 @@
 
 data(obk.long, package = "afex")
 
-# run univariate mixed ANCOVA for the full design:
-aov.car(value ~ treatment * gender + age + Error(id/phase*hour), data = obk.long, observed = c("gender", "age"))
+# run univariate mixed ANOVA for the full design:
+aov.car(value ~ treatment * gender + Error(id/phase*hour), 
+        data = obk.long, observed = "gender")
 
-ez.glm("id", "value", obk.long, between = c("treatment", "gender"), within = c("phase", "hour"), covariate = "age", observed = c("gender", "age"))
+ez.glm("id", "value", obk.long, between = c("treatment", "gender"), 
+        within = c("phase", "hour"), observed = "gender")
 
 # both calls return the same:
 ##                         Effect          df   MSE         F  ges     p
-## 1                    treatment        2, 9 23.96    3.58 +  .20   .07
-## 2                       gender        1, 9 23.96    3.95 +  .14   .08
-## 3                          age        1, 9 23.96      0.52  .02   .49
-## 4             treatment:gender        2, 9 23.96      1.28  .09   .32
-## 5                        phase  1.7, 15.28  3.91 20.28 ***  .17 <.001
-## 6              treatment:phase 3.39, 15.28  3.91   6.07 **  .11  .005
-## 7                 gender:phase  1.7, 15.28  3.91      0.25 .002   .75
-## 8                    age:phase  1.7, 15.28  3.91    3.10 +  .03   .08
-## 9       treatment:gender:phase 3.39, 15.28  3.91      1.60  .03   .23
-## 10                        hour 2.14, 19.23  2.48 20.52 ***  .14 <.001
-## 11              treatment:hour 4.27, 19.23  2.48      0.71  .01   .60
-## 12                 gender:hour 2.14, 19.23  2.48      0.71 .006   .51
-## 13                    age:hour 2.14, 19.23  2.48    2.82 +  .02   .08
-## 14       treatment:gender:hour 4.27, 19.23  2.48      0.59 .009   .68
-## 15                  phase:hour 3.48, 31.36  2.83      0.99  .01   .42
-## 16        treatment:phase:hour 6.97, 31.36  2.83      0.33 .010   .93
-## 17           gender:phase:hour 3.48, 31.36  2.83      0.90  .01   .47
-## 18              age:phase:hour 3.48, 31.36  2.83      0.77  .01   .54
-## 19 treatment:gender:phase:hour 6.97, 31.36  2.83      0.65  .02   .71
+## 1                    treatment       2, 10 22.81    3.94 +  .20   .05
+## 2                       gender       1, 10 22.81    3.66 +  .11   .08
+## 3             treatment:gender       2, 10 22.81      2.86  .18   .10
+## 4                        phase 1.60, 15.99  5.02 16.13 ***  .15 <.001
+## 5              treatment:phase 3.20, 15.99  5.02    4.85 *  .10   .01
+## 6                 gender:phase 1.60, 15.99  5.02      0.28 .003   .71
+## 7       treatment:gender:phase 3.20, 15.99  5.02      0.64  .01   .61
+## 8                         hour 1.84, 18.41  3.39 16.69 ***  .13 <.001
+## 9               treatment:hour 3.68, 18.41  3.39      0.09 .002   .98
+## 10                 gender:hour 1.84, 18.41  3.39      0.45 .004   .63
+## 11       treatment:gender:hour 3.68, 18.41  3.39      0.62  .01   .64
+## 12                  phase:hour 3.60, 35.96  2.67      1.18  .02   .33
+## 13        treatment:phase:hour 7.19, 35.96  2.67      0.35 .009   .93
+## 14           gender:phase:hour 3.60, 35.96  2.67      0.93  .01   .45
+## 15 treatment:gender:phase:hour 7.19, 35.96  2.67      0.74  .02   .65
+
 
 # replicating ?Anova using aov.car:
-aov.car(value ~ treatment * gender + Error(id/phase*hour), data = obk.long, type = 2, return = "Anova")
+aov.car(value ~ treatment * gender + Error(id/phase*hour), 
+        data = obk.long, type = 2, return = "Anova")
 # in contrast to aov you do not need the within-subject factors outside Error()
 
 # replicating ?Anova using ez.glm:
-ez.glm("id", "value", obk.long, c("treatment", "gender"), c("phase", "hour"), type = 2, return = "Anova")
+ez.glm("id", "value", obk.long, c("treatment", "gender"), 
+        c("phase", "hour"), type = 2, return = "Anova")
 
 #both return:
 ## Type II Repeated Measures MANOVA Tests: Pillai test statistic
@@ -280,32 +309,40 @@ ez.glm("id", "value", obk.long, c("treatment", "gender"), c("phase", "hour"), ty
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
+# ANCOVA: adding a covariate (necessary to set factorize = FALSE)
+aov.car(value ~ treatment * gender + age + Error(id/phase*hour), 
+        data = obk.long, observed = c("gender", "age"), factorize = FALSE)
+
+ez.glm("id", "value", obk.long, between = c("treatment", "gender"), 
+        within = c("phase", "hour"), covariate = "age", 
+        observed = c("gender", "age"), factorize = FALSE)
 
 # aggregating over one within-subjects factor (phase) with warning:
+aov.car(value ~ treatment * gender + Error(id/hour), data = obk.long, observed = "gender")
 
-aov.car(value ~ treatment * gender + age + Error(id/hour), data = obk.long, observed = c("gender", "age"))
-
-ez.glm("id", "value", obk.long, c("treatment", "gender"), "hour", "age", observed = c("gender", "age"))
-
+ez.glm("id", "value", obk.long, c("treatment", "gender"), "hour", observed = "gender")
 
 # runs with "numeric" factors
 obk.long$hour2 <- as.numeric(as.character(obk.long$hour))
 
-aov.car(value ~ treatment * gender + Error(id/hour2), data = obk.long, type = 2,observed = c("gender"))
+aov.car(value ~ treatment * gender + Error(id/hour2), 
+        data = obk.long, type = 2,observed = c("gender"))
 
 # only between
-aov.car(value ~ treatment * gender + age + Error(id), data = obk.long, type = 2,observed = c("gender", "age"))
-aov.car(value ~ treatment * gender + Error(id), data = obk.long, type = 2, observed = c("gender"))
+aov.car(value ~ treatment * gender + Error(id), 
+        data = obk.long, type = 2,observed = c("gender"))
+aov.car(value ~ treatment * gender + Error(id), 
+        data = obk.long, type = 2, observed = c("gender"))
 
-ez.glm("id", "value", obk.long, c("treatment", "gender"), within = NULL, covariate = "age", type = 2, print.formula = TRUE, observed = c("gender", "age"))
-
-ez.glm("id", "value", obk.long, c("treatment", "gender"), within = NULL, type = 2, print.formula = TRUE, observed = c("gender"))
+ez.glm("id", "value", obk.long, c("treatment", "gender"), 
+        within = NULL, type = 2, print.formula = TRUE, observed = "gender")
 
 # only within
 
 aov.car(value ~ Error(id/phase*hour), data = obk.long, type = 2)
 
-ez.glm("id", "value", obk.long,  NULL, c("phase", "hour"), type = 2, print.formula = TRUE)
+ez.glm("id", "value", obk.long,  NULL, c("phase", "hour"), 
+        type = 2, print.formula = TRUE)
 
 # using return = "full":
 
@@ -320,9 +357,12 @@ str(aov.car(value ~ Error(id/phase*hour), data = obk.long, return = "full"), 1)
 ##  $ idata:'data.frame':  15 obs. of  2 variables:
 
 # use args.return arguments:
-aov.car(value ~ treatment * gender + age + Error(id/phase*hour), data = obk.long, args.return = list(correction = "none", es = "pes"))
+aov.car(value ~ treatment * gender + Error(id/phase*hour), 
+        data = obk.long, args.return = list(correction = "none", es = "pes"))
 
-aov.car(value ~ treatment * gender + age + Error(id/phase*hour), data = obk.long,observed = c("gender", "age"), args.return = list(correction = "none", MSE = FALSE))
+aov.car(value ~ treatment * gender + Error(id/phase*hour), 
+        data = obk.long,observed = "gender", 
+        args.return = list(correction = "none", MSE = FALSE))
 
 }
 \author{

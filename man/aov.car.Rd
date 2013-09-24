@@ -86,7 +86,7 @@
   (the default) will return a nice ANOVA table (produced by
   \code{\link{nice.anova}}. Possible values are
   \code{c("Anova", "lm", "data", "nice", "full", "all",
-  "univariate")} (possibly abbreviated).}
+  "univariate", "lme4")} (possibly abbreviated).}
 
   \item{args.return}{\code{list} of further arguments
   passed to the function which produces the return value.
@@ -146,6 +146,13 @@
   \code{anova}, \code{mauchly}, and
   \code{spehricity.correction} (containing both,
   Greenhouse-Geisser and Hyundt-Feldt correction).
+
+  If \code{return = "lme4"} The data (possibly aggregated
+  to have one observation per cell) is fitted with
+  \code{lme4::lmer} using all within-subjects factors as
+  fully crossed random slopes and the obtained \code{mer}
+  object returned for further analysis. (This behavhior is
+  rather experimental!)
 }
 \description{
   These functions allow convenient access to

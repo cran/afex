@@ -29,6 +29,7 @@
 #' @return a list with up to two elements (i.e., \code{paramteric} and/or \code{nonparamteric}) each containing  a \code{data.frame} with the following columns: \code{test}, \code{test.statistic}, \code{test.value}, \code{test.df}, \code{p}.
 #'
 #' @export compare.2.vectors
+#' @importFrom coin oneway_test wilcox_test median_test
 #' @example examples/examples.compare.R
 #'
 

@@ -2,9 +2,10 @@
 \alias{mixed}
 \title{Obtain p-values for a mixed-model from lmer().}
 \usage{
-  mixed(formula, data, type = 3, method = c("KR", "PB"),
-    per.parameter = NULL, args.test = list(),
-    check.contrasts = TRUE, progress = TRUE, ...)
+  mixed(formula, data, type = 3, method = c("KR", "PB",
+    "LRT"), per.parameter = NULL, args.test = list(),
+    check.contrasts = TRUE, progress = TRUE, cl = NULL,
+    ...)
 }
 \arguments{
   \item{formula}{a formula describing the full mixed-model
@@ -24,7 +25,10 @@
   default) corresponds to the Kenward-Rogers approximation
   for degrees of freedom (only working with linear mixed
   models). \code{"PB"} calculates p-values based on
-  parametric bootstrap.}
+  parametric bootstrap. \code{"LRT"} calculates p-values
+  via the likelihood ratio tests implemented in the
+  \code{anova} method for \code{lmerMod} objects (and is
+  not recommended).}
 
   \item{per.parameter}{\code{character} vector specifying
   for which variable tests should be run for each parameter
@@ -45,6 +49,10 @@
   \item{progress}{if \code{TRUE}, shows progress with a
   text progress bar}
 
+  \item{cl}{A vector identifying a cluster; used for
+  distributing the estimation of the different models using
+  several cores. See examples.}
+
   \item{...}{further arguments (such as \code{weights})
   passed to \code{\link{lmer}}.}
 }
@@ -55,14 +63,14 @@
   \enumerate{ \item \code{anova.table} a data.frame
   containing the statistics returned from
   \code{\link[pbkrtest]{KRmodcomp}}. \item
-  \code{full.model} the \code{"mer"} object returned from
-  fitting the full mixed model. \item
-  \code{restricted.models} a list of \code{"mer"} objects
-  from fitting the restricted models (i.e., each model
-  lacks the corresponding effect) \item \code{tests} a list
-  of objects returned by the function for obtaining the
-  p-values. \item \code{type} The \code{type} argument used
-  when calling this function. \item \code{method} The
+  \code{full.model} the \code{"lmerMod"} object returned
+  from fitting the full mixed model. \item
+  \code{restricted.models} a list of \code{"lmerMod"}
+  objects from fitting the restricted models (i.e., each
+  model lacks the corresponding effect) \item \code{tests}
+  a list of objects returned by the function for obtaining
+  the p-values. \item \code{type} The \code{type} argument
+  used when calling this function. \item \code{method} The
   \code{method} argument used when calling this function. }
 
   The following methods exist for objects of class
@@ -88,7 +96,7 @@
   only the corresponding effect is missing with the full
   model (containing all effects). This corresponds to the
   (type 3) Wald tests given by \code{car::Anova} for
-  \code{"mer"} models (from version 2.0-13).
+  \code{"lmerMod"} models.
 
   Type 2 tests are obtained by comparing a model in which
   the corresponding effect and all higher oder effect
@@ -103,8 +111,8 @@
   didn't find a better way} of implementing the Type 2
   tests). This \strong{does not} correspond to the (type 2)
   Wald Test reported by \code{car::Anova}. If you want type
-  2 tests, use \code{car::Anova} with \code{test = "F"}
-  (from version 2.0-13) instead of this function.
+  2 Wald tests, use \code{car::Anova} with \code{test =
+  "F"} (from version 2.0-13) instead of this function.
 
   For an introduction to mixed-modeling for experimental
   designs using p-values see Judd, Westfall, and Kenny
@@ -115,12 +123,12 @@
   random effects structure for experimental designs can be
   found in Barr and colleagues (2013).
 
-  p-values are calculated via methods from \pkg{pbkrtest}.
-  When \code{method = "KR"}, the Kenward-Rogers
-  approximation for degrees-of-freedom is calculated using
-  \code{\link[pbkrtest]{KRmodcomp}}, which is only
-  applicable to linear-mixed models. The possible argument
-  to \code{pbkrtest} via \code{args.test} is
+  p-values are per default calculated via methods from
+  \pkg{pbkrtest}. When \code{method = "KR"}, the
+  Kenward-Rogers approximation for degrees-of-freedom is
+  calculated using \code{\link[pbkrtest]{KRmodcomp}}, which
+  is only applicable to linear-mixed models. The possible
+  argument to \code{pbkrtest} via \code{args.test} is
   \code{details}.
 
   \code{method = "PB"} calculates p-values using parametric
@@ -136,9 +144,17 @@
   (argument to \code{lmer}) will be set to \code{FALSE} if
   method is \code{PB}.
 
+  \code{method = "LRT"} calculates p-values via likelihood
+  ratio tests implemented in the \code{anova} method for
+  \code{"merMod"} objects. This is recommended by Barr et
+  al. (2013) which did not test the other methods
+  implemented here. Furthermore, this is not recommended by
+  the \href{http://glmm.wikidot.com/faq}{lme4 faq} which
+  instead recommends the other methods implemented here.
+
   If \code{check.contrasts = TRUE}, contrasts will be set
-  to \code{"contr.sum"} for all factors if default
-  contrasts are not equal to \code{"contr.sum"} or
+  to \code{"contr.sum"} for all factors in the formula if
+  default contrasts are not equal to \code{"contr.sum"} or
   \code{attrib(factor, "contrasts") != "contr.sum"}.
 }
 \note{
@@ -150,15 +166,12 @@
   an example including code and data!
 
   This functions needs a lot of RAM and rather long time
-  especially with complex random structures. The RAM demand
-  is a problem especially on 32 bit Windows which only
-  supports up to 2 or 3GB RAM (see
+  especially with complex random structures (when
+  \code{method = "KR"}). The RAM demand is a problem
+  especially on 32 bit Windows which only supports up to 2
+  or 3GB RAM (see
   \href{http://cran.r-project.org/bin/windows/base/rw-FAQ.html}{R
   Windows FAQ}).
-
-  This function calls \code{lme4:::nobars} for dealing with
-  the formula. So any significant changes to \pkg{lme4} or
-  \code{lme4:::nobars} may disrupt its functionality.
 }
 \examples{
 \dontrun{
@@ -208,6 +221,17 @@ require("mlmRev") # for the data, see ?Contraception
 
 gm1 <- mixed(use ~ age + I(age^2) + urban + livch + (1 | district),
  family = binomial, data = Contraception, args.test = list(nsim = 10), method = "PB")
+
+## using multicore
+require(parallel)
+(nc <- detectCores()) # number of cores
+cl <- makeCluster(rep("localhost", nc)) # make cluster
+# to keep track of what the function is doind, redirect output to outfile:
+# cl <- makeCluster(rep("localhost", nc), outfile = "cl.log.txt")
+
+# obtain fits with multicore:
+mixed(value ~ treatment*phase*hour +(1|id), data = obk.long, method = "LRT", cl = cl)
+
 }
 }
 \author{

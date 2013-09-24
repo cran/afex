@@ -1,4 +1,47 @@
                     ************************
+                    ** afex VERSION 0.6-x **
+                    ************************
+                    
+                    Changes in afex Version 0.6-x
+                    Released XXX 2013
+
+    Significant User Visible Changes and New Features
+
+    o   added LRT tests to mixed() which should replicate
+        the recommended test by Barr et al. (2013, JML).
+        
+    o   multicore estimation of (g)lmer models now available
+        through package parallel (argument cl) for mixed().
+        
+    o   added experimental "lme4" return method for 
+        aov.car and ez.glm (which fits the data using lmer).
+        
+    o   reshape2 and stringr are not any more loaded when
+        loading afex (are now only imported via Imports)
+    
+    Bugfixes
+    
+    o   Type 2 tests of mixed() were implemented incorretly (i.e.,
+        they did not give what they should have given according
+        to the description in the help file).
+        
+    o   aov.car() and ez.glm() now convert factor levels of within 
+        subjects factors to be of length one so that long levels 
+        do not lead to problems when constructing the call to lm. 
+        Thanks to Isaac Schwabacher for noticing this, see also:
+        https://bugs.r-project.org/bugzilla3/show_bug.cgi?id=15377
+    
+    o   mixed should now work with missing values as it construes
+        a new data object if the model.matrix from which the
+        different versions are fitted has nrow different to 
+        nrow(data) (with warning). Thanks to Daniel Bunker
+        for reporting this.
+        
+    o   mixed should work with the neweset version of lme4 (>= 1.0.4)
+        and the newst version of pbkrtest (>= 0.3-5.1), but not 
+        with older versions (due to CRAN policy to disallow :::).
+
+                    ************************
                     ** afex VERSION 0.5-x **
                     ************************
                     
@@ -8,25 +51,25 @@
     Significant User Visible Changes and New Features
 
     o   added argument factorize (default: TRUE) to aov.car and ez.glm:
-		all variables are now factorized per default. (now it is 
-		necessary to set factorize=FALSE for ANCOVAs!)
+        all variables are now factorized per default. (now it is 
+        necessary to set factorize=FALSE for ANCOVAs!)
     
     o   added argument per.parameter to mixed() which allows to specify
-		variables for which each parameter is tested (not only the 
-		overall effect). Can be useful to test for ordered factors. 
-		(only implemented for "Type 3" tests)
-	
-	o	added more informative startup message (thanks to Robert Volcic 
-		and Lars Konieczny)
-		
-	o	mixed, ez.glm and aov.car now check for correct contrasts and set 
-		factors to contr.sum if other contrasts are found (can be tunred 
-		off via check.contrasts argument). Resetting the default contrast
-		to contr.treatment should therefore not interfere with afex.
+        variables for which each parameter is tested (not only the 
+        overall effect). Can be useful to test for ordered factors. 
+        (only implemented for "Type 3" tests)
+    
+    o   added more informative startup message (thanks to Robert Volcic 
+        and Lars Konieczny)
+        
+    o   mixed, ez.glm and aov.car now check for correct contrasts and set 
+        factors to contr.sum if other contrasts are found (can be tunred 
+        off via check.contrasts argument). Resetting the default contrast
+        to contr.treatment should therefore not interfere with afex.
         (this is not intensly tested, so please report anything)
-	
-	o	mixed checks numeric variables if they are centered on 0 (and
-		gives warning if not).
+    
+    o   mixed checks numeric variables if they are centered on 0 (and
+        gives warning if not).
     
     Bugfixes
     

@@ -21,7 +21,7 @@
 #' @param factorize logical. Should between subject factors be factorized (with note) before running the analysis. Default is \code{TRUE}. If one wants to run an ANCOVA, needs to be set to \code{FALSE} (in which case centering on 0 is checked on numeric variables).
 #' @param check.contrasts \code{logical}. Should contrasts for between-subject factors be checked and (if necessary) changed to be \code{"contr.sum"}. See details.
 #' @param print.formula \code{ez.glm} is a wrapper for \code{aov.car}. This boolean argument indicates whether the formula in the call to \code{car.aov} should be printed. 
-#' @param return What should be returned? If \code{"nice"} (the default) will return a nice ANOVA table (produced by \code{\link{nice.anova}}. Possible values are \code{c("Anova", "lm", "data", "nice", "full", "all", "univariate")} (possibly abbreviated).
+#' @param return What should be returned? If \code{"nice"} (the default) will return a nice ANOVA table (produced by \code{\link{nice.anova}}. Possible values are \code{c("Anova", "lm", "data", "nice", "full", "all", "univariate", "lme4")} (possibly abbreviated).
 #' @param args.return \code{list} of further arguments passed to the function which produces the return value. Currently only supports \code{return = "nice"} (the default) which then passes arguments to \code{\link{nice.anova}} (see examples).
 #' @param ... Further arguments passed to \code{fun.aggregate}.
 #' @param object An object of class \code{Anova.mlm} as returned by \code{aov.car}, \code{ez.glm}, or \code{\link[car]{Anova}}.
@@ -43,6 +43,8 @@
 #' For objects of class \code{"anova"} (i.e., the object returned by \code{car::Anova} for a purely between-subjects ANOVA) the object is returned unaltered.
 #'
 #' The elements of the list returned by \code{univ} are: \code{anova}, \code{mauchly}, and \code{spehricity.correction} (containing both, Greenhouse-Geisser and Hyundt-Feldt correction).
+#' 
+#' If \code{return = "lme4"} The data (possibly aggregated to have one observation per cell) is fitted with \code{lme4::lmer} using all within-subjects factors as fully crossed random slopes and the obtained \code{mer} object returned for further analysis. (This behavhior is rather experimental!)
 #' 
 #' @details \strong{Type 3 sums of squares are default in \pkg{afex}.} Note that type 3 sums of squares are said to be dangerous and/or problematic. On the other side they are the default in in SPSS and SAS and recommended by e.g. Maxwell and Delaney (2004). For a brief discussion see \href{http://stats.stackexchange.com/q/6208/442}{here}. 
 #'
@@ -83,12 +85,15 @@
 #' @name aov.car
 #' @aliases aov.car ez.glm univ
 #' @export aov.car ez.glm univ
+#' @import car
+#' @importFrom stringr str_c str_detect str_replace_all
+#' @importFrom reshape2 dcast
 #' @example examples/examples.aov.car.R
 #'
 
 aov.car <- function(formula, data, fun.aggregate = NULL, type = 3, factorize = TRUE, check.contrasts = TRUE, return = "nice", observed = NULL, args.return = list(), ...) {
   #browser()
-  return <- match.arg(return, c("Anova", "lm", "data", "nice", "full", "all", "univariate"))
+  return <- match.arg(return, c("Anova", "lm", "data", "nice", "full", "all", "univariate", "lme4"))
   # stuff copied from aov:
   Terms <- terms(formula, "Error", data = data)
   indError <- attr(Terms, "specials")$Error
@@ -123,15 +128,17 @@ aov.car <- function(formula, data, fun.aggregate = NULL, type = 3, factorize = T
       non.null <- c.ns[!abs(vapply(data[, c.ns, drop = FALSE], mean, 0)) < .Machine$double.eps ^ 0.5]
       if (length(non.null) > 0) warning(str_c("Numerical variables NOT centered on 0 (i.e., likely bogus results): ", str_c(non.null, collapse = ", ")))
     }
-  }
+  }  
   # make formulas
   rh2 <- if (length(between) > 0) str_c(effect.parts.no.within, collapse = "+") else "1"
   lh1 <- str_c(id, if (length(between) > 0) str_c(between, collapse = "+") else NULL, sep = "+")
   rh1 <- str_c(within, collapse = "+")
   rh3 <- str_c(within, collapse = "*")
   # converting all within subject factors to factors and adding a leading charcter (x) if starting with a digit.
+  new.factor.levels <- c(letters, LETTERS)
   for (within.factor in within) {
     data[,within.factor] <- factor(make.names(as.character(data[,within.factor])))
+    if (length(levels(data[,within.factor])) <= length(new.factor.levels)) levels(data[,within.factor]) <- new.factor.levels[seq_along(levels(data[,within.factor]))]
   }
   # Check if each id is in only one between subjects cell.
   if (length(between) > 0) {
@@ -149,6 +156,14 @@ aov.car <- function(formula, data, fun.aggregate = NULL, type = 3, factorize = T
   }
   # Is Type == 3 and contrasts != contr.sum and check.contrasts == FALSE?
   if ((type == 3 | type == "III") & options("contrasts")[[1]][1] != "contr.sum" & !check.contrasts) warning(str_c("Calculating Type 3 sums with contrasts = ", options("contrasts")[[1]][1], "\n  Results likely bogus or not interpretable!\n  You should use check.contrasts = TRUE or options(contrasts=c('contr.sum','contr.poly'))"))
+  # if return = "lme4" return the (aggregated) data fitted with lmer!
+  if (return == "lme4") {
+    warning("lme4 return is experimental!\nAlso: Missing values and contrasts not checked for return = 'lme4'!")
+    n.dat <- dcast(data, formula = as.formula(str_c(lh1, if (length(within) > 0) paste0("+", rh1) else "", "~ .", sep = "")), fun.aggregate = fun.aggregate, ..., value.var = dv)
+    colnames(n.dat)[length(colnames(n.dat))] <- "value"
+    f.within.new <- str_replace_all(rh1, pattern="\\+", replacement="*")
+    return(lmer(as.formula(str_c("value~", rh2, if (length(within) > 0) paste0("*", f.within.new) else "", "+ (1", if (length(within) > 0) paste0("+", f.within.new) else "", "|", id, ")" , sep = "")), data = n.dat))
+  }
   # prepare the data:
   tmp.dat <- dcast(data, formula = as.formula(str_c(lh1, if (length(within) > 0) rh1 else ".", sep = "~")), fun.aggregate = fun.aggregate, ..., value.var = dv)
   #browser()

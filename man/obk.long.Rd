@@ -32,7 +32,7 @@ OBrienKaiser2 <- within(OBrienKaiser, {
 		age <- scale(sample(18:35, nrow(OBrienKaiser), replace = TRUE), scale = FALSE)})
 attributes(OBrienKaiser2$age) <- NULL # needed or resahpe2::melt throws an error.
 OBrienKaiser2$age <- as.numeric(OBrienKaiser2$age)
-obk.long <- melt(OBrienKaiser2, id.vars = c("id", "treatment", "gender", "age"))
+obk.long <- reshape2::melt(OBrienKaiser2, id.vars = c("id", "treatment", "gender", "age"))
 obk.long[,c("phase", "hour")] <- lapply(as.data.frame(do.call(rbind,
         strsplit(as.character(obk.long$variable), "\\\\."),)), factor)
 obk.long <- obk.long[,c("id", "treatment", "gender", "age", "phase", "hour", "value")]

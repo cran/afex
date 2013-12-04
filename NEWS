@@ -1,9 +1,39 @@
                     ************************
+                    ** afex VERSION 0.7-x **
+                    ************************
+                    
+                    Changes in afex Version 0.7-x
+                    Released December 2013
+
+    Significant User Visible Changes and New Features
+
+    o   nicer output of print.mixed
+    
+    Bugfixes
+    
+    o   mixed() correctly converts all non-formula arguments to 
+        formula correctly to a formula (gave error if formula
+        was a different object and not-available on cluster nodes).
+        Prints message if formula is converted to a formula.
+        
+    o   Using multicore for fitting the models prodcued erroneous 
+        results (did not use correct contrasts at nodes). Now the
+        current contrasts are also set at the nodes.
+        
+    o   mixed() sets REML = FALSE if method = "LRT" and no 
+        family argument is present (i.e., for LMMs) as LRTs
+        for models fitted with REML are not recommended.
+        
+    o   on the cluster nodes now only the lme4 namespace is 
+        loaded (instead of using library) to avoid a CRAN note.
+
+
+                    ************************
                     ** afex VERSION 0.6-x **
                     ************************
                     
                     Changes in afex Version 0.6-x
-                    Released XXX 2013
+                    Released September 2013
 
     Significant User Visible Changes and New Features
 
@@ -21,7 +51,7 @@
     
     Bugfixes
     
-    o   Type 2 tests of mixed() were implemented incorretly (i.e.,
+    o   Type 2 tests of mixed() were implemented incorrectly (i.e.,
         they did not give what they should have given according
         to the description in the help file).
         
@@ -37,10 +67,11 @@
         nrow(data) (with warning). Thanks to Daniel Bunker
         for reporting this.
         
-    o   mixed should work with the neweset version of lme4 (>= 1.0.4)
+    o   mixed should work with the newest version of lme4 (>= 1.0.4)
         and the newst version of pbkrtest (>= 0.3-5.1), but not 
         with older versions (due to CRAN policy to disallow :::).
 
+                    
                     ************************
                     ** afex VERSION 0.5-x **
                     ************************

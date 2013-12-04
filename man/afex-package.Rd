@@ -8,9 +8,9 @@
 }
 \details{
   \tabular{ll}{ Package: \tab afex\cr Type: \tab Package\cr
-  Version: \tab 0.6-82\cr Date: \tab 2013-09-24\cr Depends:
+  Version: \tab 0.7-90\cr Date: \tab 2013-12-04\cr Depends:
   \tab R (>= 2.14.0), coin, car, lme4 (>= 1.0.4), pbkrtest
-  (>= 0.3-2)\cr Encoding: \tab UTF-8\cr License: \tab GPL
+  (>= 0.3-6)\cr Encoding: \tab UTF-8\cr License: \tab GPL
   (>=3)\cr URL: \tab
   http://www.psychologie.uni-freiburg.de/Members/singmann/R/afex\cr
   }
@@ -27,11 +27,11 @@
   and computes p-values for all effects in the model using
   either the Kenward-Rogers approximation of degrees of
   freedom (LMM only), parametric bootstrap (LMMs and GLMMs)
-  or likelihood ratio tests (LRT). afex uses type 3 sums of
-  squares as default (imitating commercial statistical
-  software) and sets the default contrasts to contr.sum.
-  Furthermore, compare.2.vectors() conveniently compares
-  two vectors using a variety of tests.
+  or likelihood ratio tests (LMMs and GLMMs). afex uses
+  type 3 sums of squares as default (imitating commercial
+  statistical software) and sets the default contrasts to
+  contr.sum. Furthermore, compare.2.vectors() conveniently
+  compares two vectors using a variety of tests.
 }
 \author{
   Henrik Singmann

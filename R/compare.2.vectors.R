@@ -2,7 +2,11 @@
 #'
 #' Compares two vectors \code{x} and \code{y} using t-test, Welch-test (also known as Satterthwaite), Wilcoxon-test, and a permutation test implemented in \pkg{coin}.
 #'
-#' @usage compare.2.vectors(x, y, paired = FALSE, na.rm = FALSE, tests = c("parametric", "nonparametric"), coin = TRUE, alternative = "two.sided", perm.distribution = approximate(100000), wilcox.exact = NULL, wilcox.correct = TRUE)
+#' @usage compare.2.vectors(x, y, paired = FALSE, na.rm = FALSE, 
+#'      tests = c("parametric", "nonparametric"), coin = TRUE, 
+#'      alternative = "two.sided", 
+#'      perm.distribution = approximate(100000), 
+#'      wilcox.exact = NULL, wilcox.correct = TRUE)
 #'
 #' @param x a (non-empty) numeric vector of data values.
 #' @param y a (non-empty) numeric vector of data values.
@@ -29,7 +33,7 @@
 #' @return a list with up to two elements (i.e., \code{paramteric} and/or \code{nonparamteric}) each containing  a \code{data.frame} with the following columns: \code{test}, \code{test.statistic}, \code{test.value}, \code{test.df}, \code{p}.
 #'
 #' @export compare.2.vectors
-#' @importFrom coin oneway_test wilcox_test median_test
+#' @importFrom coin oneway_test wilcox_test median_test approximate statistic pvalue
 #' @example examples/examples.compare.R
 #'
 

@@ -1,4 +1,38 @@
                     ************************
+                    ** afex VERSION 0.8-x **
+                    ************************
+                    
+                    Changes in afex Version 0.8-x
+                    Released February 2014
+
+    Significant User Visible Changes and New Features
+
+    o   removed renaming of within subject factor levels to names
+        with length 1 (which was introduced in 0.6).
+        
+    o   helper function round_ps which nicely rounds p-values
+        is now exported.
+        
+    o   warning about numerical non-centered variables in mixed
+        is now a message only.
+        
+    o   added examples data sets from Maxwell & Delaney (2004) for 
+        within-subjects ANOVA and mixed models.
+        
+    o   reshape2 is now again in depends but coin only imported.
+    
+    Bugfixes
+        
+    o   the default effect size (ges: generalized eta-squared) was 
+        calculated wrong (the error term for the intercept was not 
+        included). Sorry. This is now corrected (with new examples).
+    
+    o   removed bug that aov.car didn't work when running some ANCOVAs
+        (thanks to Gang Chen for reporting this).
+
+        
+
+                    ************************
                     ** afex VERSION 0.7-x **
                     ************************
                     

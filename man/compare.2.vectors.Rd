@@ -2,11 +2,11 @@
 \alias{compare.2.vectors}
 \title{Compare two vectors using various tests.}
 \usage{
-  compare.2.vectors(x, y, paired = FALSE, na.rm = FALSE,
-    tests = c("parametric", "nonparametric"), coin = TRUE,
-    alternative = "two.sided", perm.distribution =
-    approximate(100000), wilcox.exact = NULL,
-    wilcox.correct = TRUE)
+compare.2.vectors(x, y, paired = FALSE, na.rm = FALSE,
+     tests = c("parametric", "nonparametric"), coin = TRUE,
+     alternative = "two.sided",
+     perm.distribution = approximate(100000),
+     wilcox.exact = NULL, wilcox.correct = TRUE)
 }
 \arguments{
   \item{x}{a (non-empty) numeric vector of data values.}
@@ -52,37 +52,36 @@
   \code{\link{wilcox.test}}.}
 }
 \value{
-  a list with up to two elements (i.e., \code{paramteric}
-  and/or \code{nonparamteric}) each containing a
-  \code{data.frame} with the following columns:
-  \code{test}, \code{test.statistic}, \code{test.value},
-  \code{test.df}, \code{p}.
+a list with up to two elements (i.e., \code{paramteric}
+and/or \code{nonparamteric}) each containing a
+\code{data.frame} with the following columns: \code{test},
+\code{test.statistic}, \code{test.value}, \code{test.df},
+\code{p}.
 }
 \description{
-  Compares two vectors \code{x} and \code{y} using t-test,
-  Welch-test (also known as Satterthwaite), Wilcoxon-test,
-  and a permutation test implemented in \pkg{coin}.
+Compares two vectors \code{x} and \code{y} using t-test,
+Welch-test (also known as Satterthwaite), Wilcoxon-test,
+and a permutation test implemented in \pkg{coin}.
 }
 \details{
-  The \code{parametric} tests (currently) only contain the
-  \emph{t}-test and Welch/Statterwaithe/Smith/unequal
-  variance \emph{t}-test implemented in
-  \code{\link{t.test}}. The latter one is only displayed if
-  \code{paired = FALSE}.
+The \code{parametric} tests (currently) only contain the
+\emph{t}-test and Welch/Statterwaithe/Smith/unequal
+variance \emph{t}-test implemented in \code{\link{t.test}}.
+The latter one is only displayed if \code{paired = FALSE}.
 
-  The \code{nonparametric} tests (currently) contain the
-  Wilcoxon test implemented in \code{\link{wilcox.test}}
-  (\code{stats::Wilcoxon}) and (if \code{coin = TRUE}) the
-  following tests implemented in \pkg{coin}:
+The \code{nonparametric} tests (currently) contain the
+Wilcoxon test implemented in \code{\link{wilcox.test}}
+(\code{stats::Wilcoxon}) and (if \code{coin = TRUE}) the
+following tests implemented in \pkg{coin}:
 
-  \itemize{ \item a \code{permutation} test
-  \code{\link{oneway_test}} (the only test in this selction
-  not using a rank transformation), \item the
-  \code{Wilcoxon} test \code{\link{wilcox_test}}
-  (\code{coin::Wilcoxon}), and \item the \code{median} test
-  \code{median_test}. } Note that the two implementations
-  of the Wilcoxon test probably differ. This is due to
-  differences in the calculation of the Null distributions.
+\itemize{ \item a \code{permutation} test
+\code{\link{oneway_test}} (the only test in this selction
+not using a rank transformation), \item the \code{Wilcoxon}
+test \code{\link{wilcox_test}} (\code{coin::Wilcoxon}), and
+\item the \code{median} test \code{median_test}. } Note
+that the two implementations of the Wilcoxon test probably
+differ. This is due to differences in the calculation of
+the Null distributions.
 }
 \examples{
 

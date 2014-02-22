@@ -2,7 +2,9 @@
 #'
 #' Fits and calculates p-values for all effects in a mixed model fitted with \code{\link[lme4]{lmer}}. The default behavior calculates type 3 like p-values using the Kenward-Rogers approximation for degrees-of-freedom implemented in \code{\link[pbkrtest]{KRmodcomp}} (for LMMs only), but also allows for parametric bootstrap (\code{method = "PB"}) (for LMMs and GLMMs). \code{print}, \code{summary}, and \code{anova} methods for the returned object of class \code{"mixed"} are available (all return the same data.frame).
 #'
-#' @usage mixed(formula, data, type = 3, method = c("KR", "PB", "LRT"), per.parameter = NULL, args.test = list(), check.contrasts = TRUE, progress = TRUE, cl = NULL, ...)
+#' @usage mixed(formula, data, type = 3, method = c("KR", "PB", "LRT"), 
+#'      per.parameter = NULL, args.test = list(), 
+#'      check.contrasts = TRUE, progress = TRUE, cl = NULL, ...)
 #'
 #' @param formula a formula describing the full mixed-model to be fitted. As this formula is passed to \code{lmer}, it needs at least one random term.
 #' @param data data.frame containing the data. Should have all the variables present in \code{fixed}, \code{random}, and \code{dv} as columns.
@@ -50,6 +52,8 @@
 #' @author Henrik Singmann with contributions from \href{http://stackoverflow.com/q/11335923/289572}{Ben Bolker and Joshua Wiley}.
 #'
 #' @seealso \code{\link{ez.glm}} and \code{\link{aov.car}} for convenience functions to analyze experimental deisgns with classical ANOVA or ANCOVA wrapping \code{\link[car]{Anova}}. 
+#' 
+#' see the following foir the data sets from Maxwell and Delaney (2004) used: \code{\link{md_16.1}} and \code{\link{md_16.4}}.
 #'
 #' @references Baayen, R. H. (2008). \emph{Analyzing linguistic data: a practical introduction to statistics using R}. Cambridge, UK; New York: Cambridge University Press.
 #'
@@ -60,6 +64,8 @@
 #' Barr, D. J., Levy, R., Scheepers, C., & Tily, H. J. (2013). Random effects structure for confirmatory hypothesis testing: Keep it maximal. \emph{Journal of Memory and Language}, 68(3), 255-278. doi:10.1016/j.jml.2012.11.001
 #'
 #' Judd, C. M., Westfall, J., & Kenny, D. A. (2012). Treating stimuli as a random factor in social psychology: A new and comprehensive solution to a pervasive but largely ignored problem. \emph{Journal of Personality and Social Psychology}, 103(1), 54-69. doi:10.1037/a0028347
+#' 
+#' Maxwell, S. E., & Delaney, H. D. (2004). \emph{Designing experiments and analyzing data: a model-comparisons perspective.} Mahwah, N.J.: Lawrence Erlbaum Associates.
 #'
 #' @export mixed
 #' @S3method print mixed
@@ -68,6 +74,67 @@
 #' @import pbkrtest
 #' @importFrom lme4 lmer glmer nobars
 #' @examples
+#' 
+#' ### replicate results from Table 16.3 (Maxwell & Delaney, 2004, p. 837)
+#' data(md_16.1)
+#' 
+#' # original results need treatment contrasts:
+#' (mixed1_orig <- mixed(severity ~ sex + (1|id), md_16.1, check.contrasts=FALSE))
+#' summary(mixed1_orig$full.model)
+#' 
+#' # p-values stay the same with afex default contrasts (contr.sum),
+#' # but estimates and t-values for the fixed effects parameters change.
+#' (mixed1 <- mixed(severity ~ sex + (1|id), md_16.1))
+#' summary(mixed1$full.model)
+#' 
+#' 
+#' # data for next examples (Maxwell & Delaney, Table 16.4)
+#' data(md_16.4)
+#' str(md_16.4)
+#' 
+#' ### replicate results from Table 16.6 (Maxwell & Delaney, 2004, p. 845)
+#' # Note that (1|room:cond) is needed because room is nested within cond.
+#' # p-values (almost) hold.
+#' (mixed2 <- mixed(induct ~ cond + (1|room:cond), md_16.4))
+#' # (differences are dut to the use of Kenward-Rogers approximation here,
+#' # whereas M&W's p-values are based on uncorrected df.)
+#' 
+#' # again, to obtain identical parameter and t-values, use treatment contrasts:
+#' summary(mixed2$full.model) # not identical
+#' 
+#' # prepare new data.frame with contrasts:
+#' md_16.4b <- within(md_16.4, cond <- C(cond, contr.treatment, base = 2))
+#' str(md_16.4b)
+#' 
+#' # p-values stays identical:
+#' (mixed2_orig <- mixed(induct ~ cond + (1|room:cond), md_16.4b, check.contrasts=FALSE))
+#' summary(mixed2_orig$full.model) # replicates parameters
+#' 
+#' 
+#' ### replicate results from Table 16.7 (Maxwell & Delaney, 2004, p. 851)
+#' # F-values (almost) hold, p-values (especially for skill) are off
+#' (mixed3 <- mixed(induct ~ cond + skill + (1|room:cond), md_16.4))
+#' 
+#' # however, parameters are perfectly recovered when using the original contrasts:
+#' mixed3_orig <- mixed(induct ~ cond + skill + (1|room:cond), md_16.4b, check.contrasts=FALSE)
+#' summary(mixed3_orig$full.model)
+#' 
+#' 
+#' 
+#' ### replicate results from Table 16.10 (Maxwell & Delaney, 2004, p. 862)
+#' # for this we need to center cog:
+#' md_16.4b$cog <- scale(md_16.4b$cog, scale=FALSE)
+#' 
+#' # F-values and p-values are relatively off:
+#' (mixed4 <- mixed(induct ~ cond*cog + (cog|room:cond), md_16.4b))
+#' # contrast has a relatively important influence on cog
+#' (mixed4_orig <- mixed(induct ~ cond*cog + (cog|room:cond), md_16.4b, check.contrasts=FALSE))
+#' 
+#' # parameters are again almost perfectly recovered:
+#' summary(mixed4_orig$full.model)
+#' 
+#' 
+#' 
 #' \dontrun{
 #' 
 #' # use the obk.long data (not reasonable, no random slopes)
@@ -178,7 +245,7 @@ mixed <- function(formula, data, type = 3, method = c("KR", "PB", "LRT"), per.pa
   c.ns <- fixed.vars[vapply(data[, fixed.vars, drop = FALSE], is.numeric, TRUE)]
   if (length(c.ns) > 0) {
     non.null <- c.ns[!abs(vapply(data[, c.ns, drop = FALSE], mean, 0)) < .Machine$double.eps ^ 0.5]
-    if (length(non.null) > 0) warning(str_c("Numerical variables NOT centered on 0 (i.e., likely bogus results if in interactions): ", str_c(non.null, collapse = ", ")))
+    if (length(non.null) > 0) message(str_c("Numerical variables NOT centered on 0 (i.e., interpretation of all main effects might be difficult if in interactions): ", str_c(non.null, collapse = ", ")))
   }
   # obtain the lmer fits
   mf <- mc[!names(mc) %in% c("type", "method", "args.test", "progress", "check.contrasts", "per.parameter", "cl")]
@@ -348,17 +415,13 @@ mixed <- function(formula, data, type = 3, method = c("KR", "PB", "LRT"), per.pa
   list.out
 }
 
-round.ps <- function(x) {
-  substr(as.character(ifelse(x < 0.0001, " <.0001", ifelse(x < 0.001, formatC(x, digits = 4, format = "f"), ifelse(x < 0.01, formatC(x, digits = 3, format = "f"), ifelse(round(x, 2) == 1, " >.99", formatC(x, digits = 2, format = "f")))))), 2, 7)
-}
-
 
 print.mixed <- function(x, ...) {
   if (x[["method"]] == "KR") {
     tmp <- x[[1]][,1:6]
     tmp[,"stat"] <- formatC(tmp[,"stat"], format = "f", digits = 2)
-    tmp[,"ddf"] <- prettyNum(tmp[,"ddf"], digits = 2)
-    tmp[,"F.scaling"] <- prettyNum(tmp[,"F.scaling"], digits = 2)
+    tmp[,"ddf"] <- prettyNum(tmp[,"ddf"], digits = 2, nsmall = 2)
+    tmp[,"F.scaling"] <- prettyNum(tmp[,"F.scaling"], digits = 2, nsmall = 2)
     
   } else if (x[["method"]] == "PB") {
     tmp <- x[[1]][,1:3]
@@ -367,7 +430,7 @@ print.mixed <- function(x, ...) {
     tmp <- x[[1]]
     tmp[,"chisq"] <- formatC(tmp[,"chisq"], format = "f", digits = 2)
   }
-  tmp[,"p.value"] <- round.ps(tmp[,"p.value"])
+  tmp[,"p.value"] <- round_ps(tmp[,"p.value"])
   warnings <- lapply(x[[3]], function(y) y@optinfo$warnings)
   warn <- vapply(warnings, function(y)  !length(y)==0, NA)
   if (any(warn)) warning("At least the following warnings were obtained when fitting via lme4:\n", paste(paste(names(which(warn)), vapply(warnings[warn], function(x) x[[1]][1], ""), sep = ": "), collapse = "\n"))

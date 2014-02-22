@@ -2,9 +2,14 @@
 #'
 #' These functions allow convenient access to \code{\link[car]{Anova}} (from the \pkg{car} package) for data in the \strong{long} format (i.e., one observation per row), possibly aggregating the data if there is more than one obersvation per individuum and cell. Hence, mixed between-within ANOVAs can be calculated conveniently without using the rather unhandy format of \code{car::Anova}. \code{aov.car} can be called using a formula similar to \code{\link{aov}} specifying an error strata for the within-subject factor(s). \code{ez.glm} is called specifying the factors as character vectors.
 #'
-#' @usage aov.car(formula, data, fun.aggregate = NULL, type = 3, factorize = TRUE, check.contrasts = TRUE, return = "nice", observed = NULL, args.return = list(), ...)
+#' @usage aov.car(formula, data, fun.aggregate = NULL, type = 3, 
+#'      factorize = TRUE, check.contrasts = TRUE, 
+#'      return = "nice", observed = NULL, args.return = list(), ...)
 #'
-#' ez.glm(id, dv, data, between = NULL, within = NULL, covariate = NULL, observed = NULL, fun.aggregate = NULL, type = 3, factorize = TRUE, check.contrasts = TRUE, return = "nice", args.return = list(), ..., print.formula = FALSE)
+#' ez.glm(id, dv, data, between = NULL, within = NULL, covariate = NULL, 
+#'      observed = NULL, fun.aggregate = NULL, type = 3, 
+#'      factorize = TRUE, check.contrasts = TRUE, 
+#'      return = "nice", args.return = list(), ..., print.formula = FALSE)
 #' 
 #' univ(object)
 #'
@@ -138,11 +143,12 @@ aov.car <- function(formula, data, fun.aggregate = NULL, type = 3, factorize = T
   new.factor.levels <- c(letters, LETTERS)
   for (within.factor in within) {
     data[,within.factor] <- factor(make.names(as.character(data[,within.factor])))
-    if (length(levels(data[,within.factor])) <= length(new.factor.levels)) levels(data[,within.factor]) <- new.factor.levels[seq_along(levels(data[,within.factor]))]
+    #if (length(levels(data[,within.factor])) <= length(new.factor.levels)) levels(data[,within.factor]) <- new.factor.levels[seq_along(levels(data[,within.factor]))]
   }
   # Check if each id is in only one between subjects cell.
-  if (length(between) > 0) {
-    split.data <- split(data, lapply(between, function(x) data[,x]))
+  between.factors <- between[vapply(data[, between, drop = FALSE], is.factor, TRUE)]
+  if (length(between.factors) > 0) {
+    split.data <- split(data, lapply(between.factors, function(x) data[,x]))
     ids.per.condition <- lapply(split.data, function(x) unique(as.character(x[,id])))
     ids.in.more.condition <- unique(unlist(lapply(seq_along(ids.per.condition), function(x) unique(unlist(lapply(ids.per.condition[-x], function(y, z = ids.per.condition[[x]]) intersect(z, y)))))))
     if (length(ids.in.more.condition) > 0) stop(str_c("Following ids are in more than one between subjects condition:\n", str_c(ids.in.more.condition, collapse = ", ")))

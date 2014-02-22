@@ -4,17 +4,16 @@
 \alias{univ}
 \title{Convenience wrappers for car::Anova using either a formula or factor based interface.}
 \usage{
-  aov.car(formula, data, fun.aggregate = NULL, type = 3,
-    factorize = TRUE, check.contrasts = TRUE, return =
-    "nice", observed = NULL, args.return = list(), ...)
+aov.car(formula, data, fun.aggregate = NULL, type = 3,
+     factorize = TRUE, check.contrasts = TRUE,
+     return = "nice", observed = NULL, args.return = list(), ...)
 
-  ez.glm(id, dv, data, between = NULL, within = NULL,
-    covariate = NULL, observed = NULL, fun.aggregate =
-    NULL, type = 3, factorize = TRUE, check.contrasts =
-    TRUE, return = "nice", args.return = list(), ...,
-    print.formula = FALSE)
+ez.glm(id, dv, data, between = NULL, within = NULL, covariate = NULL,
+     observed = NULL, fun.aggregate = NULL, type = 3,
+     factorize = TRUE, check.contrasts = TRUE,
+     return = "nice", args.return = list(), ..., print.formula = FALSE)
 
-  univ(object)
+univ(object)
 }
 \arguments{
   \item{formula}{A formula specifying the ANOVA model
@@ -102,160 +101,166 @@
   \code{\link[car]{Anova}}.}
 }
 \value{
-  \code{aov.car} and \code{ez.glm} are wrappers to
-  \code{\link[car]{Anova}}, the return value is dependent
-  on the \code{return} argument. When argument
-  \code{return} is \code{"nice"} (the default) a nice ANOVA
-  table is returnd (\code{\link{nice.anova}}) with the
-  following columns: \code{Effect}, \code{df}, \code{MSE}
-  (mean-squared errors), \code{F} (potentially with
-  significant symbols), \code{ges} (generalized
-  eta-squared), \code{p}.
+\code{aov.car} and \code{ez.glm} are wrappers to
+\code{\link[car]{Anova}}, the return value is dependent on
+the \code{return} argument. When argument \code{return} is
+\code{"nice"} (the default) a nice ANOVA table is returnd
+(\code{\link{nice.anova}}) with the following columns:
+\code{Effect}, \code{df}, \code{MSE} (mean-squared errors),
+\code{F} (potentially with significant symbols), \code{ges}
+(generalized eta-squared), \code{p}.
 
-  If \code{return = "full"} or \code{return = "all"} a list
-  \code{list} with the following elements:
+If \code{return = "full"} or \code{return = "all"} a list
+\code{list} with the following elements:
 
-  \describe{ \item{"Anova"}{the same as
-  \code{\link[car]{Anova}}. Usually an object of class
-  \code{"Anova.mlm"} (with within-subjects factors) or of
-  class \code{c("anova", "data.frame")}. Also returned if
-  \code{return = "Anova"}.} \item{"lm"}{the object fitted
-  with \code{lm} and passed to \code{Anova} (i.e., an
-  object of class \code{"lm"} or \code{"mlm"}). Also
-  returned if \code{return = "lm"}.} \item{"data"}{the data
-  used to fit the \code{lm} object. Also returned if
-  \code{return = "data"}.} \item{"idata"}{if within-subject
-  factors are present, the \code{idata} argument passed to
-  \code{Anova}.} }
+\describe{ \item{"Anova"}{the same as
+\code{\link[car]{Anova}}. Usually an object of class
+\code{"Anova.mlm"} (with within-subjects factors) or of
+class \code{c("anova", "data.frame")}. Also returned if
+\code{return = "Anova"}.} \item{"lm"}{the object fitted
+with \code{lm} and passed to \code{Anova} (i.e., an object
+of class \code{"lm"} or \code{"mlm"}). Also returned if
+\code{return = "lm"}.} \item{"data"}{the data used to fit
+the \code{lm} object. Also returned if \code{return =
+"data"}.} \item{"idata"}{if within-subject factors are
+present, the \code{idata} argument passed to \code{Anova}.}
+}
 
-  If \code{return = "univariate"} the object returned from
-  \code{univ}.
+If \code{return = "univariate"} the object returned from
+\code{univ}.
 
-  \code{univ} returns a \code{list} of \code{data.frame}s
-  containing the univariate results (i.e., the classical
-  ANOVA results) from an object of class
-  \code{"Anova.mlm"}. This is essentially the output from
-  \code{summary.Anova.mlm} with \code{multivariate =
-  FALSE}, e.g. \code{summary(aov.car(...), multivriate =
-  FALSE)}, as a list instead of printed to the console.\cr
-  For objects of class \code{"anova"} (i.e., the object
-  returned by \code{car::Anova} for a purely
-  between-subjects ANOVA) the object is returned unaltered.
+\code{univ} returns a \code{list} of \code{data.frame}s
+containing the univariate results (i.e., the classical
+ANOVA results) from an object of class \code{"Anova.mlm"}.
+This is essentially the output from
+\code{summary.Anova.mlm} with \code{multivariate = FALSE},
+e.g. \code{summary(aov.car(...), multivriate = FALSE)}, as
+a list instead of printed to the console.\cr For objects of
+class \code{"anova"} (i.e., the object returned by
+\code{car::Anova} for a purely between-subjects ANOVA) the
+object is returned unaltered.
 
-  The elements of the list returned by \code{univ} are:
-  \code{anova}, \code{mauchly}, and
-  \code{spehricity.correction} (containing both,
-  Greenhouse-Geisser and Hyundt-Feldt correction).
+The elements of the list returned by \code{univ} are:
+\code{anova}, \code{mauchly}, and
+\code{spehricity.correction} (containing both,
+Greenhouse-Geisser and Hyundt-Feldt correction).
 
-  If \code{return = "lme4"} The data (possibly aggregated
-  to have one observation per cell) is fitted with
-  \code{lme4::lmer} using all within-subjects factors as
-  fully crossed random slopes and the obtained \code{mer}
-  object returned for further analysis. (This behavhior is
-  rather experimental!)
+If \code{return = "lme4"} The data (possibly aggregated to
+have one observation per cell) is fitted with
+\code{lme4::lmer} using all within-subjects factors as
+fully crossed random slopes and the obtained \code{mer}
+object returned for further analysis. (This behavhior is
+rather experimental!)
 }
 \description{
-  These functions allow convenient access to
-  \code{\link[car]{Anova}} (from the \pkg{car} package) for
-  data in the \strong{long} format (i.e., one observation
-  per row), possibly aggregating the data if there is more
-  than one obersvation per individuum and cell. Hence,
-  mixed between-within ANOVAs can be calculated
-  conveniently without using the rather unhandy format of
-  \code{car::Anova}. \code{aov.car} can be called using a
-  formula similar to \code{\link{aov}} specifying an error
-  strata for the within-subject factor(s). \code{ez.glm} is
-  called specifying the factors as character vectors.
+These functions allow convenient access to
+\code{\link[car]{Anova}} (from the \pkg{car} package) for
+data in the \strong{long} format (i.e., one observation per
+row), possibly aggregating the data if there is more than
+one obersvation per individuum and cell. Hence, mixed
+between-within ANOVAs can be calculated conveniently
+without using the rather unhandy format of
+\code{car::Anova}. \code{aov.car} can be called using a
+formula similar to \code{\link{aov}} specifying an error
+strata for the within-subject factor(s). \code{ez.glm} is
+called specifying the factors as character vectors.
 }
 \details{
-  \strong{Type 3 sums of squares are default in
-  \pkg{afex}.} Note that type 3 sums of squares are said to
-  be dangerous and/or problematic. On the other side they
-  are the default in in SPSS and SAS and recommended by
-  e.g. Maxwell and Delaney (2004). For a brief discussion
-  see
-  \href{http://stats.stackexchange.com/q/6208/442}{here}.
+\strong{Type 3 sums of squares are default in \pkg{afex}.}
+Note that type 3 sums of squares are said to be dangerous
+and/or problematic. On the other side they are the default
+in in SPSS and SAS and recommended by e.g. Maxwell and
+Delaney (2004). For a brief discussion see
+\href{http://stats.stackexchange.com/q/6208/442}{here}.
 
-  However, note that lower order effects (e.g., main
-  effects) in type 3 ANOVAs are only meaningful with
-  \href{http://www.ats.ucla.edu/stat/mult_pkg/faq/general/effect.htm}{effects
-  coding}. That is, contrasts should be set to
-  \code{\link{contr.sum}} via
-  \code{options(contrasts=c('contr.sum','contr.poly'))}.
-  This should be done automatically when loading \pkg{afex}
-  and \pkg{afex} will issue a warning when running type 3
-  SS and
-  \href{http://www.ats.ucla.edu/stat/r/library/contrast_coding.htm}{other
-  coding schemes}. You can check the coding with
-  \code{options("contrasts")}.
+However, note that lower order effects (e.g., main effects)
+in type 3 ANOVAs are only meaningful with
+\href{http://www.ats.ucla.edu/stat/mult_pkg/faq/general/effect.htm}{effects
+coding}. That is, contrasts should be set to
+\code{\link{contr.sum}} via
+\code{options(contrasts=c('contr.sum','contr.poly'))}. This
+should be done automatically when loading \pkg{afex} and
+\pkg{afex} will issue a warning when running type 3 SS and
+\href{http://www.ats.ucla.edu/stat/r/library/contrast_coding.htm}{other
+coding schemes}. You can check the coding with
+\code{options("contrasts")}.
 
-  The \code{formula} for \code{aov.car} must contain a
-  single \code{Error} term specyfying the \code{ID} column
-  and potential within-subject factors (you may use
-  \code{\link{mixed}} with multiple error terms). Factors
-  outside the \code{Error} term are treated as
-  between-subject factors (the within-subject factors
-  specified in the \code{Error} term are ignored outside
-  the \code{Error} term, i.e., it is not necessary to
-  specify them outside the \code{Error} term, see
-  Examples).
+The \code{formula} for \code{aov.car} must contain a single
+\code{Error} term specyfying the \code{ID} column and
+potential within-subject factors (you may use
+\code{\link{mixed}} with multiple error terms). Factors
+outside the \code{Error} term are treated as
+between-subject factors (the within-subject factors
+specified in the \code{Error} term are ignored outside the
+\code{Error} term, i.e., it is not necessary to specify
+them outside the \code{Error} term, see Examples).
 
-  Suppressing the intercept (i.e, via \code{0 +} or \code{-
-  1}) is ignored. Specific specifications of effects (e.g.,
-  excluding terms with \code{-} or using \code{^}) could be
-  okay but is not tested. Using the \code{\link{I}} or
-  \code{\link{poly}} function within the formula is not
-  tested and not supported!
+Suppressing the intercept (i.e, via \code{0 +} or \code{-
+1}) is ignored. Specific specifications of effects (e.g.,
+excluding terms with \code{-} or using \code{^}) could be
+okay but is not tested. Using the \code{\link{I}} or
+\code{\link{poly}} function within the formula is not
+tested and not supported!
 
-  For \code{ez.glm} either \code{between} or \code{within}
-  must not be \code{NULL}.
+For \code{ez.glm} either \code{between} or \code{within}
+must not be \code{NULL}.
 
-  \code{ez.glm} will concatante all between-subject factors
-  using \code{*} (i.e., producing all main effects and
-  interactions) and all covariates by \code{+} (i.e.,
-  adding only the main effects to the existing
-  between-subject factors). The within-subject factors do
-  fully interact with all between-subject factors and
-  covariates. This is essentially identical to the behavior
-  of SPSS's \code{glm} function.
+\code{ez.glm} will concatante all between-subject factors
+using \code{*} (i.e., producing all main effects and
+interactions) and all covariates by \code{+} (i.e., adding
+only the main effects to the existing between-subject
+factors). The within-subject factors do fully interact with
+all between-subject factors and covariates. This is
+essentially identical to the behavior of SPSS's \code{glm}
+function.
 
-  To run an ANCOVA you need to set \code{factorize = FALSE}
-  and make sure that all variables have the correct type
-  (i.e., factors are factors and numeric variables are
-  numeric and centered).
+To run an ANCOVA you need to set \code{factorize = FALSE}
+and make sure that all variables have the correct type
+(i.e., factors are factors and numeric variables are
+numeric and centered).
 
-  Note that the default behavior is to return a
-  \code{\link{nice.anova}} \code{data.frame}. This includes
-  calculation of generalized eta squared for which
-  \strong{all non manipluated (i.e., observed)} variables
-  need to be specified via the \code{observed} argument.
-  Changing the effect size to \code{"pes"} (partial
-  eta-squared) via \code{args.return} or the return value
-  via \code{return} removes this necessity.
+Note that the default behavior is to return a
+\code{\link{nice.anova}} \code{data.frame}. This includes
+calculation of generalized eta squared for which
+\strong{all non manipluated (i.e., observed)} variables
+need to be specified via the \code{observed} argument.
+Changing the effect size to \code{"pes"} (partial
+eta-squared) via \code{args.return} or the return value via
+\code{return} removes this necessity.
 
-  If \code{check.contrasts = TRUE}, contrasts will be set
-  to \code{"contr.sum"} for all between-subject factors if
-  default contrasts are not equal to \code{"contr.sum"} or
-  \code{attrib(factor, "contrasts") != "contr.sum"}.
-  (within-subject factors are hard-coded
-  \code{"contr.sum"}.)
+If \code{check.contrasts = TRUE}, contrasts will be set to
+\code{"contr.sum"} for all between-subject factors if
+default contrasts are not equal to \code{"contr.sum"} or
+\code{attrib(factor, "contrasts") != "contr.sum"}.
+(within-subject factors are hard-coded \code{"contr.sum"}.)
 }
 \note{
-  Variables entered as within-subjects (i.e., repeated
-  measures) factors are silently converted to factors and
-  unused levels dropped.
+Variables entered as within-subjects (i.e., repeated
+measures) factors are silently converted to factors and
+unused levels dropped.
 
-  Contrasts attached to a factor as an attribute are
-  probably not preserved and not supported.
+Contrasts attached to a factor as an attribute are probably
+not preserved and not supported.
 
-  Function \code{univ} was called \code{univariate} in
-  prior versions, but there was a function with similar
-  name in package \pkg{multcomp} leading to bugs and
-  unexpected behavior.
+Function \code{univ} was called \code{univariate} in prior
+versions, but there was a function with similar name in
+package \pkg{multcomp} leading to bugs and unexpected
+behavior.
 }
 \examples{
 
-# exampel using obk.long (see ?obk.long), a long version of the OBrienKaiser dataset from car.
+# Examples from a pureyl within-design from
+# Maxwell & Delaney (2004, Chapter 11),
+# Table 12.5 (p. 578):
+data(md_12.1)
+ez.glm("id", "rt", md_12.1, within = c("angle", "noise"), 
+       args.return=list(correction = "none", es = "none"))
+
+# Default output
+ez.glm("id", "rt", md_12.1, within = c("angle", "noise"))       
+
+
+# examples using obk.long (see ?obk.long), a long version of the OBrienKaiser dataset from car.
 
 data(obk.long, package = "afex")
 
@@ -267,22 +272,22 @@ ez.glm("id", "value", obk.long, between = c("treatment", "gender"),
         within = c("phase", "hour"), observed = "gender")
 
 # both calls return the same:
-##                         Effect          df   MSE         F  ges     p
-## 1                    treatment       2, 10 22.81    3.94 +  .20   .05
-## 2                       gender       1, 10 22.81    3.66 +  .11   .08
-## 3             treatment:gender       2, 10 22.81      2.86  .18   .10
-## 4                        phase 1.60, 15.99  5.02 16.13 ***  .15 <.001
-## 5              treatment:phase 3.20, 15.99  5.02    4.85 *  .10   .01
-## 6                 gender:phase 1.60, 15.99  5.02      0.28 .003   .71
-## 7       treatment:gender:phase 3.20, 15.99  5.02      0.64  .01   .61
-## 8                         hour 1.84, 18.41  3.39 16.69 ***  .13 <.001
-## 9               treatment:hour 3.68, 18.41  3.39      0.09 .002   .98
-## 10                 gender:hour 1.84, 18.41  3.39      0.45 .004   .63
-## 11       treatment:gender:hour 3.68, 18.41  3.39      0.62  .01   .64
-## 12                  phase:hour 3.60, 35.96  2.67      1.18  .02   .33
-## 13        treatment:phase:hour 7.19, 35.96  2.67      0.35 .009   .93
-## 14           gender:phase:hour 3.60, 35.96  2.67      0.93  .01   .45
-## 15 treatment:gender:phase:hour 7.19, 35.96  2.67      0.74  .02   .65
+##                         Effect          df   MSE         F  ges      p
+## 1                    treatment       2, 10 22.81    3.94 +  .20    .05
+## 2                       gender       1, 10 22.81    3.66 +  .11    .08
+## 3             treatment:gender       2, 10 22.81      2.86  .18    .10
+## 4                        phase 1.60, 15.99  5.02 16.13 ***  .15  .0003
+## 5              treatment:phase 3.20, 15.99  5.02    4.85 *  .10    .01
+## 6                 gender:phase 1.60, 15.99  5.02      0.28 .003    .71
+## 7       treatment:gender:phase 3.20, 15.99  5.02      0.64  .01    .61
+## 8                         hour 1.84, 18.41  3.39 16.69 ***  .13 <.0001
+## 9               treatment:hour 3.68, 18.41  3.39      0.09 .002    .98
+## 10                 gender:hour 1.84, 18.41  3.39      0.45 .004    .63
+## 11       treatment:gender:hour 3.68, 18.41  3.39      0.62  .01    .64
+## 12                  phase:hour 3.60, 35.96  2.67      1.18  .02    .33
+## 13        treatment:phase:hour 7.19, 35.96  2.67      0.35 .009    .93
+## 14           gender:phase:hour 3.60, 35.96  2.67      0.93  .01    .45
+## 15 treatment:gender:phase:hour 7.19, 35.96  2.67      0.74  .02    .65
 
 
 # replicating ?Anova using aov.car:
@@ -345,7 +350,6 @@ ez.glm("id", "value", obk.long, c("treatment", "gender"),
         within = NULL, type = 2, print.formula = TRUE, observed = "gender")
 
 # only within
-
 aov.car(value ~ Error(id/phase*hour), data = obk.long, type = 2)
 
 ez.glm("id", "value", obk.long,  NULL, c("phase", "hour"), 
@@ -373,28 +377,28 @@ aov.car(value ~ treatment * gender + Error(id/phase*hour),
 
 }
 \author{
-  \code{univ} is basically a copy of
-  \code{\link[car]{summary.Anova.mlm}} written by John
-  Fox.\cr The other functions were written by Henrik
-  Singmann.
+\code{univ} is basically a copy of
+\code{\link[car]{summary.Anova.mlm}} written by John
+Fox.\cr The other functions were written by Henrik
+Singmann.
 
-  The design of these functions is heavily influenced by
-  \code{\link[ez]{ezANOVA}} from package \pkg{ez}.
+The design of these functions is heavily influenced by
+\code{\link[ez]{ezANOVA}} from package \pkg{ez}.
 }
 \references{
-  Maxwell, S. E., & Delaney, H. D. (2004). \emph{Designing
-  Experiments and Analyzing Data: A Model-Comparisons
-  Perspective}. Mahwah, N.J.: Lawrence Erlbaum Associates.
+Maxwell, S. E., & Delaney, H. D. (2004). \emph{Designing
+Experiments and Analyzing Data: A Model-Comparisons
+Perspective}. Mahwah, N.J.: Lawrence Erlbaum Associates.
 }
 \seealso{
-  \code{\link{nice.anova}} creats the nice ANOVA tables
-  which are by default returned. See also there for a
-  slightly longer discussion of effect sizes.
+\code{\link{nice.anova}} creats the nice ANOVA tables which
+are by default returned. See also there for a slightly
+longer discussion of effect sizes.
 
-  \code{\link{mixed}} provides a (formula) interface for
-  obtaining p-values for mixed-models via \pkg{lme4}.
+\code{\link{mixed}} provides a (formula) interface for
+obtaining p-values for mixed-models via \pkg{lme4}.
 
-  \code{\link{obk.long}} describes the long version of the
-  \code{OBrienKaiser} dataset used in the examples.
+\code{\link{obk.long}} describes the long version of the
+\code{OBrienKaiser} dataset used in the examples.
 }
 

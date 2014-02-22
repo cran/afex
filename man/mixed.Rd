@@ -2,10 +2,9 @@
 \alias{mixed}
 \title{Obtain p-values for a mixed-model from lmer().}
 \usage{
-  mixed(formula, data, type = 3, method = c("KR", "PB",
-    "LRT"), per.parameter = NULL, args.test = list(),
-    check.contrasts = TRUE, progress = TRUE, cl = NULL,
-    ...)
+mixed(formula, data, type = 3, method = c("KR", "PB", "LRT"),
+     per.parameter = NULL, args.test = list(),
+     check.contrasts = TRUE, progress = TRUE, cl = NULL, ...)
 }
 \arguments{
   \item{formula}{a formula describing the full mixed-model
@@ -59,125 +58,183 @@
   passed to \code{\link{lmer}}.}
 }
 \value{
-  An object of class \code{"mixed"} (i.e., a list) with the
-  following elements:
+An object of class \code{"mixed"} (i.e., a list) with the
+following elements:
 
-  \enumerate{ \item \code{anova.table} a data.frame
-  containing the statistics returned from
-  \code{\link[pbkrtest]{KRmodcomp}}. \item
-  \code{full.model} the \code{"lmerMod"} object returned
-  from fitting the full mixed model. \item
-  \code{restricted.models} a list of \code{"lmerMod"}
-  objects from fitting the restricted models (i.e., each
-  model lacks the corresponding effect) \item \code{tests}
-  a list of objects returned by the function for obtaining
-  the p-values. \item \code{type} The \code{type} argument
-  used when calling this function. \item \code{method} The
-  \code{method} argument used when calling this function. }
+\enumerate{ \item \code{anova.table} a data.frame
+containing the statistics returned from
+\code{\link[pbkrtest]{KRmodcomp}}. \item \code{full.model}
+the \code{"lmerMod"} object returned from fitting the full
+mixed model. \item \code{restricted.models} a list of
+\code{"lmerMod"} objects from fitting the restricted models
+(i.e., each model lacks the corresponding effect) \item
+\code{tests} a list of objects returned by the function for
+obtaining the p-values. \item \code{type} The \code{type}
+argument used when calling this function. \item
+\code{method} The \code{method} argument used when calling
+this function. }
 
-  The following methods exist for objects of class
-  \code{"mixed"}: \code{print} (which uses rounding and
-  invisibly returns the output), \code{summary}, and
-  \code{anova} (the latter two return the same data.frame).
+The following methods exist for objects of class
+\code{"mixed"}: \code{print} (which uses rounding and
+invisibly returns the output), \code{summary}, and
+\code{anova} (the latter two return the same data.frame).
 }
 \description{
-  Fits and calculates p-values for all effects in a mixed
-  model fitted with \code{\link[lme4]{lmer}}. The default
-  behavior calculates type 3 like p-values using the
-  Kenward-Rogers approximation for degrees-of-freedom
-  implemented in \code{\link[pbkrtest]{KRmodcomp}} (for
-  LMMs only), but also allows for parametric bootstrap
-  (\code{method = "PB"}) (for LMMs and GLMMs).
-  \code{print}, \code{summary}, and \code{anova} methods
-  for the returned object of class \code{"mixed"} are
-  available (all return the same data.frame).
+Fits and calculates p-values for all effects in a mixed
+model fitted with \code{\link[lme4]{lmer}}. The default
+behavior calculates type 3 like p-values using the
+Kenward-Rogers approximation for degrees-of-freedom
+implemented in \code{\link[pbkrtest]{KRmodcomp}} (for LMMs
+only), but also allows for parametric bootstrap
+(\code{method = "PB"}) (for LMMs and GLMMs). \code{print},
+\code{summary}, and \code{anova} methods for the returned
+object of class \code{"mixed"} are available (all return
+the same data.frame).
 }
 \details{
-  Type 3 tests are obtained by comparing a model in which
-  only the corresponding effect is missing with the full
-  model (containing all effects). This corresponds to the
-  (type 3) Wald tests given by \code{car::Anova} for
-  \code{"lmerMod"} models.
+Type 3 tests are obtained by comparing a model in which
+only the corresponding effect is missing with the full
+model (containing all effects). This corresponds to the
+(type 3) Wald tests given by \code{car::Anova} for
+\code{"lmerMod"} models.
 
-  Type 2 tests are obtained by comparing a model in which
-  the corresponding effect and all higher oder effect
-  (e.g., all three-way interactions for a two-way
-  interaction) are missing with a model in which all
-  effects of the relevant order are present and all higher
-  order effects absent. Consequently, the results for lower
-  order effects are identical of wether or not higher order
-  effects are part of the model or not, which is rather
-  dubious (but
-  \href{https://stat.ethz.ch/pipermail/r-sig-mixed-models/2012q3/018992.html}{I
-  didn't find a better way} of implementing the Type 2
-  tests). This \strong{does not} correspond to the (type 2)
-  Wald Test reported by \code{car::Anova}. If you want type
-  2 Wald tests, use \code{car::Anova} with \code{test =
-  "F"} (from version 2.0-13) instead of this function.
+Type 2 tests are obtained by comparing a model in which the
+corresponding effect and all higher oder effect (e.g., all
+three-way interactions for a two-way interaction) are
+missing with a model in which all effects of the relevant
+order are present and all higher order effects absent.
+Consequently, the results for lower order effects are
+identical of wether or not higher order effects are part of
+the model or not, which is rather dubious (but
+\href{https://stat.ethz.ch/pipermail/r-sig-mixed-models/2012q3/018992.html}{I
+didn't find a better way} of implementing the Type 2
+tests). This \strong{does not} correspond to the (type 2)
+Wald Test reported by \code{car::Anova}. If you want type 2
+Wald tests, use \code{car::Anova} with \code{test = "F"}
+(from version 2.0-13) instead of this function.
 
-  For an introduction to mixed-modeling for experimental
-  designs using p-values see Judd, Westfall, and Kenny
-  (2012). Further introductions to mixed-modeling for
-  experimental designs are given by Baayen and colleagues
-  (Baayen, 2008; Baayen, Davidson & Bates, 2008; Baayen &
-  Milin, 2010). Recommendations on how to specify the
-  random effects structure for experimental designs can be
-  found in Barr and colleagues (2013).
+For an introduction to mixed-modeling for experimental
+designs using p-values see Judd, Westfall, and Kenny
+(2012). Further introductions to mixed-modeling for
+experimental designs are given by Baayen and colleagues
+(Baayen, 2008; Baayen, Davidson & Bates, 2008; Baayen &
+Milin, 2010). Recommendations on how to specify the random
+effects structure for experimental designs can be found in
+Barr and colleagues (2013).
 
-  p-values are per default calculated via methods from
-  \pkg{pbkrtest}. When \code{method = "KR"}, the
-  Kenward-Rogers approximation for degrees-of-freedom is
-  calculated using \code{\link[pbkrtest]{KRmodcomp}}, which
-  is only applicable to linear-mixed models. The possible
-  argument to \code{pbkrtest} via \code{args.test} is
-  \code{details}.
+p-values are per default calculated via methods from
+\pkg{pbkrtest}. When \code{method = "KR"}, the
+Kenward-Rogers approximation for degrees-of-freedom is
+calculated using \code{\link[pbkrtest]{KRmodcomp}}, which
+is only applicable to linear-mixed models. The possible
+argument to \code{pbkrtest} via \code{args.test} is
+\code{details}.
 
-  \code{method = "PB"} calculates p-values using parametric
-  bootstrap using \code{\link[pbkrtest]{PBmodcomp}}. This
-  can be used for linear and also generalized linear mixed
-  models (GLMM) by specifiying a
-  \code{\link[stats]{family}} argument to \code{mixed}.
-  Note that you should specify further arguments to
-  \code{PBmodcomp} via \code{args.test}, especially
-  \code{nsim} (the number of simulations to form the
-  reference distribution. For other arguments see
-  \code{\link[pbkrtest]{PBmodcomp}}. Note that \code{REML}
-  (argument to \code{lmer}) will be set to \code{FALSE} if
-  method is \code{PB}.
+\code{method = "PB"} calculates p-values using parametric
+bootstrap using \code{\link[pbkrtest]{PBmodcomp}}. This can
+be used for linear and also generalized linear mixed models
+(GLMM) by specifiying a \code{\link[stats]{family}}
+argument to \code{mixed}. Note that you should specify
+further arguments to \code{PBmodcomp} via \code{args.test},
+especially \code{nsim} (the number of simulations to form
+the reference distribution. For other arguments see
+\code{\link[pbkrtest]{PBmodcomp}}. Note that \code{REML}
+(argument to \code{lmer}) will be set to \code{FALSE} if
+method is \code{PB}.
 
-  \code{method = "LRT"} calculates p-values via likelihood
-  ratio tests implemented in the \code{anova} method for
-  \code{"merMod"} objects. This is recommended by Barr et
-  al. (2013) which did not test the other methods
-  implemented here. Furthermore, this is not recommended by
-  the \href{http://glmm.wikidot.com/faq}{lme4 faq} which
-  instead recommends the other methods implemented here.
+\code{method = "LRT"} calculates p-values via likelihood
+ratio tests implemented in the \code{anova} method for
+\code{"merMod"} objects. This is recommended by Barr et al.
+(2013) which did not test the other methods implemented
+here. Furthermore, this is not recommended by the
+\href{http://glmm.wikidot.com/faq}{lme4 faq} which instead
+recommends the other methods implemented here.
 
-  If \code{check.contrasts = TRUE}, contrasts will be set
-  to \code{"contr.sum"} for all factors in the formula if
-  default contrasts are not equal to \code{"contr.sum"} or
-  \code{attrib(factor, "contrasts") != "contr.sum"}.
-  Furthermore, the current contrasts (obtained via
-  \code{getOption("contrasts")}) will be set at the cluster
-  nodes if \code{cl} is not \code{NULL}.
+If \code{check.contrasts = TRUE}, contrasts will be set to
+\code{"contr.sum"} for all factors in the formula if
+default contrasts are not equal to \code{"contr.sum"} or
+\code{attrib(factor, "contrasts") != "contr.sum"}.
+Furthermore, the current contrasts (obtained via
+\code{getOption("contrasts")}) will be set at the cluster
+nodes if \code{cl} is not \code{NULL}.
 }
 \note{
-  Please report all bugs to henrik.singmann (at)
-  psychologie.uni-freiburg.de \cr There might be problems
-  with rather big models when constructing the model matrix
-  to fit the \code{lmer} models (potentially problematic
-  with Type 2 tests). If you find any such bug, please send
-  an example including code and data!
+Please report all bugs to henrik.singmann (at)
+psychologie.uni-freiburg.de \cr There might be problems
+with rather big models when constructing the model matrix
+to fit the \code{lmer} models (potentially problematic with
+Type 2 tests). If you find any such bug, please send an
+example including code and data!
 
-  This functions needs a lot of RAM and rather long time
-  especially with complex random structures (when
-  \code{method = "KR"}). The RAM demand is a problem
-  especially on 32 bit Windows which only supports up to 2
-  or 3GB RAM (see
-  \href{http://cran.r-project.org/bin/windows/base/rw-FAQ.html}{R
-  Windows FAQ}).
+This functions needs a lot of RAM and rather long time
+especially with complex random structures (when
+\code{method = "KR"}). The RAM demand is a problem
+especially on 32 bit Windows which only supports up to 2 or
+3GB RAM (see
+\href{http://cran.r-project.org/bin/windows/base/rw-FAQ.html}{R
+Windows FAQ}).
 }
 \examples{
+### replicate results from Table 16.3 (Maxwell & Delaney, 2004, p. 837)
+data(md_16.1)
+
+# original results need treatment contrasts:
+(mixed1_orig <- mixed(severity ~ sex + (1|id), md_16.1, check.contrasts=FALSE))
+summary(mixed1_orig$full.model)
+
+# p-values stay the same with afex default contrasts (contr.sum),
+# but estimates and t-values for the fixed effects parameters change.
+(mixed1 <- mixed(severity ~ sex + (1|id), md_16.1))
+summary(mixed1$full.model)
+
+
+# data for next examples (Maxwell & Delaney, Table 16.4)
+data(md_16.4)
+str(md_16.4)
+
+### replicate results from Table 16.6 (Maxwell & Delaney, 2004, p. 845)
+# Note that (1|room:cond) is needed because room is nested within cond.
+# p-values (almost) hold.
+(mixed2 <- mixed(induct ~ cond + (1|room:cond), md_16.4))
+# (differences are dut to the use of Kenward-Rogers approximation here,
+# whereas M&W's p-values are based on uncorrected df.)
+
+# again, to obtain identical parameter and t-values, use treatment contrasts:
+summary(mixed2$full.model) # not identical
+
+# prepare new data.frame with contrasts:
+md_16.4b <- within(md_16.4, cond <- C(cond, contr.treatment, base = 2))
+str(md_16.4b)
+
+# p-values stays identical:
+(mixed2_orig <- mixed(induct ~ cond + (1|room:cond), md_16.4b, check.contrasts=FALSE))
+summary(mixed2_orig$full.model) # replicates parameters
+
+
+### replicate results from Table 16.7 (Maxwell & Delaney, 2004, p. 851)
+# F-values (almost) hold, p-values (especially for skill) are off
+(mixed3 <- mixed(induct ~ cond + skill + (1|room:cond), md_16.4))
+
+# however, parameters are perfectly recovered when using the original contrasts:
+mixed3_orig <- mixed(induct ~ cond + skill + (1|room:cond), md_16.4b, check.contrasts=FALSE)
+summary(mixed3_orig$full.model)
+
+
+
+### replicate results from Table 16.10 (Maxwell & Delaney, 2004, p. 862)
+# for this we need to center cog:
+md_16.4b$cog <- scale(md_16.4b$cog, scale=FALSE)
+
+# F-values and p-values are relatively off:
+(mixed4 <- mixed(induct ~ cond*cog + (cog|room:cond), md_16.4b))
+# contrast has a relatively important influence on cog
+(mixed4_orig <- mixed(induct ~ cond*cog + (cog|room:cond), md_16.4b, check.contrasts=FALSE))
+
+# parameters are again almost perfectly recovered:
+summary(mixed4_orig$full.model)
+
+
+
 \dontrun{
 
 # use the obk.long data (not reasonable, no random slopes)
@@ -239,40 +296,47 @@ mixed(value ~ treatment*phase*hour +(1|id), data = obk.long, method = "LRT", cl 
 }
 }
 \author{
-  Henrik Singmann with contributions from
-  \href{http://stackoverflow.com/q/11335923/289572}{Ben
-  Bolker and Joshua Wiley}.
+Henrik Singmann with contributions from
+\href{http://stackoverflow.com/q/11335923/289572}{Ben
+Bolker and Joshua Wiley}.
 }
 \references{
-  Baayen, R. H. (2008). \emph{Analyzing linguistic data: a
-  practical introduction to statistics using R}. Cambridge,
-  UK; New York: Cambridge University Press.
+Baayen, R. H. (2008). \emph{Analyzing linguistic data: a
+practical introduction to statistics using R}. Cambridge,
+UK; New York: Cambridge University Press.
 
-  Baayen, R. H., Davidson, D. J., & Bates, D. M. (2008).
-  Mixed-effects modeling with crossed random effects for
-  subjects and items. \emph{Journal of Memory and
-  Language}, 59(4), 390-412. doi:10.1016/j.jml.2007.12.005
+Baayen, R. H., Davidson, D. J., & Bates, D. M. (2008).
+Mixed-effects modeling with crossed random effects for
+subjects and items. \emph{Journal of Memory and Language},
+59(4), 390-412. doi:10.1016/j.jml.2007.12.005
 
-  Baayen, R. H., & Milin, P. (2010). Analyzing Reaction
-  Times. \emph{International Journal of Psychological
-  Research}, 3(2), 12-28.
+Baayen, R. H., & Milin, P. (2010). Analyzing Reaction
+Times. \emph{International Journal of Psychological
+Research}, 3(2), 12-28.
 
-  Barr, D. J., Levy, R., Scheepers, C., & Tily, H. J.
-  (2013). Random effects structure for confirmatory
-  hypothesis testing: Keep it maximal. \emph{Journal of
-  Memory and Language}, 68(3), 255-278.
-  doi:10.1016/j.jml.2012.11.001
+Barr, D. J., Levy, R., Scheepers, C., & Tily, H. J. (2013).
+Random effects structure for confirmatory hypothesis
+testing: Keep it maximal. \emph{Journal of Memory and
+Language}, 68(3), 255-278. doi:10.1016/j.jml.2012.11.001
 
-  Judd, C. M., Westfall, J., & Kenny, D. A. (2012).
-  Treating stimuli as a random factor in social psychology:
-  A new and comprehensive solution to a pervasive but
-  largely ignored problem. \emph{Journal of Personality and
-  Social Psychology}, 103(1), 54-69. doi:10.1037/a0028347
+Judd, C. M., Westfall, J., & Kenny, D. A. (2012). Treating
+stimuli as a random factor in social psychology: A new and
+comprehensive solution to a pervasive but largely ignored
+problem. \emph{Journal of Personality and Social
+Psychology}, 103(1), 54-69. doi:10.1037/a0028347
+
+Maxwell, S. E., & Delaney, H. D. (2004). \emph{Designing
+experiments and analyzing data: a model-comparisons
+perspective.} Mahwah, N.J.: Lawrence Erlbaum Associates.
 }
 \seealso{
-  \code{\link{ez.glm}} and \code{\link{aov.car}} for
-  convenience functions to analyze experimental deisgns
-  with classical ANOVA or ANCOVA wrapping
-  \code{\link[car]{Anova}}.
+\code{\link{ez.glm}} and \code{\link{aov.car}} for
+convenience functions to analyze experimental deisgns with
+classical ANOVA or ANCOVA wrapping
+\code{\link[car]{Anova}}.
+
+see the following foir the data sets from Maxwell and
+Delaney (2004) used: \code{\link{md_16.1}} and
+\code{\link{md_16.4}}.
 }
 

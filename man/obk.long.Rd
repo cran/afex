@@ -4,25 +4,28 @@
 \title{O'Brien Kaiser's Repeated-Measures Dataset with Covariate}
 \format{A data frame with 240 rows and 7 variables.}
 \source{
-  O'Brien, R. G., & Kaiser, M. K. (1985). MANOVA method for
-  analyzing repeated measures designs: An extensive primer.
-  \emph{Psychological Bulletin}, 97, 316-333.
-  doi:10.1037/0033-2909.97.2.316
+O'Brien, R. G., & Kaiser, M. K. (1985). MANOVA method for
+analyzing repeated measures designs: An extensive primer.
+\emph{Psychological Bulletin}, 97, 316-333.
+doi:10.1037/0033-2909.97.2.316
+}
+\usage{
+obk.long
 }
 \description{
-  This is the long version of the \code{OBrienKaiser}
-  dataset from the \pkg{car} pakage adding a random
-  covariate \code{age}. Originally the dataset ist taken
-  from O'Brien and Kaiser (1985). The description from
-  \code{\link[car]{OBrienKaiser}} says: "These contrived
-  repeated-measures data are taken from O'Brien and Kaiser
-  (1985). The data are from an imaginary study in which 16
-  female and male subjects, who are divided into three
-  treatments, are measured at a pretest, postest, and a
-  follow-up session; during each session, they are measured
-  at five occasions at intervals of one hour. The design,
-  therefore, has two between-subject and two within-subject
-  factors."
+This is the long version of the \code{OBrienKaiser} dataset
+from the \pkg{car} pakage adding a random covariate
+\code{age}. Originally the dataset ist taken from O'Brien
+and Kaiser (1985). The description from
+\code{\link[car]{OBrienKaiser}} says: "These contrived
+repeated-measures data are taken from O'Brien and Kaiser
+(1985). The data are from an imaginary study in which 16
+female and male subjects, who are divided into three
+treatments, are measured at a pretest, postest, and a
+follow-up session; during each session, they are measured
+at five occasions at intervals of one hour. The design,
+therefore, has two between-subject and two within-subject
+factors."
 }
 \examples{
 # The dataset is constructed as follows:
@@ -57,5 +60,4 @@ head(obk.long)
 ## 6  1   control      M -4.75  post    1     3
 }
 \keyword{dataset}
-\keyword{datasets}
 

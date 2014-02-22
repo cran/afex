@@ -1,9 +1,10 @@
 Package: afex
 Type: Package
 Title: Analysis of Factorial Experiments
-Depends: R (>= 2.14.0), coin, car, lme4 (>= 1.0.4), pbkrtest (>= 0.3-6)
+Depends: R (>= 2.14.0), car, lme4 (>= 1.0.4), pbkrtest (>= 0.3-6),
+        reshape2
 Suggests: ascii, xtable, parallel
-Imports: reshape2, stringr
+Imports: stringr, coin
 Description: Provides convenience functions for analyzing factorial
     experiments using ANOVA or mixed-models. ez.glm() and aov.car()
     allow convenient calculation of between, within (i.e.,
@@ -26,17 +27,15 @@ Encoding: UTF-8
 Authors@R: c(person(given="Henrik", family="Singmann",
     email="henrik.singmann@psychologie.uni-freiburg.de",
     role=c("aut", "cre")))
-Version: 0.7-90
-Date: 2013-12-04
-Collate: 'afex-package.R' 'aov.car.R' 'compare.2.vectors.R' 'mixed.R'
-        'nice.anova.R' 'obk.long-data.R' 'zzz.R'
+Version: 0.8-94
+Date: 2014-02-22
 Author: Henrik Singmann [aut, cre]
 Maintainer: Henrik Singmann
         <henrik.singmann@psychologie.uni-freiburg.de>
 Repository: CRAN
 Repository/R-Forge/Project: afe
-Repository/R-Forge/Revision: 90
-Repository/R-Forge/DateTimeStamp: 2013-12-04 10:15:55
-Date/Publication: 2013-12-04 14:56:10
-Packaged: 2013-12-04 11:36:12 UTC; rforge
+Repository/R-Forge/Revision: 95
+Repository/R-Forge/DateTimeStamp: 2014-02-22 21:59:44
+Date/Publication: 2014-02-23 12:09:55
+Packaged: 2014-02-22 23:18:51 UTC; rforge
 NeedsCompilation: no

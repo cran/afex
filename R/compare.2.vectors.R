@@ -35,7 +35,9 @@
 #' @export compare.2.vectors
 #' @importFrom coin oneway_test wilcox_test median_test approximate statistic pvalue
 #' @example examples/examples.compare.R
-#'
+#' 
+#' @encoding UTF-8
+#' 
 
 compare.2.vectors <- function(x, y, paired = FALSE, na.rm = FALSE, tests = c("parametric", "nonparametric"), coin = TRUE, alternative = "two.sided", perm.distribution = approximate(100000), wilcox.exact = NULL, wilcox.correct = TRUE) {
 	#browser()

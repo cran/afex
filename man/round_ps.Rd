@@ -1,3 +1,4 @@
+\encoding{UTF-8}
 \name{round_ps}
 \alias{round_ps}
 \title{Helper function which rounds p-values}

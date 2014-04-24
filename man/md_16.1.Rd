@@ -1,4 +1,5 @@
 \docType{data}
+\encoding{UTF-8}
 \name{md_16.1}
 \alias{md_16.1}
 \title{Data 16.1 / 10.9 from Maxwell & Delaney}

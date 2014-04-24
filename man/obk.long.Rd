@@ -1,4 +1,5 @@
 \docType{data}
+\encoding{UTF-8}
 \name{obk.long}
 \alias{obk.long}
 \title{O'Brien Kaiser's Repeated-Measures Dataset with Covariate}

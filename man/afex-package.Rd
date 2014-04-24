@@ -1,6 +1,5 @@
 \docType{package}
 \name{afex-package}
-\alias{afex}
 \alias{afex-package}
 \title{The afex Package}
 \description{
@@ -8,9 +7,9 @@ Analysis of Factorial Experiments.
 }
 \details{
 \tabular{ll}{ Package: \tab afex\cr Type: \tab Package\cr
-Version: \tab 0.8-94\cr Date: \tab 2014-02-22\cr Depends:
-\tab R (>= 2.14.0), car, lme4 (>= 1.0.4), pbkrtest (>=
-0.3-6), reshape2\cr Encoding: \tab UTF-8\cr License: \tab
+Version: \tab 0.9-109\cr Date: \tab 2014-04-24\cr Depends:
+\tab R (>= 3.0.0), car, lme4 (>= 1.0.5), pbkrtest (>=
+0.3-6), reshape2\cr Encoding: \tab latin1\cr License: \tab
 GPL (>=3)\cr URL: \tab
 http://www.psychologie.uni-freiburg.de/Members/singmann/R/afex\cr
 }
@@ -25,7 +24,7 @@ more then one observation per individual and cell of the
 design), per default returning a print ready ANOVA table.
 Function mixed() fits a mixed model using lme4::lmer() and
 computes p-values for all effects in the model using either
-the Kenward-Rogers approximation of degrees of freedom (LMM
+the Kenward-Roger approximation of degrees of freedom (LMM
 only), parametric bootstrap (LMMs and GLMMs) or likelihood
 ratio tests (LMMs and GLMMs). afex uses type 3 sums of
 squares as default (imitating commercial statistical
@@ -34,8 +33,8 @@ Furthermore, compare.2.vectors() conveniently compares two
 vectors using a variety of tests.
 }
 \author{
-Henrik Singmann
-\email{henrik.singmann@psychologie.uni-freiburg.de}
+Henrik Singmann, with contributions from Ben Bolker, Søren
+Højsgaard, Ulrich Halekoh, John Fox, Michael A. Lawrence
 }
 \keyword{package}
 

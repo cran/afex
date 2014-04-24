@@ -17,7 +17,8 @@
 #' @usage md_16.4
 #' @format A data.frame with 24 rows and 3 variables.
 #' @source Maxwell, S. E., & Delaney, H. D. (2004). Designing experiments and analyzing data: a model-comparisons perspective. Mahwah, N.J.: Lawrence Erlbaum Associates. p. 574
-
+#' 
+#' @encoding UTF-8
 #'
 #' @examples
 #' # data for next examples (Maxwell & Delaney, Table 16.4)

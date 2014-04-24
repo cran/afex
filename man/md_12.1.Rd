@@ -1,4 +1,5 @@
 \docType{data}
+\encoding{UTF-8}
 \name{md_12.1}
 \alias{md_12.1}
 \title{Data 12.1 from Maxwell & Delaney}
@@ -31,17 +32,17 @@ the screen. In some trials, the letter appears by itself,
 but in other trials, the target letter is embedded in a
 group of other letters. This variation in the display
 constitutes the first factor, which is referred to as
-noise. The noise factor has two levels—absent and
-present. The other factor varied by the experimenter is
-where in the display the target letter appears. This
-factor, which is called angle, has three levels. The target
-letter is either shown at the center of the screen (i.e.,
-0° off-center, where the subject has been instructed to
-fixate), 4° off-center or 8° off-center (in each case,
-the deviation from the center varies randomly between left
-and right). Table 12.1 presents hypothetical data for 10
-subjects. As usual, the sample size is kept small to make
-the calculations easier to follow. The dependent measure is
+noise. The noise factor has two levels?absent and present.
+The other factor varied by the experimenter is where in the
+display the target letter appears. This factor, which is
+called angle, has three levels. The target letter is either
+shown at the center of the screen (i.e., 0° off-center,
+where the subject has been instructed to fixate), 4°
+off-center or 8° off-center (in each case, the deviation
+from the center varies randomly between left and right).
+Table 12.1 presents hypothetical data for 10 subjects. As
+usual, the sample size is kept small to make the
+calculations easier to follow. The dependent measure is
 reaction time (latency), measured in milliseconds (ms),
 required by a subject to identify the correct target
 letter. Notice that each subject has six scores, one for

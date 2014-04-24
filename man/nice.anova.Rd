@@ -1,3 +1,4 @@
+\encoding{UTF-8}
 \name{nice.anova}
 \alias{nice.anova}
 \title{Make nice ANOVA table for printing.}

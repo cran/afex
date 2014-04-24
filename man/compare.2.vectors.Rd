@@ -1,3 +1,4 @@
+\encoding{UTF-8}
 \name{compare.2.vectors}
 \alias{compare.2.vectors}
 \title{Compare two vectors using various tests.}

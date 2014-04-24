@@ -10,6 +10,8 @@
 #'
 #' @author Henrik Singmann
 #'
+#' @encoding UTF-8
+#'
 #' @export round_ps
 #' @examples
 #' round_ps(runif(10))

@@ -1,4 +1,48 @@
                     ************************
+                    ** afex VERSION 0.9-x **
+                    ************************
+                    
+                    Changes in afex Version 0.9-x
+                    Released April 2014
+
+    Significant User Visible Changes and New Features
+
+    o   added function aov4: another wrapper of car::Anova for ANOVA
+        models specified via lme4::lmer syntax.
+    
+    o   added return="marginal" to aov.car which returns the marginal 
+        means of all effects (i.e., grand mean and mean of main 
+        effects and interactions). Is also returned if return="full".
+        
+    o   testing the intercept in mixed models in now only optional.
+        The default is that the new argument test.intercept = FALSE.
+    
+    o   removed return="lme4" from aov.car.
+    
+    o   added argument intercept to nice.anova (default FALSE) which
+        allows to selective display the intercept in an ANOVA table.
+        
+    o   added method = "F" to mixed() which only returns the F-value 
+        but no ddf (and hence no p-value). Experimental, not documented.
+     
+    o   renamed colname stat to F when method = "KR" (mixed).
+    
+    o   added tests (currently mainly for mixed()) via pkg testthat, 
+        see tests/testthat.
+        
+    Bugfixes
+    
+    o   increased requirement of R version and lme4 version.    
+    
+    o   print.mixed should now propagate all warnings from lme4 (i.e., 
+        also the new convergence warnings).
+        
+    o   lme4 is now loaded at worker nodes for mixed (default, 
+        turn of via check.contrasts)
+
+        
+
+                    ************************
                     ** afex VERSION 0.8-x **
                     ************************
                     

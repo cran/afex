@@ -29,4 +29,6 @@
 #' (mixed1 <- mixed(severity ~ sex + (1|id), md_16.1))
 #' summary(mixed1$full.model)
 #' 
+#' @encoding UTF-8
+#' 
 NULL

@@ -151,9 +151,12 @@ aov.car <- function(formula, data, fun.aggregate = NULL, type = 3, factorize = T
   rh1 <- str_c(within, collapse = "+")
   rh3 <- str_c(within, collapse = "*")
   # converting all within subject factors to factors and adding a leading charcter (x) if starting with a digit.
+  #browser()
   new.factor.levels <- c(letters, LETTERS)
   for (within.factor in within) {
-    data[,within.factor] <- factor(make.names(as.character(data[,within.factor])))
+    data[,within.factor] <- factor(as.character(data[,within.factor]), levels = unique(as.character(data[,within.factor])), labels = make.names(unique(as.character(data[,within.factor])), unique=TRUE))
+    #data[,within.factor] <- factor(as.character(data[,within.factor]))
+    #levels(data[,within.factor]) <- make.names(levels(data[,within.factor]), unique=TRUE)
     #if (length(levels(data[,within.factor])) <= length(new.factor.levels)) levels(data[,within.factor]) <- new.factor.levels[seq_along(levels(data[,within.factor]))]
   }
   # Check if each id is in only one between subjects cell.

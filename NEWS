@@ -1,4 +1,30 @@
                     ************************
+                    ** afex VERSION 0.10-x **
+                    ************************
+                    
+                    Changes in afex Version 0.10-x
+                    Released August 2014
+
+    Significant User Visible Changes and New Features
+
+    o   afex does not change the global contrasts anymore when loading 
+        the package (due to popular demand).
+    
+    o   new functions to globally set contrasts: set_sum_contrasts & 
+        set_treatment_contrasts (and some more wrappers).
+        
+    o   Added more mixed model examples from Maxwell & Delaney, Chapter 
+        15 ("Multilevel Models for within subjects designs"), see ?mixed 
+        and ?md_15.1. Thanks to Ulf Mertens. 
+        
+    Bugfixes
+    
+    o   removed bug when factor levels of within-subject factors
+        contained "+" or "-" and were not converted correctly. Added 
+        tests for known bugs in aov.car.
+        
+
+                    ************************
                     ** afex VERSION 0.9-x **
                     ************************
                     
@@ -25,7 +51,7 @@
     o   added method = "F" to mixed() which only returns the F-value 
         but no ddf (and hence no p-value). Experimental, not documented.
      
-    o   renamed colname stat to F when method = "KR" (mixed).
+    o   renamed colname "stat" to "F" when method = "KR" (mixed).
     
     o   added tests (currently mainly for mixed()) via pkg testthat, 
         see tests/testthat.

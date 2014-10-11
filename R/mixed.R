@@ -2,9 +2,6 @@
 #'
 #' Fits and calculates p-values for all effects in a mixed model fitted with \code{\link[lme4]{lmer}}. The default behavior calculates type 3 like p-values using the Kenward-Roger approximation for degrees-of-freedom implemented in \code{\link[pbkrtest]{KRmodcomp}} (for LMMs only), but also allows for parametric bootstrap (\code{method = "PB"}), or likelihood ratio tests (the latter two for LMMs and GLMMs). \code{print}, \code{summary}, and \code{anova} methods for the returned object of class \code{"mixed"} are available (the last two return the same data.frame).
 #'
-#' @usage mixed(formula, data, type = 3, method = c("KR", "PB", "LRT"), 
-#'      per.parameter = NULL, args.test = list(), test.intercept = FALSE,
-#'      check.contrasts = TRUE, progress = TRUE, cl = NULL, ...)
 #'
 #' @param formula a formula describing the full mixed-model to be fitted. As this formula is passed to \code{lmer}, it needs at least one random term.
 #' @param data data.frame containing the data. Should have all the variables present in \code{fixed}, \code{random}, and \code{dv} as columns.
@@ -14,9 +11,11 @@
 #' @param args.test \code{list} of arguments passed to the function calculating the p-values. See Details.
 #' @param test.intercept logical. Whether or not the intercept should also be fitted and tested for significance. Default is \code{FALSE}. Only relevant if \code{type = 3}.
 #' @param check.contrasts \code{logical}. Should contrasts be checked and (if necessary) changed to \code{"contr.sum"}? See Details.
+#' @param set.data.arg \code{logical}. Should the data argument in the slot \code{call} of the \code{merMod} object returned from \code{lmer} be set to the passed data argument? Otherwise the name will be \code{data}. Helpful if fitted objects are used afterwards (e.g., using \pkg{lsmeans}). Default is \code{TRUE}. 
 #' @param progress  if \code{TRUE}, shows progress with a text progress bar and other status messages during fitting.
 #' @param cl  A vector identifying a cluster; used for distributing the estimation of the different models using several cores. See examples. If \code{ckeck.contrasts}, mixed sets the current contrasts (\code{getOption("contrasts")}) at the nodes. Note this does \emph{not} distribute calculation of p-values (e.g., when using \code{method = "PB"}) across the cluster. Use \code{args.test} for this.
 #' @param ... further arguments (such as \code{weights}) passed to \code{\link{lmer}}.
+#'
 #'
 #' @return An object of class \code{"mixed"} (i.e., a list) with the following elements:
 #'
@@ -29,15 +28,40 @@
 #' \item \code{method} The \code{method} argument used when calling this function.
 #' }
 #'
-#' The following methods exist for objects of class \code{"mixed"}: \code{print} (which uses rounding and invisibly returns the output), \code{summary}, and \code{anova} (the latter two return the same data.frame).
+#' Three identical methods exist for objects of class \code{"mixed"}: \code{print}, \code{summary}, and \code{anova}. They all print a nice version of the \code{anova.table} element of the returned object (which is also invisibly returned). This methods omit some columns and nicely round the other columns. The following columns are always printed:
+#' \enumerate{
+#' \item \code{Effect} name of effect
+#' \item \code{p.value} estimated p-value for the effect
+#' }
 #'
-#' @details For an introduction to mixed-modeling for experimental designs see Barr, Levy, Scheepers, & Tily (2013; I highly recommend reading this paper if you use this function), arguments for using the Kenward-Roger approximation for obtaining p-values are given by Judd, Westfall, and Kenny (2012). Further introductions to mixed-modeling for experimental designs are given by Baayen and colleagues (Baayen, 2008; Baayen, Davidson & Bates, 2008; Baayen & Milin, 2010). Specific recommendations on which random effects structure to specify for confirmatory tests can be found in Barr and colleagues (2013).
+#' For LMMs with \code{method="KR"} the following further columns are returned (note: the Kenward-Roger correction does two separate things: (1) it computes an effective number for the denominator df; (2) it scales the statistic by a calculated amount, see also \url{http://stackoverflow.com/a/25612960/289572}):
+#' \enumerate{
+#' \item \code{F} computed F statistic
+#' \item \code{ndf} numerator degrees of freedom (number of parameters used for the effect)
+#' \item \code{ddf} denominator degrees of freedom (effective residual degrees of freedom for testing the effect), computed from the Kenward-Roger correction using \code{pbkrtest::KRmodcomp}
+#' \item \code{F.scaling} scaling of F-statistic computing from Kenward-Roger approximation.
+#' }
+#' 
+#' For models with \code{method="LRT"} the following further columns are returned:
+#' \enumerate{
+#' \item \code{df.large} degrees of freedom (i.e., estimated paramaters) for full model (i.e., model containing the corresponding effect)
+#' \item \code{df.small} degrees of freedom (i.e., estimated paramaters) for restricted model (i.e., model without the corresponding effect)
+#' \item \code{chisq} 2 times the difference in likelihood (obtained with \code{logLik}) between full and restricted model
+#' \item \code{df} difference in degrees of freedom between full and restricted model (p-value is based on these df).
+#' }
+#' 
+#' For models with \code{method="PB"} the following further column is returned:
+#' \enumerate{
+#' \item \code{stat} 2 times the difference in likelihood (obtained with \code{logLik}) between full and restricted model (i.e., a chi-square value).
+#' }
+#'
+#' @details For an introduction to mixed-modeling for experimental designs see Barr, Levy, Scheepers, & Tily (2013; I highly recommend reading this paper if you use this function), arguments for using the Kenward-Roger approximation for obtaining p-values are given by Judd, Westfall, and Kenny (2012). Further introductions to mixed-modeling for experimental designs are given by Baayen and colleagues (Baayen, 2008; Baayen, Davidson & Bates, 2008; Baayen & Milin, 2010). Specific recommendations on which random effects structure to specify for confirmatory tests can be found in Barr and colleagues (2013) and Barr (2013).
 #'
 #' p-values are per default calculated via methods from \pkg{pbkrtest}. When \code{method = "KR"} (the default), the Kenward-Roger approximation for degrees-of-freedom is calculated using \code{\link[pbkrtest]{KRmodcomp}}, which is only applicable to linear-mixed models. The test statistic in the output is a F-value (\code{F}).
 #'
 #' \code{method = "PB"} calculates p-values using parametric bootstrap using \code{\link[pbkrtest]{PBmodcomp}}. This can be used for linear and also generalized linear mixed models (GLMM) by specifying a \code{\link[stats]{family}} argument to \code{mixed}. Note that you should specify further arguments to \code{PBmodcomp} via \code{args.test}, especially \code{nsim} (the number of simulations to form the reference distribution) or \code{cl} (for using multiple cores). For other arguments see \code{\link[pbkrtest]{PBmodcomp}}. Note that \code{REML} (argument to \code{[g]lmer}) will be set to \code{FALSE} if method is \code{PB}.
 #'
-#' \code{method = "LRT"} calculates p-values via likelihood ratio tests implemented in the \code{anova} method for \code{"merMod"} objects. This is recommended by Barr et al. (2013; which did not test the other methods implemented here). Using likelihood ratio tests is only recommended for models with many levels for the random effects (> 50), but can be pretty helpful in case the othwer methods fail (due to memory and/or time limitations). The \href{http://glmm.wikidot.com/faq}{lme4 faq} also recommends the other methods over likelihood ratio tests.
+#' \code{method = "LRT"} calculates p-values via likelihood ratio tests implemented in the \code{anova} method for \code{"merMod"} objects. This is recommended by Barr et al. (2013; which did not test the other methods implemented here). Using likelihood ratio tests is only recommended for models with many levels for the random effects (> 50), but can be pretty helpful in case the other methods fail (due to memory and/or time limitations). The \href{http://glmm.wikidot.com/faq}{lme4 faq} also recommends the other methods over likelihood ratio tests.
 #' 
 #' Type 3 tests are obtained by comparing a model in which only the tested effect is excluded with the full model (containing all effects). This corresponds to the (type 3) Wald tests given by \code{car::Anova} for \code{"lmerMod"} models. The submodels in which the tested effect is excluded are obtained by manually creating a model matrix which si then fitted in \code{"lme4"}. This is done to avoid R's "feature" to not allow this behavior.
 #'
@@ -48,7 +72,7 @@
 #'
 #' @note When \code{method = "KR"}, obtaining p-values is known to crash due too insufficient memory or other computational limitations (especially with complex random effects structures). In these cases, the other methods should be used. The RAM demand is a problem especially on 32 bit Windows which only supports up to 2 or 3GB RAM (see \href{http://cran.r-project.org/bin/windows/base/rw-FAQ.html}{R Windows FAQ}). Then it is probably a good idea to use methods "LRT" or "PB".
 #'
-#' \code{"mixed"} will throw a message if numerical variables are not centered on 0, as main effects (of other variables then the numeric one) can be hard to interpret if numerical variables appear in interactions. See
+#' \code{"mixed"} will throw a message if numerical variables are not centered on 0, as main effects (of other variables then the numeric one) can be hard to interpret if numerical variables appear in interactions. See Dalal & Zickar (2012).
 #'
 #' Please report all bugs to henrik.singmann (at) psychologie.uni-freiburg.de 
 #'
@@ -64,6 +88,8 @@
 #' 
 #' Baayen, R. H., & Milin, P. (2010). Analyzing Reaction Times. \emph{International Journal of Psychological Research}, 3(2), 12-28.
 #' 
+#' Barr, D. J. (2013). Random effects structure for testing interactions in linear mixed-effects models. \emph{Frontiers in Quantitative Psychology and Measurement}, 328. doi:10.3389/fpsyg.2013.00328
+#' 
 #' Barr, D. J., Levy, R., Scheepers, C., & Tily, H. J. (2013). Random effects structure for confirmatory hypothesis testing: Keep it maximal. \emph{Journal of Memory and Language}, 68(3), 255-278. doi:10.1016/j.jml.2012.11.001
 #'
 #' Dalal, D. K., & Zickar, M. J. (2012). Some Common Myths About Centering Predictor Variables in Moderated Multiple Regression and Polynomial Regression. \emph{Organizational Research Methods}, 15(3), 339-362. doi:10.1177/1094428111430540
@@ -77,16 +103,17 @@
 #' @S3method summary mixed
 #' @S3method anova mixed
 #' @import pbkrtest
-#' @importFrom lme4 lmer glmer nobars
+#' @importFrom lme4 lmer glmer nobars getME fixef isREML
 #' @importMethodsFrom Matrix t isSymmetric "%*%" solve diag
 #' @importClassesFrom Matrix Matrix
-#' @importFrom Matrix Matrix sparseMatrix
+#' @importFrom Matrix Matrix sparseMatrix rankMatrix
+#' @importFrom parallel clusterCall clusterExport clusterEvalQ clusterApplyLB
 #' @encoding UTF-8
 #' 
 #' @example examples/examples.mixed.R
 #' 
 
-mixed <- function(formula, data, type = 3, method = c("KR", "PB", "LRT"), per.parameter = NULL, args.test = list(), test.intercept = FALSE, check.contrasts = TRUE, progress = TRUE, cl = NULL, ...) {
+mixed <- function(formula, data, type = 3, method = c("KR", "PB", "LRT"), per.parameter = NULL, args.test = list(), test.intercept = FALSE, check.contrasts = TRUE, set.data.arg = TRUE, progress = TRUE, cl = NULL, ...) {
   if (check.contrasts) {
     #browser()
     vars.to.check <- all.vars(formula)
@@ -132,6 +159,10 @@ mixed <- function(formula, data, type = 3, method = c("KR", "PB", "LRT"), per.pa
     data <- model.frame(as.formula(str_c(vars.to.check[1], "~", str_c(vars.to.check[-1], collapse = "+"))), data = data)
     m.matrix <- model.matrix(rh2, data = data)
     warning(str_c("Due to missing values, reduced number of observations to ", nrow(data)))
+    if(set.data.arg) {
+      warning("Due to missing values, set.data.arg set to FALSE.")
+      set.data.arg <- FALSE
+    }
   }
   
   # check if numerical variables are centered
@@ -241,9 +272,57 @@ mixed <- function(formula, data, type = 3, method = c("KR", "PB", "LRT"), per.pa
     fits <- clusterApplyLB(cl = cl, x = formulas, eval.cl, m.call = mf, progress = progress)
     if (progress) junk <- clusterEvalQ(cl = cl, cat("]"))
   }
+  ## add correct data argument to lmer calls:
+
   ####################
-  ### Part III: obtain p-values
+  ### Part IIb: likelihood checks and refitting
   ####################
+  
+  check_likelihood <- function(fits) {
+    if (type == 3 | type == "III") {
+      logLik_full <- as.numeric(logLik(fits[[1]]))
+      logLik_restricted <- as.numeric(vapply(fits[2:length(fits)], logLik, 0))
+      if(any(logLik_restricted > logLik_full)) return(fixed.effects[logLik_restricted > logLik_full])
+    } else if (type == 2 | type == "II") {
+      logLik_full <- as.numeric(vapply(fits[1:max.effect.order],logLik, 0))
+      logLik_restricted <- as.numeric(vapply(fits[(max.effect.order+1):length(fits)], logLik, 0))
+      warn_logLik <- c()
+      for (c in seq_along(fixed.effects)) {
+        order.c <- effect.order[c]
+        if(logLik_restricted[[c]] > logLik_full[[order.c]]) warn_logLik <- c(warn_logLik, fixed.effects[c])
+      }
+      if(length(warn_logLik)>0) return(warn_logLik)
+    }
+    return(TRUE)    
+  }
+  
+  # check for smaller likelihood of nested model and refit if test fails:
+  if (FALSE) {
+    if(!isTRUE(check_likelihood(fits))) {
+      if (progress) cat("refitting...")
+      refits <- lapply(fits, allFit, verbose=FALSE, data = data)
+      browser()
+      str(fits[[1]], 2)
+      fits[[1]]@call
+      sapply(allFit(fits[[1]], data=md_16.4b), function(y) try(logLik(y)))
+      sapply(refits, function(x) sapply(x, function(y) tryCatch(as.numeric(logLik(y)), error = function(e) as.numeric(NA))))
+      
+      fits <- lapply(refits, function(x) {
+        tmp_llk <- vapply(x, function(y) tryCatch(logLik(y), error = function(e) as.numeric(NA)), 0)
+        x[[which.min(tmp_llk)]]
+      })
+    }
+  }
+  # check again and warn 
+  if(!isREML(fits[[1]]) & !isTRUE(check_likelihood(fits))) {
+    warning(paste("Following nested model(s) provide better fit than full model:", paste(check_likelihood(fits), collapse = ", "), "\n  It is highly recommended to try different optimizer via lmerControl or allFit!"))
+  }
+  
+  if(set.data.arg){
+    for (i in seq_along(fits)) {
+      fits[[i]]@call[["data"]] <- mc[["data"]]
+    }
+  }
   ## prepare for p-values:
   if (type == 3 | type == "III") {
     full.model <- fits[[1]]
@@ -252,8 +331,12 @@ mixed <- function(formula, data, type = 3, method = c("KR", "PB", "LRT"), per.pa
     full.model <- fits[1:max.effect.order]
     fits <- fits[(max.effect.order+1):length(fits)]
   }
-  names(fits) <- fixed.effects
-  # obtain p-values:
+  names(fits) <- fixed.effects  
+  
+  ####################
+  ### Part III: obtain p-values
+  ####################
+  ## obtain p-values:
   #browser()
   if (method[1] == "KR") {
     if (progress) cat(str_c("Obtaining ", length(fixed.effects), " p-values:\n["))
@@ -384,9 +467,10 @@ print.mixed <- function(x, ...) {
 }
 
 
-summary.mixed <- function(object, ...) object[[1]]
+#anova.mixed <- 
 
-anova.mixed <- function(object, ...) object[[1]]
+summary.mixed <- anova.mixed <- function(object, ...) print.mixed(x = object, ...)
+
 
 # is.mixed <- function(x) inherits(x, "mixed")
 

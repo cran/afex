@@ -1,3 +1,42 @@
+                    *************************
+                    ** afex VERSION 0.11-x **
+                    *************************
+                    
+                    Changes in afex Version 0.11-x
+                    Released October 2014
+
+    Significant User Visible Changes and New Features
+
+    o   added allFit() function (written by Ben Bolker).
+    
+    o   mixed() gives warning if nested model provides worse fit 
+        (logLik) than full model (when fitted with ML).
+    
+    o   print, summary, and anova method for mixed objects are now 
+        identical.
+        
+    o   description of returned object from mixed() extended (Thanks
+        to Ben Bolker, see http://stackoverflow.com/a/25612960/289572)
+        
+    o   added return = "aov" to aov.car which returns the ANOVA 
+        fitted with aov (with correct Error strata) so that it can be
+        passed to lsmeans for post-hoc tests or plotting (lsmip).
+        
+        
+    Bugfixes
+    
+    o   all required functions are now correctly imported avoiding 
+        CRAN warnings and better functioning.
+        
+    o   data argument to lmer calls in mixed set correctly. Note that
+        still contrasts added to the data in mixed may prohibit use of 
+        predict.merMod() or similar functions. It is recommended to 
+        set the contrasts globally to "contr.sum", e.g., 
+        via set_sum_contrasts(), for correct functioning
+        (disable via set.data.arg argument for mixed).
+        
+    
+        
                     ************************
                     ** afex VERSION 0.10-x **
                     ************************

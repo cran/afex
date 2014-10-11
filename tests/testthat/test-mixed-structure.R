@@ -15,6 +15,19 @@ test_that("mixed: Maxell & Delaney (2004), Table 16.4, p. 842: Type 2", {
   expect_that(fixef(mixed4_2$full.model[[1]]), is_equivalent_to(fixef(lmer4_small)))  
 })
 
+test_that("mixed: Maxell & Delaney (2004), Table 16.4, p. 842: Type 3", {
+  data(md_16.4)
+  md_16.4b <- md_16.4
+  md_16.4b$cog <- scale(md_16.4b$cog, scale=FALSE)
+  contrasts(md_16.4b$cond) <- "contr.sum"
+  suppressWarnings(mixed4_2 <- mixed(induct ~ cond*cog + (cog|room:cond), md_16.4b, type = 3, progress=FALSE))
+  lmer4_full <- lmer(induct ~ cond*cog + (cog|room:cond), md_16.4b)
+  lmer4_small <- lmer(induct ~ cond+cog + (cog|room:cond), md_16.4b)
+  expect_that(fixef(mixed4_2$full.model), equals(fixef(lmer4_full)))
+  expect_that(mixed4_2$full.model, is_equivalent_to(lmer4_full))
+  expect_that(fixef(mixed4_2$restricted.models$`cond:cog`), is_equivalent_to(fixef(lmer4_small)))  
+})
+
 test_that("mixed, obk.long: type 2 and LRTs", {
   data(obk.long, package = "afex")
   contrasts(obk.long$treatment) <- "contr.sum"
@@ -66,4 +79,20 @@ test_that("mixed, obk.long: multicore loads lme4 and produces the same results",
   m_mc2 <- mixed(value ~ treatment +(1|id), data = obk.long, method = "LRT", control = lmerControl(optCtrl=list(maxfun = 100000)), progress=FALSE)
   expect_that(all(vapply(cl_search, function(x) any(grepl("^package:lme4$", x)), NA)), is_true())
   expect_that(m_mc1, equals(m_mc2))
+})
+
+
+# test_that("mixed, Maxell & Delaney (2004), Table 16.4, p. 842: bobyqa not fitting well", {
+#   data(md_16.4)
+#   # F-values and p-values are relatively off:
+#   expect_that(mixed(induct ~ cond*cog + (cog|room:cond), md_16.4, control=lmerControl(optimizer="bobyqa")), gives_warning("better fit"))
+#   expect_that(mixed(induct ~ cond*cog + (cog|room:cond), md_16.4, type=2, control=lmerControl(optimizer="bobyqa")), gives_warning("better fit"))
+# })
+
+test_that("mixed: set.data.arg", {
+  data(obk.long, package = "afex")
+  suppressWarnings(m1 <- mixed(value ~ treatment*phase +(1|id), obk.long, method = "LRT", progress=FALSE))
+  suppressWarnings(m2 <- mixed(value ~ treatment*phase +(1|id), obk.long, method = "LRT", progress=FALSE, set.data.arg = FALSE))
+  expect_that(m1$full.model@call[["data"]], is_identical_to(as.name("obk.long")))
+  expect_that(m2$full.model@call[["data"]], is_identical_to(as.name("data")))
 })

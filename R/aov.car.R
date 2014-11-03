@@ -130,6 +130,7 @@ aov.car <- function(formula, data, fun.aggregate = NULL, type = 3, factorize = T
   between <- vars[!(vars %in% c(id, within))]
   effect.parts <- parts[!str_detect(parts, "^Error\\(")]
   effect.parts.no.within <- effect.parts[!str_detect(effect.parts, str_c("\\<",within,"\\>", collapse = "|"))]
+  data <- droplevels(data) #remove empty levels.
   # factorize if necessary
   if (factorize) {
     if (any(!vapply(data[, between, drop = FALSE], is.factor, TRUE))) {
@@ -195,6 +196,10 @@ aov.car <- function(formula, data, fun.aggregate = NULL, type = 3, factorize = T
     missing.values <- apply(tmp.dat, 1, function(x) any(is.na(x)))
     warning(str_c("Missing values for following ID(s):\n", str_c(tmp.dat[missing.values,1], collapse = ", "), "\nRemoving those cases from the analysis."))        
   }
+#   if (length(between) > 0) {
+#     n_data_points <- xtabs(as.formula(paste("~", paste(between, collapse = "+"))), data = tmp.dat)
+#     if (any(n_data_points == 0)) warning("Some cells of the fully crossed between-subjects design are empty. A full model might not be estimable.")
+#   }
   # marginals:
   dat.ret <- dcast(data, formula = as.formula(str_c(str_c(lh1, if (length(within) > 0) rh1 else NULL, sep = "+"), "~.")), fun.aggregate = fun.aggregate, ..., value.var = dv)
   colnames(dat.ret)[length(colnames(dat.ret))] <- dv
@@ -261,6 +266,8 @@ aov.car <- function(formula, data, fun.aggregate = NULL, type = 3, factorize = T
     # print(as.formula(str_c("cbind(",str_c(colnames(tmp.dat[-(seq_along(c(id, between)))]), collapse = ", "), ") ~ ", rh2)))
     # browser()
     tmp.lm <- do.call("lm", list(formula = as.formula(str_c("cbind(",str_c(colnames(tmp.dat[-(seq_along(c(id, between)))]), collapse = ", "), ") ~ ", rh2)), data = tmp.dat))
+    # browser()
+    if (any(is.na(coef(tmp.lm)))) stop("Some parameters are not estimable, most likely due to empty cells of the design (i.e., structural missings). Check your data.")
     if (return == "lm") return(tmp.lm)
     Anova.out <- Anova(tmp.lm, idata = idata, idesign = as.formula(str_c("~", rh3)), type = type)
     data.l <- c(data.l, idata = list(idata))

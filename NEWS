@@ -1,4 +1,29 @@
                     *************************
+                    ** afex VERSION 0.12-x **
+                    *************************
+                    
+                    Changes in afex Version 0.12-x
+                    Released November 2014
+
+    Significant User Visible Changes and New Features
+
+    o   ANOVA functions give informative error if some parameters are
+        not estimable (most likely due to structural missings, i.e. 
+        empty cells).
+        
+    Bugfixes
+    
+    o   mixed(..., method = "PB") does not fail anymore when only 
+        having a single fixed effect (thanks to Kiyoshi Sasaki for
+        reporting it). 
+        
+    o   aov.car() failed when a within-subject factor had empty levels.
+        Unused factor levels are now dropped. This bug was probably 
+        introduced in Rev 126 as part of an attempt to solve a bug. 
+        (thanks to Will Bowditch for reporting it).
+    
+
+                    *************************
                     ** afex VERSION 0.11-x **
                     *************************
                     

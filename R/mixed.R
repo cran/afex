@@ -371,8 +371,10 @@ mixed <- function(formula, data, type = 3, method = c("KR", "PB", "LRT"), per.pa
     }
     if (progress) cat("]\n")
     names(tests) <- fixed.effects
+    #browser()
     df.out<- data.frame(Effect = fixed.effects, stringsAsFactors = FALSE)
-    df.out <- cbind(df.out, t(vapply(tests, function(x) unlist(x[["test"]][2,]), unlist(tests[[1]][["test"]][2,])))[,-2])
+    df.out <- cbind(df.out, t(vapply(tests, function(x) unlist(x[["test"]][2,]), unlist(tests[[1]][["test"]][2,]))))
+    df.out <- df.out[,-3]
     LRT <- vapply(tests, function(x) unlist(x[["test"]][1,]), unlist(tests[[1]][["test"]][1,]))
     row.names(LRT) <- str_c(row.names(LRT), ".LRT")
     df.out <- cbind(df.out, t(LRT))

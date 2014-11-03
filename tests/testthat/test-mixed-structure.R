@@ -73,14 +73,24 @@ test_that("mixed, obk.long: multicore loads lme4 and produces the same results",
   require(parallel)
   cl <- makeCluster(rep("localhost", 2)) # make cluster
   # 1. Obtain fits with multicore:
-  m_mc1 <- mixed(value ~ treatment +(1|id), data = obk.long, method = "LRT", cl = cl, control = lmerControl(optCtrl=list(maxfun = 100000)), progress=FALSE)
+  m_mc1 <- mixed(value ~ treatment +(phase|id), data = obk.long, method = "LRT", cl = cl, control = lmerControl(optCtrl=list(maxfun = 100000)), progress=FALSE)
   cl_search <- clusterEvalQ(cl, search())
   stopCluster(cl)  
-  m_mc2 <- mixed(value ~ treatment +(1|id), data = obk.long, method = "LRT", control = lmerControl(optCtrl=list(maxfun = 100000)), progress=FALSE)
+  m_mc2 <- mixed(value ~ treatment +(phase|id), data = obk.long, method = "LRT", control = lmerControl(optCtrl=list(maxfun = 100000)), progress=FALSE)
   expect_that(all(vapply(cl_search, function(x) any(grepl("^package:lme4$", x)), NA)), is_true())
-  expect_that(m_mc1, equals(m_mc2))
+  expect_that(m_mc1, equals(m_mc2, check.attributes = FALSE))
 })
 
+test_that("print(mixed) works: only 1 or 2 fixed effects with all methods", {
+  data(obk.long, package = "afex")
+  expect_that(print(mixed(value ~ treatment+(1|id), data = obk.long)), is_a("data.frame"))
+  expect_that(print(mixed(value ~ treatment+phase+(1|id), data = obk.long)), is_a("data.frame"))
+  expect_that(print(mixed(value ~ treatment+(1|id), data = obk.long, method = "LRT")), is_a("data.frame"))
+  expect_that(print(mixed(value ~ treatment+phase+(1|id), data = obk.long, method = "LRT")), is_a("data.frame"))
+  require("mlmRev") # for the data, see ?Contraception
+  expect_that(print(mixed(use ~ urban + (1 | district), method = "PB", family = binomial, data = Contraception, args.test=list(nsim=2))), is_a("data.frame"))
+  expect_that(print(mixed(use ~ urban + livch + (1 | district), method = "PB", family = binomial, data = Contraception, args.test=list(nsim=2))), is_a("data.frame"))  
+})
 
 # test_that("mixed, Maxell & Delaney (2004), Table 16.4, p. 842: bobyqa not fitting well", {
 #   data(md_16.4)

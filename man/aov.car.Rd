@@ -105,11 +105,13 @@ Note that the default behavior is to return a \code{\link{nice.anova}} \code{dat
 If \code{check.contrasts = TRUE}, contrasts will be set to \code{"contr.sum"} for all between-subject factors if default contrasts are not equal to \code{"contr.sum"} or \code{attrib(factor, "contrasts") != "contr.sum"}. (within-subject factors are hard-coded \code{"contr.sum"}.)
 }
 \note{
-Variables entered as within-subjects (i.e., repeated measures) factors are silently converted to factors and unused levels dropped.
+The id variable and variables entered as within-subjects (i.e., repeated-measures) factors are silently converted to factors. Unused factor levels are silently dropped on all variables.
 
 Contrasts attached to a factor as an attribute are probably not preserved and not supported.
 
 The workhorse is \code{aov.car}. \code{aov4} and \code{ez.glm} only construe and pass an appropriate formula to \code{aov.car}. Use \code{print.formula = TRUE} to view this formula.
+
+In contrast to \code{\link{aov}} \code{aov.car} assumes that all factors to the right of \code{/} in the \code{Error} term are belonging together. Consequently, \code{Error(id/(a*b))} and \code{Error(id/a*b)} are identical (which is not true \code{aov}).
 }
 \examples{
 
@@ -129,7 +131,7 @@ ez.glm("id", "rt", md_12.1, within = c("angle", "noise"))
 data(obk.long, package = "afex")
 
 # run univariate mixed ANOVA for the full design:
-aov.car(value ~ treatment * gender + Error(id/phase*hour), 
+aov.car(value ~ treatment * gender + Error(id/(phase*hour)), 
         data = obk.long, observed = "gender")
 
 aov4(value ~ treatment * gender + (phase*hour|id), 
@@ -158,7 +160,7 @@ ez.glm("id", "value", obk.long, between = c("treatment", "gender"),
 
 
 # replicating ?Anova using aov.car:
-aov.car(value ~ treatment * gender + Error(id/phase*hour), 
+aov.car(value ~ treatment * gender + Error(id/(phase*hour)), 
         data = obk.long, type = 2, return = "Anova")
 # in contrast to aov you do not need the within-subject factors outside Error()
 
@@ -189,7 +191,7 @@ ez.glm("id", "value", obk.long, c("treatment", "gender"),
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
 # ANCOVA: adding a covariate (necessary to set factorize = FALSE)
-aov.car(value ~ treatment * gender + age + Error(id/phase*hour), 
+aov.car(value ~ treatment * gender + age + Error(id/(phase*hour)), 
         data = obk.long, observed = c("gender", "age"), factorize = FALSE)
 
 aov4(value ~ treatment * gender + age + (phase*hour|id), 
@@ -214,13 +216,13 @@ aov.car(value ~ treatment * gender + Error(id/hour2),
 # only between
 aov.car(value ~ treatment * gender + Error(id), 
         data = obk.long, observed = c("gender"))
-aov4(value ~ treatment * gender + (1|id), 
+aov4(value ~ treatment * gender + (1|id), print.formula = TRUE,
         data = obk.long, observed = c("gender"))
 ez.glm("id", "value", obk.long, c("treatment", "gender"), 
         within = NULL, print.formula = TRUE, observed = "gender")
 
 # only within
-aov.car(value ~ Error(id/phase*hour), data = obk.long, type = 2)
+aov.car(value ~ Error(id/(phase*hour)), data = obk.long, type = 2)
 
 aov4(value ~ (phase*hour|id), data = obk.long, type = 2, 
      print.formula = TRUE)
@@ -230,7 +232,7 @@ ez.glm("id", "value", obk.long,  NULL, c("phase", "hour"),
 
 # using return = "full":
 
-str(aov.car(value ~ Error(id/phase*hour), data = obk.long, return = "full"), 1)
+str(aov.car(value ~ Error(id/(phase*hour)), data = obk.long, return = "full"), 1)
 
 ## List of 4
 ##  $ Anova:List of 14
@@ -242,10 +244,10 @@ str(aov.car(value ~ Error(id/phase*hour), data = obk.long, return = "full"), 1)
 ##  $ marginal:List of 3
 
 # use args.return arguments:
-aov.car(value ~ treatment * gender + Error(id/phase*hour), 
+aov.car(value ~ treatment * gender + Error(id/(phase*hour)), 
         data = obk.long, args.return = list(correction = "none", es = "pes"))
 
-aov.car(value ~ treatment * gender + Error(id/phase*hour), 
+aov.car(value ~ treatment * gender + Error(id/(phase*hour)), 
         data = obk.long,observed = "gender", 
         args.return = list(correction = "none", MSE = FALSE))
 
@@ -259,10 +261,8 @@ The design of these functions is heavily influenced by \code{\link[ez]{ezANOVA}}
 Maxwell, S. E., & Delaney, H. D. (2004). \emph{Designing Experiments and Analyzing Data: A Model-Comparisons Perspective}. Mahwah, N.J.: Lawrence Erlbaum Associates.
 }
 \seealso{
-\code{\link{nice.anova}} creats the nice ANOVA tables which are by default returned. See also there for a slightly longer discussion of effect sizes.
+\code{\link{nice.anova}} creats the nice ANOVA tables which are by default returned. See also there for a slightly longer discussion of the available effect sizes.
 
 \code{\link{mixed}} provides a (formula) interface for obtaining p-values for mixed-models via \pkg{lme4}.
-
-\code{\link{obk.long}} describes the long version of the \code{OBrienKaiser} dataset used in the examples.
 }
 

@@ -81,17 +81,17 @@
 #'
 #' The design of these functions is heavily influenced by \code{\link[ez]{ezANOVA}} from package \pkg{ez}.
 #'
-#' @note Variables entered as within-subjects (i.e., repeated measures) factors are silently converted to factors and unused levels dropped.
+#' @note The id variable and variables entered as within-subjects (i.e., repeated-measures) factors are silently converted to factors. Unused factor levels are silently dropped on all variables.
 #'
 #' Contrasts attached to a factor as an attribute are probably not preserved and not supported.
 #' 
 #' The workhorse is \code{aov.car}. \code{aov4} and \code{ez.glm} only construe and pass an appropriate formula to \code{aov.car}. Use \code{print.formula = TRUE} to view this formula.
+#' 
+#' In contrast to \code{\link{aov}} \code{aov.car} assumes that all factors to the right of \code{/} in the \code{Error} term are belonging together. Consequently, \code{Error(id/(a*b))} and \code{Error(id/a*b)} are identical (which is not true \code{aov}).
 #'
-#' @seealso \code{\link{nice.anova}} creats the nice ANOVA tables which are by default returned. See also there for a slightly longer discussion of effect sizes.
+#' @seealso \code{\link{nice.anova}} creats the nice ANOVA tables which are by default returned. See also there for a slightly longer discussion of the available effect sizes.
 #'
 #' \code{\link{mixed}} provides a (formula) interface for obtaining p-values for mixed-models via \pkg{lme4}.
-#'
-#' \code{\link{obk.long}} describes the long version of the \code{OBrienKaiser} dataset used in the examples.
 #'
 #' @references Maxwell, S. E., & Delaney, H. D. (2004). \emph{Designing Experiments and Analyzing Data: A Model-Comparisons Perspective}. Mahwah, N.J.: Lawrence Erlbaum Associates.
 #'
@@ -108,7 +108,6 @@
 #'
 
 aov.car <- function(formula, data, fun.aggregate = NULL, type = 3, factorize = TRUE, check.contrasts = TRUE, return = "nice", observed = NULL, args.return = list(), ...) {
-  #browser()
   return <- match.arg(return, c("Anova", "lm", "data", "nice", "full", "all", "univariate", "marginal", "aov"))
   # stuff copied from aov:
   Terms <- terms(formula, "Error", data = data)
@@ -131,6 +130,8 @@ aov.car <- function(formula, data, fun.aggregate = NULL, type = 3, factorize = T
   effect.parts <- parts[!str_detect(parts, "^Error\\(")]
   effect.parts.no.within <- effect.parts[!str_detect(effect.parts, str_c("\\<",within,"\\>", collapse = "|"))]
   data <- droplevels(data) #remove empty levels.
+  # make id and within variables to factors:
+  if (!(is.factor(data[,id]))) data[,id] <- factor(data[,id])
   # factorize if necessary
   if (factorize) {
     if (any(!vapply(data[, between, drop = FALSE], is.factor, TRUE))) {
@@ -147,21 +148,19 @@ aov.car <- function(formula, data, fun.aggregate = NULL, type = 3, factorize = T
       non.null <- c.ns[!abs(vapply(data[, c.ns, drop = FALSE], mean, 0)) < .Machine$double.eps ^ 0.5]
       if (length(non.null) > 0) warning(str_c("Numerical variables NOT centered on 0 (i.e., likely bogus results): ", str_c(non.null, collapse = ", ")))
     }
-  }  
+  }
+  for (i in c(between, within)) {
+    if (is.factor(data[,i]) && length(unique(data[,i])) == 1) stop(paste0("Factor \"", i, "\" consists of one level only. Remove factor from model?"))
+  }
   # make formulas
   rh2 <- if (length(between) > 0) str_c(effect.parts.no.within, collapse = "+") else "1"
   lh1 <- str_c(id, if (length(between) > 0) str_c(between, collapse = "+") else NULL, sep = "+")
   rh1 <- str_c(within, collapse = "+")
   rh3 <- str_c(within, collapse = "*")
   # converting all within subject factors to factors and adding a leading charcter (x) if starting with a digit.
-  #browser()
-  new.factor.levels <- c(letters, LETTERS)
   for (within.factor in within) {
     if (is.factor(data[,within.factor])) levels(data[,within.factor]) <- make.names(levels(data[,within.factor]), unique = TRUE)
     else data[,within.factor] <- factor(as.character(data[,within.factor]), levels = unique(as.character(data[,within.factor])), labels = make.names(unique(as.character(data[,within.factor])), unique=TRUE))
-    #data[,within.factor] <- factor(as.character(data[,within.factor]))
-    #levels(data[,within.factor]) <- make.names(levels(data[,within.factor]), unique=TRUE)
-    #if (length(levels(data[,within.factor])) <= length(new.factor.levels)) levels(data[,within.factor]) <- new.factor.levels[seq_along(levels(data[,within.factor]))]
   }
   # Check if each id is in only one between subjects cell.
   between.factors <- between[vapply(data[, between, drop = FALSE], is.factor, TRUE)]
@@ -177,9 +176,7 @@ aov.car <- function(formula, data, fun.aggregate = NULL, type = 3, factorize = T
       warning("More than one observation per cell, aggregating the data using mean (i.e, fun.aggregate = mean)!")
       fun.aggregate <- mean
     }
-  }
-  # Is Type == 3 and contrasts != contr.sum and check.contrasts == FALSE? (ALL MOVED BELOW):
-  # if ((type == 3 | type == "III") & options("contrasts")[[1]][1] != "contr.sum" & !check.contrasts) 
+  } 
   # if return = "lme4" return the (aggregated) data fitted with lmer!
   #   if (return == "lme4") {
   #     warning("lme4 return is experimental!\nAlso: Missing values and contrasts not checked for return = 'lme4'!")
@@ -189,7 +186,6 @@ aov.car <- function(formula, data, fun.aggregate = NULL, type = 3, factorize = T
   #     return(lmer(as.formula(str_c("value~", rh2, if (length(within) > 0) paste0("*", f.within.new) else "", "+ (1", if (length(within) > 0) paste0("+", f.within.new) else "", "|", id, ")" , sep = "")), data = n.dat))
   #   }
   # prepare the data:
-  #browser()
   tmp.dat <- dcast(data, formula = as.formula(str_c(lh1, if (length(within) > 0) rh1 else ".", sep = "~")), fun.aggregate = fun.aggregate, ..., value.var = dv)
   # check for missing values:
   if (any(is.na(tmp.dat))) {
@@ -241,7 +237,7 @@ aov.car <- function(formula, data, fun.aggregate = NULL, type = 3, factorize = T
           }
         }
       }
-      if((type == 3 | type == "III") && (length(non_sum_contrast)>0)) warning(str_c("Calculating Type 3 sums with contrasts != 'contr.sum' for: ", paste0(non_sum_contrast, collapse=", "), "\n  Results likely bogus or not interpretable!\n  You should use check.contrasts = TRUE or options(contrasts=c('contr.sum','contr.poly'))"))
+      if((type == 3 | type == "III") && (length(non_sum_contrast)>0)) warning(str_c("Calculating Type 3 sums with contrasts != 'contr.sum' for: ", paste0(non_sum_contrast, collapse=", "), "\n  Results likely bogus or not interpretable!\n  You probably want check.contrasts = TRUE or options(contrasts=c('contr.sum','contr.poly'))"))
     }
   }
   if(return == "aov"){
@@ -289,7 +285,7 @@ aov4 <- function(formula, data, observed = NULL, fun.aggregate = NULL, type = 3,
   if (length(barterms) > 1) stop("aov4 only allows one random effect term")
   within <- all.vars(barterms[[1]][[2]])
   id <- all.vars(barterms[[1]][[3]])
-  error <- str_c(" + Error(", id, if (length(within) > 0) "/" else "", str_c(within, collapse = " * "), ")")
+  error <- str_c(" + Error(", id, if (length(within) > 0) "/(" else "", str_c(within, collapse = " * "), if (length(within) > 0) ")" else "", ")")
   lh <- as.character(nobars(formula))
   if (length(lh) == 1) {
    dv <- lh
@@ -310,7 +306,7 @@ ez.glm <- function(id, dv, data, between = NULL, within = NULL, covariate = NULL
   if (!is.null(covariate)) covariate <- str_c(covariate, collapse = "+")
   #browser()
   rh <- if (!is.null(between) || !is.null(covariate)) str_c(if (!is.null(between)) str_c(between, collapse = " * ") else NULL, covariate, sep = " + ") else "1"
-  error <- str_c(" + Error(", id, if (!is.null(within)) "/" else "", str_c(within, collapse = " * "), ")")
+  error <- str_c(" + Error(", id, if (!is.null(within)) "/(" else "", str_c(within, collapse = " * "), if (length(within) > 0) ")" else "", ")")
   formula <- str_c(dv, " ~ ", rh, error)
   if (print.formula) message(str_c("Formula send to aov.car: ", formula))
   aov.car(formula = as.formula(formula), data = data, fun.aggregate = fun.aggregate, type = type, return = return, factorize = factorize, check.contrasts = check.contrasts, observed = observed, args.return = args.return, ...)

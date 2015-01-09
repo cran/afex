@@ -41,3 +41,21 @@ test_that("empty factors are not causing aov.cat to choke", {
   #If you remove a factor it fails...
   expect_is(ez.glm("Subject","Reaction",sleepstudy[sleepstudy$Days!=9,], within="Days", return = "Anova"), "Anova.mlm")
 })
+
+test_that("factors have more than one level", {
+  data(obk.long)
+  expect_error(aov.car(value ~ treatment+ Error(id/phase), data = obk.long[ obk.long$treatment == "control",]), "one level only.")
+  expect_error(aov.car(value ~ treatment+ Error(id/phase), data = obk.long[ obk.long$phase == "pre",]), "one level only.")
+})
+
+
+test_that("variable names longer", {
+  data(obk.long)
+  obk.long$gender2 <- obk.long$treatment
+  orig <- aov.car(value ~ treatment * gender + age + Error(id/phase*hour), data = obk.long, factorize=FALSE, observed = "gender")
+  v1 <- aov.car(value ~ gender2 * gender + age + Error(id/phase*hour), data = obk.long, factorize=FALSE, observed = "gender")
+  v2 <- aov.car(value ~ gender2 * gender + age + Error(id/phase*hour), data = obk.long, factorize=FALSE, observed = "gender2")
+  expect_identical(orig[,-1], v1[,-1])
+  expect_identical(orig[,-c(1,5)], v2[,-c(1,5)])
+})
+

@@ -1,4 +1,32 @@
                     *************************
+                    ** afex VERSION 0.13-x **
+                    *************************
+                    
+                    Changes in afex Version 0.13-x
+                    Released January 2014
+
+    Significant User Visible Changes and New Features
+
+    o   added ems() function for deriving the expected values of the 
+        mean squares for factorial designs (contributed by Jake 
+        Westfall).
+
+        
+    Bugfixes
+    
+    o   aov.car et al. stop with error message if a factor has only one
+        level.
+        
+    o   aov.car transforms id variable to factor which ensures that 
+        return = "aov" provides equivalent results.
+        
+    o   changed regex for detecting "observed" variables to work with 
+        the new version of stringr which uses stringi.
+    
+
+
+
+                    *************************
                     ** afex VERSION 0.12-x **
                     *************************
                     
@@ -10,6 +38,7 @@
     o   ANOVA functions give informative error if some parameters are
         not estimable (most likely due to structural missings, i.e. 
         empty cells).
+
         
     Bugfixes
     
@@ -23,6 +52,7 @@
         (thanks to Will Bowditch for reporting it).
     
 
+    
                     *************************
                     ** afex VERSION 0.11-x **
                     *************************

@@ -133,11 +133,12 @@ nice.anova <- function(object, es = "ges", observed = NULL, correction = c("GG",
   if ("ges" %in% es) {
     #browser()
     # This code is basically a copy from ezANOVA by Mike Lawrence!
+    #if (packageVersion)
     if(!is.null(observed)){
       obs <- rep(FALSE,nrow(tmp2))
       for(i in observed){
-        if (!any(str_detect(rownames(tmp2),str_c("\\<",i,"\\>")))) stop(str_c("Observed variable not in data: ", i))
-        obs <- obs | str_detect(rownames(tmp2),str_c("\\<",i,"\\>"))
+        if (!any(str_detect(rownames(tmp2),str_c("\\b",i,"\\b")))) stop(str_c("Observed variable not in data: ", i))
+        obs <- obs | str_detect(rownames(tmp2),str_c("\\b",i,"\\b"))
       }
       obs_SSn1 <- sum(tmp2$SS*obs)
       obs_SSn2 <- tmp2$SS*obs

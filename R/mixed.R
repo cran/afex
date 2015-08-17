@@ -1,34 +1,36 @@
-#' Obtain p-values for a mixed-model from lmer().
+#' p-values for fixed effects of mixed-model via lme4::lmer()
 #'
-#' Fits and calculates p-values for all effects in a mixed model fitted with \code{\link[lme4]{lmer}}. The default behavior calculates type 3 like p-values using the Kenward-Roger approximation for degrees-of-freedom implemented in \code{\link[pbkrtest]{KRmodcomp}} (for LMMs only), but also allows for parametric bootstrap (\code{method = "PB"}), or likelihood ratio tests (the latter two for LMMs and GLMMs). \code{print}, \code{summary}, and \code{anova} methods for the returned object of class \code{"mixed"} are available (the last two return the same data.frame).
+#' Calculates p-values for all fixed effects in a mixed model. This is done by first fitting (with \code{\link[lme4]{lmer}}) the full model and then versions thereof in which a single effect is removed and comparing the reduced model to the full model. The default is to calculate type 3 like p-values using the Kenward-Roger approximation for degrees-of-freedom (using \code{\link[pbkrtest]{KRmodcomp}}; for LMMs only). Other methods for obtaining p-values are parametric bootstrap (\code{method = "PB"}) or likelihood ratio tests (\code{method = "LRT"}), both of which are available for both LMMs and GLMMs. \code{print}, \code{summary}, and \code{anova} methods for the returned object of class \code{"mixed"} are available (the last two return the same data.frame). \code{lmer_alt} is simply a wrapper for mixed that only returns the \code{"merMod"} object and correctly uses the \code{||} notation to remove correlation among factors, but otherwise behaves like \code{g/lmer} (as for \code{mixed}, it calls \code{glmer} as soon as a \code{family} argument is present).
 #'
 #'
 #' @param formula a formula describing the full mixed-model to be fitted. As this formula is passed to \code{lmer}, it needs at least one random term.
 #' @param data data.frame containing the data. Should have all the variables present in \code{fixed}, \code{random}, and \code{dv} as columns.
-#' @param type type of test on which effects are based. Only type 3 tests (\code{3} or \code{"III"}) are correctly implemented (see Details).
-#' @param method character vector indicating which methods for obtaining p-values should be used. \code{"KR"} (the default) corresponds to the Kenward-Roger approximation for degrees of freedom (only working with linear mixed models). \code{"PB"} calculates p-values based on parametric bootstrap. \code{"LRT"} calculates p-values via the likelihood ratio tests implemented in the \code{anova} method for \code{merMod} objects (only recommended for models with many [i.e., > 50] levels for the random factors).
+#' @param type type of test on which effects are based. Default is to use type 3 tests, taken from \code{\link{afex_options}}.
+#' @param method character vector indicating which methods for obtaining p-values should be used: \code{"KR"} corresponds to the Kenward-Roger approximation for degrees of freedom (only working with linear mixed models), \code{"PB"} calculates p-values based on parametric bootstrap, \code{"LRT"} calculates p-values via the likelihood ratio tests implemented in the \code{anova} method for \code{merMod} objects (only recommended for models with many [i.e., > 50] levels for the random factors). The default (currently \code{"KR"}) is taken from \code{\link{afex_options}}.
 #' @param per.parameter \code{character} vector specifying for which variable tests should be run for each parameter (instead for the overall effect). Can be useful e.g., for testing ordered factors. Relatively untested so results should be compared with a second run without setting this argument. Uses \code{\link{grep}} for selecting parameters among the fixed effects so regular expressions (\code{\link{regex}}) are possible. See Examples.
 #' @param args.test \code{list} of arguments passed to the function calculating the p-values. See Details.
 #' @param test.intercept logical. Whether or not the intercept should also be fitted and tested for significance. Default is \code{FALSE}. Only relevant if \code{type = 3}.
-#' @param check.contrasts \code{logical}. Should contrasts be checked and (if necessary) changed to \code{"contr.sum"}? See Details.
+#' @param check.contrasts \code{logical}. Should contrasts be checked and (if necessary) changed to \code{"contr.sum"}? See Details. The default (\code{"TRUE"}) is taken from \code{\link{afex_options}}.
+#' @param expand_re logical. Should random effects terms be expanded (i.e., factors transformed into numerical variables) before fitting with \code{(g)lmer}? Allows to use "||" notation with factors.
 #' @param set.data.arg \code{logical}. Should the data argument in the slot \code{call} of the \code{merMod} object returned from \code{lmer} be set to the passed data argument? Otherwise the name will be \code{data}. Helpful if fitted objects are used afterwards (e.g., using \pkg{lsmeans}). Default is \code{TRUE}. 
 #' @param progress  if \code{TRUE}, shows progress with a text progress bar and other status messages during fitting.
 #' @param cl  A vector identifying a cluster; used for distributing the estimation of the different models using several cores. See examples. If \code{ckeck.contrasts}, mixed sets the current contrasts (\code{getOption("contrasts")}) at the nodes. Note this does \emph{not} distribute calculation of p-values (e.g., when using \code{method = "PB"}) across the cluster. Use \code{args.test} for this.
-#' @param ... further arguments (such as \code{weights}) passed to \code{\link{lmer}}.
+#' @param return the default is to return an object of class \code{"mixed"}. \code{return = "merMod"} will skip the calculation of all submodels and p-values and simply return the full model fitted with lmer. Can be useful in combination with \code{expand_re = TRUE} which allows to use "||" with factors.
+#' @param ... further arguments (such as \code{weights}/\code{family}) passed to \code{\link{lmer}}/\code{\link{glmer}}.
 #'
 #'
 #' @return An object of class \code{"mixed"} (i.e., a list) with the following elements:
 #'
 #' \enumerate{
-#' \item \code{anova.table} a data.frame containing the statistics returned from \code{\link[pbkrtest]{KRmodcomp}}. The \code{stat} column in this data.frame gives the value of the test statistic, an F-value for \code{method = "KR"} and a chi-square value for the other two methods.
+#' \item \code{anova_table} a data.frame containing the statistics returned from \code{\link[pbkrtest]{KRmodcomp}}. The \code{stat} column in this data.frame gives the value of the test statistic, an F-value for \code{method = "KR"} and a chi-square value for the other two methods.
 #' \item \code{full.model} the \code{"lmerMod"} object returned from fitting the full mixed model.
 #' \item \code{restricted.models} a list of \code{"lmerMod"} objects from fitting the restricted models (i.e., each model lacks the corresponding effect)
 #' \item \code{tests} a list of objects returned by the function for obtaining the p-values.
-#' \item \code{type} The \code{type} argument used when calling this function.
-#' \item \code{method} The \code{method} argument used when calling this function.
 #' }
+#' 
+#' It also has the following attributes, \code{"type"} and \code{"method"}.
 #'
-#' Three identical methods exist for objects of class \code{"mixed"}: \code{print}, \code{summary}, and \code{anova}. They all print a nice version of the \code{anova.table} element of the returned object (which is also invisibly returned). This methods omit some columns and nicely round the other columns. The following columns are always printed:
+#' Two similar methods exist for objects of class \code{"mixed"}: \code{print} and \code{anova}. They print a nice version of the \code{anova_table} element of the returned object (which is also invisibly returned). This methods omit some columns and nicely round the other columns. The following columns are always printed:
 #' \enumerate{
 #' \item \code{Effect} name of effect
 #' \item \code{p.value} estimated p-value for the effect
@@ -55,30 +57,49 @@
 #' \item \code{stat} 2 times the difference in likelihood (obtained with \code{logLik}) between full and restricted model (i.e., a chi-square value).
 #' }
 #'
-#' @details For an introduction to mixed-modeling for experimental designs see Barr, Levy, Scheepers, & Tily (2013; I highly recommend reading this paper if you use this function), arguments for using the Kenward-Roger approximation for obtaining p-values are given by Judd, Westfall, and Kenny (2012). Further introductions to mixed-modeling for experimental designs are given by Baayen and colleagues (Baayen, 2008; Baayen, Davidson & Bates, 2008; Baayen & Milin, 2010). Specific recommendations on which random effects structure to specify for confirmatory tests can be found in Barr and colleagues (2013) and Barr (2013).
+#' Note that  \code{anova} can also be called with additional mixed and/or \code{merMod} objects. In this casethe full models are passed on to \code{anova.merMod} (with \code{refit=FALSE}, which differs from the default of \code{anova.merMod}) which produces the known LRT tables.
+#'
+#' The \code{summary} method for objects of class \code{mixed} simply calls \code{\link{summary.merMod}} on the full model.
+#' 
+#' If \code{return = "merMod"}, an object of class \code{"merMod"}, as returned from \code{g/lmer}, is returned.
+#' 
+#' @details For an introduction to mixed-modeling for experimental designs see Barr, Levy, Scheepers, & Tily (2013; I highly recommend reading this paper if you use this function), arguments for using the Kenward-Roger approximation for obtaining p-values are given by Judd, Westfall, and Kenny (2012). Further introductions to mixed-modeling for experimental designs are given by Baayen and colleagues (Baayen, 2008; Baayen, Davidson & Bates, 2008; Baayen & Milin, 2010). Specific recommendations on which random effects structure to specify for confirmatory tests can be found in Barr and colleagues (2013) and Barr (2013), but also see Bates et al. (2015).
+#'
+#'\subsection{p-value Calculations}{
 #'
 #' p-values are per default calculated via methods from \pkg{pbkrtest}. When \code{method = "KR"} (the default), the Kenward-Roger approximation for degrees-of-freedom is calculated using \code{\link[pbkrtest]{KRmodcomp}}, which is only applicable to linear-mixed models. The test statistic in the output is a F-value (\code{F}).
 #'
 #' \code{method = "PB"} calculates p-values using parametric bootstrap using \code{\link[pbkrtest]{PBmodcomp}}. This can be used for linear and also generalized linear mixed models (GLMM) by specifying a \code{\link[stats]{family}} argument to \code{mixed}. Note that you should specify further arguments to \code{PBmodcomp} via \code{args.test}, especially \code{nsim} (the number of simulations to form the reference distribution) or \code{cl} (for using multiple cores). For other arguments see \code{\link[pbkrtest]{PBmodcomp}}. Note that \code{REML} (argument to \code{[g]lmer}) will be set to \code{FALSE} if method is \code{PB}.
 #'
 #' \code{method = "LRT"} calculates p-values via likelihood ratio tests implemented in the \code{anova} method for \code{"merMod"} objects. This is recommended by Barr et al. (2013; which did not test the other methods implemented here). Using likelihood ratio tests is only recommended for models with many levels for the random effects (> 50), but can be pretty helpful in case the other methods fail (due to memory and/or time limitations). The \href{http://glmm.wikidot.com/faq}{lme4 faq} also recommends the other methods over likelihood ratio tests.
+#' }
+#' 
+#' \subsection{Implementation Details}{
 #' 
 #' Type 3 tests are obtained by comparing a model in which only the tested effect is excluded with the full model (containing all effects). This corresponds to the (type 3) Wald tests given by \code{car::Anova} for \code{"lmerMod"} models. The submodels in which the tested effect is excluded are obtained by manually creating a model matrix which si then fitted in \code{"lme4"}. This is done to avoid R's "feature" to not allow this behavior.
 #'
 #' Type 2 tests are truly sequential. They are obtained by comparing a model in which the tested effect and all higher oder effect (e.g., all three-way interactions for testing a two-way interaction) are excluded with a model in which only effects up to the order of the tested effect are present and all higher order effects absent. In other words, there are multiple full models, one for each order of effects. Consequently, the results for lower order effects are identical of whether or not higher order effects are part of the model or not. This latter feature is not consistent with classical ANOVA type 2 tests but a consequence of the sequential tests (and \href{https://stat.ethz.ch/pipermail/r-sig-mixed-models/2012q3/018992.html}{I didn't find a better way} of implementing the Type 2 tests). This \strong{does not} correspond to the (type 2) Wald test reported by \code{car::Anova}. If you want type 2 Wald tests instead of truly sequential typde 2 tests, use \code{car::Anova} with \code{test = "F"}. Note that the order in which the effects are entered into the formula does not matter (in contrast to type 1 tests).
-#'
 #' 
 #' If \code{check.contrasts = TRUE}, contrasts will be set to \code{"contr.sum"} for all factors in the formula if default contrasts are not equal to \code{"contr.sum"} or \code{attrib(factor, "contrasts") != "contr.sum"}. Furthermore, the current contrasts (obtained via \code{getOption("contrasts")}) will be set at the cluster nodes if \code{cl} is not \code{NULL}.
+#' }
+#' 
+#' \subsection{Expand Random Effects}{
+#' The latest addition, motivated by Bates et al. (2015), is the possibility to expand the random effects structure before passing it to \code{lmer} by setting \code{expand_re = TRUE}. This allows to disable estimation of correlation among random effects for random effects term containing factors using the \code{||} notation. This is achieved by first creating a model matrix for each random effects term individually, rename and append the so created columns to the data that will be fitted, replace the actual random effects term with the so created variables (concatenated with +), and then fit the model. The variables are renamed by prepending all variables with rei (where i is the number of the random effects term) and replacing ":" with "_by_".
+#' 
+#' \code{lmer_alt} is simply a wrapper for \code{mixed} that is intended to behave like \code{lmer} (or \code{glmer} if a \code{family} argument is present), but also allows to use \code{||} with factors correctly (by always using \code{expand_re = TRUE}). This means that \code{lmer_alt} per default does not enforce a specific contrast on factors and only returns the \code{"merMod"} object without calculating any additional models or p-values (this is achieved by setting \code{return = "merMod"}). Note that it most likely differs from \code{g/lmer} in how it handles missing values so it is recommended to only pass data without missing values to it!
+#' 
+#' One negative consequence of using \code{expand_re = TRUE} is that the data that is fitted will not be the same as the passed data.frame which can lead to problems with e.g., the \code{predict} method. Finally, note that this functionality is relatively new so please proceed with care.
+#'  } 
 #'
 #' @note When \code{method = "KR"}, obtaining p-values is known to crash due too insufficient memory or other computational limitations (especially with complex random effects structures). In these cases, the other methods should be used. The RAM demand is a problem especially on 32 bit Windows which only supports up to 2 or 3GB RAM (see \href{http://cran.r-project.org/bin/windows/base/rw-FAQ.html}{R Windows FAQ}). Then it is probably a good idea to use methods "LRT" or "PB".
 #'
 #' \code{"mixed"} will throw a message if numerical variables are not centered on 0, as main effects (of other variables then the numeric one) can be hard to interpret if numerical variables appear in interactions. See Dalal & Zickar (2012).
 #'
-#' Please report all bugs to henrik.singmann (at) psychologie.uni-freiburg.de 
+#' Please report bugs or unexpected behavior to maintainer via email!
 #'
 #' @author Henrik Singmann with contributions from \href{http://stackoverflow.com/q/11335923/289572}{Ben Bolker and Joshua Wiley}.
 #'
-#' @seealso \code{\link{ez.glm}} and \code{\link{aov.car}} for convenience functions to analyze experimental deisgns with classical ANOVA or ANCOVA wrapping \code{\link[car]{Anova}}. 
+#' @seealso \code{\link{aov_ez}} and \code{\link{aov_car}} for convenience functions to analyze experimental deisgns with classical ANOVA or ANCOVA wrapping \code{\link[car]{Anova}}. 
 #' 
 #' see the following for the data sets from Maxwell and Delaney (2004) used and more examples: \code{\link{md_15.1}}, \code{\link{md_16.1}}, and \code{\link{md_16.4}}.
 #'
@@ -91,6 +112,8 @@
 #' Barr, D. J. (2013). Random effects structure for testing interactions in linear mixed-effects models. \emph{Frontiers in Quantitative Psychology and Measurement}, 328. doi:10.3389/fpsyg.2013.00328
 #' 
 #' Barr, D. J., Levy, R., Scheepers, C., & Tily, H. J. (2013). Random effects structure for confirmatory hypothesis testing: Keep it maximal. \emph{Journal of Memory and Language}, 68(3), 255-278. doi:10.1016/j.jml.2012.11.001
+#' 
+#' Bates, D., Kliegl, R., Vasishth, S., & Baayen, H. (2015). \emph{Parsimonious Mixed Models}. arXiv:1506.04967 [stat]. Retrieved from \url{http://arxiv.org/abs/1506.04967}
 #'
 #' Dalal, D. K., & Zickar, M. J. (2012). Some Common Myths About Centering Predictor Variables in Moderated Multiple Regression and Polynomial Regression. \emph{Organizational Research Methods}, 15(3), 339-362. doi:10.1177/1094428111430540
 #'
@@ -98,22 +121,22 @@
 #' 
 #' Maxwell, S. E., & Delaney, H. D. (2004). \emph{Designing experiments and analyzing data: a model-comparisons perspective.} Mahwah, N.J.: Lawrence Erlbaum Associates.
 #'
-#' @export mixed
-#' @S3method print mixed
-#' @S3method summary mixed
-#' @S3method anova mixed
+#'
 #' @import pbkrtest
 #' @importFrom lme4 lmer glmer nobars getME fixef isREML
+#' @importFrom stringr str_replace
 #' @importMethodsFrom Matrix t isSymmetric "%*%" solve diag
 #' @importClassesFrom Matrix Matrix
 #' @importFrom Matrix Matrix sparseMatrix rankMatrix
 #' @importFrom parallel clusterCall clusterExport clusterEvalQ clusterApplyLB
+#' @importFrom stats logLik terms as.formula contrasts<- model.matrix model.frame anova vcov
+#' @importFrom methods is
 #' @encoding UTF-8
 #' 
 #' @example examples/examples.mixed.R
 #' 
-
-mixed <- function(formula, data, type = 3, method = c("KR", "PB", "LRT"), per.parameter = NULL, args.test = list(), test.intercept = FALSE, check.contrasts = TRUE, set.data.arg = TRUE, progress = TRUE, cl = NULL, ...) {
+#' @export
+mixed <- function(formula, data, type = afex_options("type"), method = afex_options("method_mixed"), per.parameter = NULL, args.test = list(), test.intercept = FALSE, check.contrasts = afex_options("check.contrasts"), expand_re = FALSE, set.data.arg = TRUE, progress = TRUE, cl = NULL, return = "mixed", ...) {
   if (check.contrasts) {
     #browser()
     vars.to.check <- all.vars(formula)
@@ -171,12 +194,37 @@ mixed <- function(formula, data, type = 3, method = c("KR", "PB", "LRT"), per.pa
     non.null <- c.ns[!abs(vapply(data[, c.ns, drop = FALSE], mean, 0)) < .Machine$double.eps ^ 0.5]
     if (length(non.null) > 0) message(str_c("Numerical variables NOT centered on 0 (i.e., interpretation of all main effects might be difficult if in interactions): ", str_c(non.null, collapse = ", ")))
   }
+  if (expand_re) {
+    random_parts <- str_c(all.terms[grepl("\\|", all.terms)])
+    which_random_double_bars <- str_detect(random_parts, "\\|\\|")
+    random_units <- str_replace(random_parts, "^.+\\|\\s+", "")
+    tmp_random <- lapply(str_replace(random_parts, "\\|.+$", ""), function(x) as.formula(str_c("~", x)))
+    tmp_model.matrix <- vector("list", length(random_parts))
+    re_contains_intercept <- rep(FALSE, length(random_parts))
+    new_random <- vector("character", length(random_parts))
+    for (i in seq_along(random_parts)) {
+      tmp_model.matrix[[i]] <- model.matrix(tmp_random[[i]], data = data)
+      if (ncol(tmp_model.matrix[[i]]) == 0) stop("Invalid random effects term, e.g., (0|id)")
+      if (colnames(tmp_model.matrix[[i]])[1] == "(Intercept)") {
+        tmp_model.matrix[[i]] <- tmp_model.matrix[[i]][,-1, drop = FALSE]
+        re_contains_intercept[i] <- TRUE
+      }
+      if (ncol(tmp_model.matrix[[i]]) > 0) {
+        colnames(tmp_model.matrix[[i]]) <- str_c("re", i, ".", str_replace_all(colnames(tmp_model.matrix[[i]]), ":", "_by_"))
+        new_random[i] <- str_c("(", as.numeric(re_contains_intercept[i]), "+", str_c(colnames(tmp_model.matrix[[i]]), collapse = "+"), if (which_random_double_bars[i]) "||" else "|", random_units[i], ")")
+      } else {
+        new_random[i] <- str_c("(", as.numeric(re_contains_intercept[i]), if (which_random_double_bars[i]) "||" else "|", random_units[i], ")")
+      }
+    }
+    data <- cbind(data, as.data.frame(do.call(cbind, tmp_model.matrix)))
+    random <- str_c(new_random, collapse = "+")
+  }
   ####################
   ### Part II: obtain the lmer fits
   ####################
   ## Part IIa: prepare formulas
-  mf <- mc[!names(mc) %in% c("type", "method", "args.test", "progress", "check.contrasts", "per.parameter", "cl", "test.intercept")]
-  mf[["formula"]] <- formula.f
+  mf <- mc[!names(mc) %in% c("type", "method", "args.test", "progress", "check.contrasts", "per.parameter", "cl", "test.intercept", "expand_re", "return")]
+  mf[["formula"]] <-as.formula(str_c(dv,deparse(rh2),"+",random))   #formula.f
   if ("family" %in% names(mf)) mf[[1]] <- as.name("glmer")
   else mf[[1]] <- as.name("lmer")
   mf[["data"]] <- as.name("data")
@@ -185,6 +233,11 @@ mixed <- function(formula, data, type = 3, method = c("KR", "PB", "LRT"), per.pa
     mf[["REML"]] <- FALSE
   }
   #browser()
+  if (return == "merMod") {
+    out <- eval(mf)
+    if(set.data.arg) out@call[["data"]] <- mc[["data"]]
+    return(out)
+  }
   ## prepare (g)lmer formulas:
   if (type == 3 | type == "III") {
     if (attr(terms(rh2, data = data), "intercept") == 1) fixed.effects <- c("(Intercept)", fixed.effects)
@@ -351,13 +404,15 @@ mixed <- function(formula, data, type = 3, method = c("KR", "PB", "LRT"), per.pa
     }
     if (progress) cat("]\n")
     names(tests) <- fixed.effects
-    df.out <- data.frame(Effect = fixed.effects, stringsAsFactors = FALSE)
-    df.out <- cbind(df.out, t(vapply(tests, function(x) unlist(x[["test"]][1,]), unlist(tests[[1]][["test"]][1,]))))
-    FtestU <- vapply(tests, function(x) unlist(x[["test"]][2,]), unlist(tests[[1]][["test"]][2,]))
-    row.names(FtestU) <- str_c(row.names(FtestU), ".U")
-    df.out <- cbind(df.out, t(FtestU))
-    rownames(df.out) <- NULL
-    colnames(df.out)[2] <- "F"
+    #df.out <- data.frame(Effect = fixed.effects, stringsAsFactors = FALSE)
+    anova_table <- data.frame(t(vapply(tests, function(x) unlist(x[["test"]][1,]), unlist(tests[[1]][["test"]][1,]))))
+    #FtestU <- vapply(tests, function(x) unlist(x[["test"]][2,]), unlist(tests[[1]][["test"]][2,]))
+    #row.names(FtestU) <- str_c(row.names(FtestU), ".U")
+    #anova_table <- cbind(anova_table, t(FtestU))
+    rownames(anova_table) <- fixed.effects
+    colnames(anova_table) <- c("F", "num Df", "den Df", "F.scaling", "Pr(>F)")
+    anova_table <- anova_table[, c("num Df", "den Df", "F.scaling", "F", "Pr(>F)")]
+    anova_tab_addition <- NULL
   } else if (method[1] == "PB") {
     if (progress) cat(str_c("Obtaining ", length(fixed.effects), " p-values:\n["))
     tests <- vector("list", length(fixed.effects))
@@ -372,13 +427,16 @@ mixed <- function(formula, data, type = 3, method = c("KR", "PB", "LRT"), per.pa
     if (progress) cat("]\n")
     names(tests) <- fixed.effects
     #browser()
-    df.out<- data.frame(Effect = fixed.effects, stringsAsFactors = FALSE)
-    df.out <- cbind(df.out, t(vapply(tests, function(x) unlist(x[["test"]][2,]), unlist(tests[[1]][["test"]][2,]))))
-    df.out <- df.out[,-3]
+    #df.out<- data.frame(Effect = fixed.effects, stringsAsFactors = FALSE)
+    anova_table <- data.frame(t(vapply(tests, function(x) unlist(x[["test"]][2,]), unlist(tests[[1]][["test"]][2,]))))
+    anova_table <- anova_table[,-2]
     LRT <- vapply(tests, function(x) unlist(x[["test"]][1,]), unlist(tests[[1]][["test"]][1,]))
     row.names(LRT) <- str_c(row.names(LRT), ".LRT")
-    df.out <- cbind(df.out, t(LRT))
-    rownames(df.out) <- NULL
+    anova_table <- cbind(anova_table, t(LRT))
+    rownames(anova_table) <- fixed.effects
+    anova_table <- anova_table[, c("stat", "df.LRT", "p.value.LRT", "p.value")]
+    colnames(anova_table) <- c("Chisq", "Chi Df", "Pr(>Chisq)", "Pr(>PB)")
+    anova_tab_addition <- NULL
   } else if (method[1] == "LRT") {
     tests <- vector("list", length(fixed.effects))
     for (c in seq_along(fixed.effects)) {
@@ -395,8 +453,16 @@ mixed <- function(formula, data, type = 3, method = c("KR", "PB", "LRT"), per.pa
     chisq  <- vapply(tests, function(x) x[["Chisq"]][2], 0)
     df  <- vapply(tests, function(x) x[["Chi Df"]][2], 0)
     p.value  <- vapply(tests, function(x) x[["Pr(>Chisq)"]][2], 0)
-    df.out <- data.frame(Effect = fixed.effects, df.large, df.small, chisq, df, p.value, stringsAsFactors = FALSE)
-    rownames(df.out) <- NULL
+    anova_table <- data.frame(Df = df.small, Chisq = chisq, "Chi Df" = df, "Pr(>Chisq)"=p.value, stringsAsFactors = FALSE, check.names = FALSE)
+    rownames(anova_table) <- fixed.effects
+    if (type == 3 | type == "III") anova_tab_addition <- paste0("Df full model: ", df.large[1])
+    else anova_tab_addition <- paste0("Df full model(s): ", df.large)
+    
+    # 
+    # attr(anova_table, "heading") <- c(paste0("Mixed Model Anova Table (Type ", type , " tests)\n"), paste0("Response: ", dv)
+    #title <- "Analysis of Variance Table\n"
+    #topnote <- paste("Model ", format(1L:nmodels), ": ", variables, 
+    #    sep = "", collapse = "\n")
   } else if (method[1] == "F") {
     #browser()
     tests <- vector("list", length(fixed.effects))
@@ -428,32 +494,22 @@ mixed <- function(formula, data, type = 3, method = c("KR", "PB", "LRT"), per.pa
   ####################
   ### Part IV: prepare output
   ####################
-  list.out <- list(anova.table = df.out, full.model = full.model, restricted.models = fits, tests = tests, type = type, method = method[[1]])
+  class(anova_table) <- c("anova", "data.frame")
+  attr(anova_table, "heading") <- c(
+    paste0("Mixed Model Anova Table (Type ", type , " tests)\n"), 
+    paste0("Model: ", deparse(formula.f)),
+    paste0("Data: " ,mc[["data"]]),
+    anova_tab_addition
+    )
+  list.out <- list(anova_table = anova_table, full.model = full.model, restricted.models = fits, tests = tests) #, type = type, method = method[[1]]
   class(list.out) <- "mixed"
+  attr(list.out, "type") <- type
+  attr(list.out, "method") <- method
   list.out
 }
 
-
-print.mixed <- function(x, ...) {
+get_mixed_warnings <- function(x) {
   ntry <- function(x) tryCatch(x, error = function(e) NULL)
-  
-  if (x[["method"]] == "KR") {
-    tmp <- x[[1]][,1:6]
-    tmp[,"F"] <- formatC(tmp[,"F"], format = "f", digits = 2)
-    tmp[,"ddf"] <- prettyNum(tmp[,"ddf"], digits = 2, nsmall = 2)
-    tmp[,"F.scaling"] <- prettyNum(tmp[,"F.scaling"], digits = 2, nsmall = 2)
-    
-  } else if (x[["method"]] == "PB") {
-    tmp <- x[[1]][,1:3]
-    tmp[,2] <- formatC(tmp[,2], format = "f", digits = 2)
-  } else if (x[["method"]] == "LRT") {
-    tmp <- x[[1]]
-    tmp[,"chisq"] <- formatC(tmp[,"chisq"], format = "f", digits = 2)
-  } else {
-    tmp <- x[[1]]
-    tmp[,2] <- formatC(tmp[,2], format = "f", digits = 2)
-  }
-  tmp[,"p.value"] <- round_ps(tmp[,"p.value"])
   if (is.list(x$full)) {
     warnings1 <- c(full = lapply(x[[2]], function(y) y@optinfo$warnings), lapply(x[[3]], function(y) y@optinfo$warnings))  
     warnings2 <- c(full = lapply(x[[2]], function(y) ntry(y@optinfo$conv$lme4$messages)), lapply(x[[3]], function(y) ntry(y@optinfo$conv$lme4$messages)))
@@ -464,6 +520,49 @@ print.mixed <- function(x, ...) {
   warnings <- mapply(function(x, y) c(unlist(x), y), warnings1, warnings2, SIMPLIFY=FALSE)  
   warn <- vapply(warnings, function(y) !length(y)==0, NA)
   for (i in names(warn)[warn]) warning("lme4 reported (at least) the following warnings for '", i, "':\n  * ", paste(warnings[[i]], collapse = "\n  * "))
+}
+
+check_likelihood <- function(object) {
+  if (attr(object, "type") == 3 | attr(object, "type") == "III") {
+    logLik_full <- as.numeric(logLik(object[["full.model"]]))
+    logLik_restricted <- as.numeric(vapply(object[["restricted.models"]], logLik, 0))
+    if(any(logLik_restricted > logLik_full)) return(rownames(object$anova_table)[logLik_restricted > logLik_full])
+  } else if (attr(object, "type") == 2 | attr(object, "type") == "II") {
+    NULL
+#     logLik_full <- as.numeric(vapply(fits[1:max.effect.order],logLik, 0))
+#     logLik_restricted <- as.numeric(vapply(fits[(max.effect.order+1):length(fits)], logLik, 0))
+#     warn_logLik <- c()
+#     for (c in seq_along(fixed.effects)) {
+#       order.c <- effect.order[c]
+#       if(logLik_restricted[[c]] > logLik_full[[order.c]]) warn_logLik <- c(warn_logLik, fixed.effects[c])
+#     }
+#     if(length(warn_logLik)>0) return(warn_logLik)
+  }
+  return(TRUE)    
+}
+
+
+#' @rdname mixed
+#' @export
+lmer_alt <- function(formula, data, check.contrasts = FALSE, ...) {
+  mc <- match.call()
+  #assign(all.vars(mc[["data"]]), data)
+  mc[[1]] <- as.name("mixed")
+  mc[["return"]] <- "merMod"
+  mc[["expand_re"]] <- TRUE
+  mc[["progress"]] <- FALSE
+  mc[["check.contrasts"]] <- check.contrasts
+  #browser()
+  eval(mc)
+}
+
+#' @method print mixed
+#' @export
+print.mixed <- function(x, ...) {
+  if(!isREML(x[["full.model"]]) && !isTRUE(check_likelihood(x))) 
+    warning(paste("Following nested model(s) provide better fit than full model:", paste(check_likelihood(x), collapse = ", "), "\n  It is highly recommended to try different optimizer via lmerControl or allFit!"))
+  get_mixed_warnings(x)
+  tmp <- nice.mixed(x, ...)
   print(tmp)
   invisible(tmp)
 }
@@ -471,9 +570,55 @@ print.mixed <- function(x, ...) {
 
 #anova.mixed <- 
 
-summary.mixed <- anova.mixed <- function(object, ...) print.mixed(x = object, ...)
+#' @method summary mixed
+#' @export
+summary.mixed <- function(object, ...) summary(object = if (length(object[["full.model"]]) == 1) object[["full.model"]] else object[["full.model"]][[length(object[["full.model"]])]], ...)
+
+#' @method anova mixed
+#' @export
+anova.mixed <- function(object, ..., refit = FALSE) {
+  mCall <- match.call(expand.dots = TRUE)
+  dots <- list(...)
+  modp <- (as.logical(vapply(dots, is, NA, "merMod")) |
+             as.logical(vapply(dots, is, NA, "lm")) |
+             as.logical(vapply(dots, is, NA, "mixed"))
+           )
+  if (any(modp)) {
+    model.names <- c(deparse(mCall[["object"]]), vapply(which(modp), function(x) deparse(mCall[[x+2]]), ""))
+    for (i in which(as.logical(vapply(dots, is, NA, "mixed")))) dots[[i]] <- dots[[i]]$full.model
+    return(do.call(anova, args = c(object = object, dots, model.names = list(model.names), refit = refit)))
+  } else {
+    if(!isREML(object[["full.model"]]) && !isTRUE(check_likelihood(object))) 
+      warning(paste("Following nested model(s) provide better fit than full model:", paste(check_likelihood(object), collapse = ", "), "\n  It is highly recommended to try different optimizer via lmerControl or allFit!"))
+    get_mixed_warnings(object)
+    object$anova_table
+  }
+}
 
 
+
+
+## support for lsmeans for mixed objects:
+#' @importFrom lsmeans recover.data lsm.basis
+#' @method recover.data mixed
+#' @export
+recover.data.mixed <- function(object, ...) {
+  recover.data(object$full.model, ...)
+}
+
+
+#' @method lsm.basis mixed 
+#' @export
+lsm.basis.mixed <- function(object, trms, xlev, grid, ...) {
+  lsm.basis(object$full.model, trms, xlev, grid, ...)
+}
+
+
+
+
+
+
+### old stuff (actually not usable right now)
 # is.mixed <- function(x) inherits(x, "mixed")
 
 ## some code copied from pbkrtest.

@@ -38,7 +38,7 @@
 #' data(md_12.1)
 #' 
 #' # Table 12.5 (p. 578):
-#' ez.glm("id", "rt", md_12.1, within = c("angle", "noise"), 
+#' aov_ez("id", "rt", md_12.1, within = c("angle", "noise"), 
 #'        args.return=list(correction = "none", es = "none"))
 #' 
 #' 

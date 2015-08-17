@@ -7,8 +7,8 @@ test_that("mixed: Maxell & Delaney (2004), Table 16.3, p. 837", {
   # original results need treatment contrasts:
   mixed1_orig <- mixed(severity ~ sex + (1|id), md_16.1, check.contrasts=FALSE, progress=FALSE)
   expect_that(fixef(mixed1_orig$full.model), is_equivalent_to(c(60, -14)))
-  expect_that(round(mixed1_orig[[1]][1,2],2), equals(9.97))
-  expect_that(round(mixed1_orig[[1]][1,"p.value"],2), equals(0.03))
+  expect_that(round(anova(mixed1_orig)[1,"F"],2), equals(9.97))
+  expect_that(round(anova(mixed1_orig)[1,"Pr(>F)"],2), equals(0.03))
 })
 
 test_that("mixed: Maxell & Delaney (2004), Table 16.6, p. 845", {
@@ -30,10 +30,10 @@ test_that("mixed: Maxell & Delaney (2004), Table 16.7, p. 851 (uses simple F!)",
   expect_that(round(fixef(mixed3_orig$full.model), 2), is_equivalent_to(c(20.25, -7.57, 2.31)))
   expect_that(round(sqrt(diag(vcov(mixed3_orig$full.model))), 2), equals(c(5.82, 2.72, 0.81)))
   expect_that(round(mixed3_orig[[1]]$F), equals(c(8, 8)))
-  mixed3_F_simple <- mixed(induct ~ cond + skill + (1|room:cond), md_16.4b, check.contrasts=FALSE, progress=FALSE, method = "F")
-  expect_that(round(fixef(mixed3_F_simple$full.model), 2), is_equivalent_to(c(20.25, -7.57, 2.31)))
-  expect_that(round(sqrt(diag(vcov(mixed3_F_simple$full.model))), 2), equals(c(5.82, 2.72, 0.81)))
-  expect_that(round(mixed3_F_simple[[1]]$F, 1), equals(c(7.8, 8.2)))
+  #mixed3_F_simple <- mixed(induct ~ cond + skill + (1|room:cond), md_16.4b, check.contrasts=FALSE, progress=FALSE, method = "F")
+  #expect_that(round(fixef(mixed3_F_simple$full.model), 2), is_equivalent_to(c(20.25, -7.57, 2.31)))
+  #expect_that(round(sqrt(diag(vcov(mixed3_F_simple$full.model))), 2), equals(c(5.82, 2.72, 0.81)))
+  #expect_that(round(mixed3_F_simple[[1]]$F, 1), equals(c(7.8, 8.2)))
 })
 
 test_that("mixed: Maxell & Delaney (2004), Table 16.10, p. 862 (does not replicate the table!)", {

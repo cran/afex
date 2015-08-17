@@ -23,7 +23,7 @@
 #' data(md_15.1)
 #' 
 #' ### ANOVA results (Table 15.2)
-#' aov4(iq ~ timecat + (timecat|id),data=md_15.1, args.return=list(correction = "none"))
+#' aov_4(iq ~ timecat + (timecat|id),data=md_15.1, anova_table=list(correction = "none"))
 #' 
 #' ### Table 15.3 (random intercept only)
 #' # we need to set the base level on the last level:

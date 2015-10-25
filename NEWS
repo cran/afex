@@ -1,4 +1,34 @@
                     *************************
+                    ** afex VERSION 0.15-x **
+                    *************************
+                    
+                    Changes in afex Version 0.15-x
+                    Released October 2015
+
+    Significant User Visible Changes and New Features
+
+    o   added p.adjust.method argument for ANOVA functions (anova and nice 
+        methods). Can be used to control for multiple comparisons in 
+        exploratory ANOVAs (see Cramer, et al., 2015; PB&R). Functionality 
+        contributed by Frederik Aust (https://github.com/singmann/afex/pull/3).
+        
+    Bugfixes
+    
+    o   ANOVA functions work with dplyr data.frames now (data is transformed
+        via as.data.frame). See: https://github.com/singmann/afex/issues/6
+    
+    o   formulas for mixed can now be of a maximum length of 500 characters 
+        (was 60 chars previously): https://github.com/singmann/afex/issues/5
+        
+    o   aov_car et al. did not work with within-subject factors that were also
+        included outside the Error term. This was caused by the use of regular
+        expressions not appropriate for the new stringi backend of stringr.
+        Thanks to Tom Wenseleers for reporting this bug.
+    
+
+    
+ 
+                    *************************
                     ** afex VERSION 0.14-x **
                     *************************
                     

@@ -121,7 +121,9 @@
 #'
 #' \code{\link{mixed}} provides a (formula) interface for obtaining p-values for mixed-models via \pkg{lme4}.
 #'
-#' @references Maxwell, S. E., & Delaney, H. D. (2004). \emph{Designing Experiments and Analyzing Data: A Model-Comparisons Perspective}. Mahwah, N.J.: Lawrence Erlbaum Associates.
+#' @references Cramer, A. O. J., van Ravenzwaaij, D., Matzke, D., Steingroever, H., Wetzels, R., Grasman, R. P. P. P., ... Wagenmakers, E.-J. (2015). Hidden multiplicity in exploratory multiway ANOVA: Prevalence and remedies.  \emph{Psychonomic Bulletin & Review}, 1–8. doi:\href{http://doi.org/10.3758/s13423-015-0913-5}{10.3758/s13423-015-0913-5} 
+#' 
+#' Maxwell, S. E., & Delaney, H. D. (2004). \emph{Designing Experiments and Analyzing Data: A Model-Comparisons Perspective}. Mahwah, N.J.: Lawrence Erlbaum Associates.
 #'
 #' Venables, W.N. (2000). \emph{Exegeses on linear models}. Paper presented to the S-Plus User's Conference, Washington DC, 8-9 October 1998, Washington, DC. Available from: \url{http://www.stats.ox.ac.uk/pub/MASS3/Exegeses.pdf}
 #'
@@ -184,7 +186,7 @@ aov_car <- function(formula, data, fun.aggregate = NULL, type = afex_options("ty
     c.ns <- between[vapply(data[, between, drop = FALSE], is.numeric, TRUE)]
     if (length(c.ns) > 0) {
       non.null <- c.ns[!abs(vapply(data[, c.ns, drop = FALSE], mean, 0)) < .Machine$double.eps ^ 0.5]
-      if (length(non.null) > 0) warning(str_c("Numerical variables NOT centered on 0 (i.e., likely bogus results): ", str_c(non.null, collapse = ", ")))
+      if (length(non.null) > 0) warning(str_c("Numerical variables NOT centered on 0 (i.e., likely bogus results): ", str_c(non.null, collapse = ", ")), call. = FALSE)
     }
   }
   for (i in c(between, within)) {
@@ -211,7 +213,7 @@ aov_car <- function(formula, data, fun.aggregate = NULL, type = afex_options("ty
   # Is fun.aggregate NULL and aggregation necessary?
   if (is.null(fun.aggregate)) {
     if (any(xtabs(as.formula(str_c("~", id, if (length(within) > 0) "+", rh1)), data = data) > 1)) {
-      warning("More than one observation per cell, aggregating the data using mean (i.e, fun.aggregate = mean)!")
+      warning("More than one observation per cell, aggregating the data using mean (i.e, fun.aggregate = mean)!", call. = FALSE)
       fun.aggregate <- mean
     }
   } 
@@ -228,7 +230,7 @@ aov_car <- function(formula, data, fun.aggregate = NULL, type = afex_options("ty
   # check for missing values:
   if (any(is.na(tmp.dat))) {
     missing.values <- apply(tmp.dat, 1, function(x) any(is.na(x)))
-    warning(str_c("Missing values for following ID(s):\n", str_c(tmp.dat[missing.values,1], collapse = ", "), "\nRemoving those cases from the analysis."))        
+    warning(str_c("Missing values for following ID(s):\n", str_c(tmp.dat[missing.values,1], collapse = ", "), "\nRemoving those cases from the analysis."), call. = FALSE)        
   }
   #   if (length(between) > 0) {
   #     n_data_points <- xtabs(as.formula(paste("~", paste(between, collapse = "+"))), data = tmp.dat)
@@ -275,7 +277,7 @@ aov_car <- function(formula, data, fun.aggregate = NULL, type = afex_options("ty
           }
         }
       }
-      if((type == 3 | type == "III") && (length(non_sum_contrast)>0)) warning(str_c("Calculating Type 3 sums with contrasts != 'contr.sum' for: ", paste0(non_sum_contrast, collapse=", "), "\n  Results likely bogus or not interpretable!\n  You probably want check.contrasts = TRUE or options(contrasts=c('contr.sum','contr.poly'))"))
+      if((type == 3 | type == "III") && (length(non_sum_contrast)>0)) warning(str_c("Calculating Type 3 sums with contrasts != 'contr.sum' for: ", paste0(non_sum_contrast, collapse=", "), "\n  Results likely bogus or not interpretable!\n  You probably want check.contrasts = TRUE or options(contrasts=c('contr.sum','contr.poly'))"), call. = FALSE)
     }
   }
   if (return %in% c("aov", "afex_aov")) include.aov <- TRUE
@@ -335,7 +337,8 @@ aov_car <- function(formula, data, fun.aggregate = NULL, type = afex_options("ty
   }
   if (return == "Anova") return(Anova.out)
   else if (return == "univariate") {
-    if (class(Anova.out) == "Anova.mlm") return(summary(Anova.out, multivariate = FALSE))
+    #if (class(Anova.out) == "Anova.mlm") return(summary(Anova.out, multivariate = FALSE))
+    if (inherits(Anova.out, "Anova.mlm")) return(summary(Anova.out, multivariate = FALSE))
     else return(Anova.out)
   }
   else if (return == "nice") {

@@ -15,7 +15,7 @@
 #' @param set.data.arg \code{logical}. Should the data argument in the slot \code{call} of the \code{merMod} object returned from \code{lmer} be set to the passed data argument? Otherwise the name will be \code{data}. Helpful if fitted objects are used afterwards (e.g., using \pkg{lsmeans}). Default is \code{TRUE}. 
 #' @param progress  if \code{TRUE}, shows progress with a text progress bar and other status messages during fitting.
 #' @param cl  A vector identifying a cluster; used for distributing the estimation of the different models using several cores. See examples. If \code{ckeck.contrasts}, mixed sets the current contrasts (\code{getOption("contrasts")}) at the nodes. Note this does \emph{not} distribute calculation of p-values (e.g., when using \code{method = "PB"}) across the cluster. Use \code{args.test} for this.
-#' @param return the default is to return an object of class \code{"mixed"}. \code{return = "merMod"} will skip the calculation of all submodels and p-values and simply return the full model fitted with lmer. Can be useful in combination with \code{expand_re = TRUE} which allows to use "||" with factors.
+#' @param return the default is to return an object of class \code{"mixed"}. \code{return = "merMod"} will skip the calculation of all submodels and p-values and simply return the full model fitted with lmer. Can be useful in combination with \code{expand_re = TRUE} which allows to use "||" with factors. \code{return = "data"} will not fit any models but just return the data that would have been used for fitting the model. Can be used in combination with \code{expand_re = TRUE} and \code{\link{allFit}} (see examples there).
 #' @param ... further arguments (such as \code{weights}/\code{family}) passed to \code{\link{lmer}}/\code{\link{glmer}}.
 #'
 #'
@@ -166,7 +166,8 @@ mixed <- function(formula, data, type = afex_options("type"), method = afex_opti
   mc <- match.call()
   #browser()
   formula.f <- as.formula(formula)
-  if (class(formula) != "formula") message("Formula (the first argument) converted to formula.")
+  #if (class(formula) != "formula") message("Formula (the first argument) converted to formula.")
+  if (!inherits(formula, "formula")) message("Formula (the first argument) converted to formula.")
   dv <- as.character(formula.f)[[2]]
   all.terms <- attr(terms(formula.f), "term.labels")
   effect.order <- attr(terms(formula.f), "order")
@@ -221,6 +222,7 @@ mixed <- function(formula, data, type = afex_options("type"), method = afex_opti
     data <- cbind(data, as.data.frame(do.call(cbind, tmp_model.matrix)))
     random <- str_c(new_random, collapse = "+")
   }
+  if (return == "data") return(data)
   ####################
   ### Part II: obtain the lmer fits
   ####################
@@ -327,7 +329,6 @@ mixed <- function(formula, data, type = afex_options("type"), method = afex_opti
     fits <- clusterApplyLB(cl = cl, x = formulas, eval.cl, m.call = mf, progress = progress)
     if (progress) junk <- clusterEvalQ(cl = cl, cat("]"))
   }
-  ## add correct data argument to lmer calls:
 
   ####################
   ### Part IIb: likelihood checks and refitting
@@ -359,7 +360,7 @@ mixed <- function(formula, data, type = afex_options("type"), method = afex_opti
       browser()
       str(fits[[1]], 2)
       fits[[1]]@call
-      sapply(allFit(fits[[1]], data=md_16.4b), function(y) try(logLik(y)))
+      #sapply(allFit(fits[[1]], data=md_16.4b), function(y) try(logLik(y)))
       sapply(refits, function(x) sapply(x, function(y) tryCatch(as.numeric(logLik(y)), error = function(e) as.numeric(NA))))
       
       fits <- lapply(refits, function(x) {
@@ -521,10 +522,15 @@ get_mixed_warnings <- function(x) {
   }
   warnings <- mapply(function(x, y) c(unlist(x), y), warnings1, warnings2, SIMPLIFY=FALSE)  
   warn <- vapply(warnings, function(y) !length(y)==0, NA)
-  for (i in names(warn)[warn]) warning("lme4 reported (at least) the following warnings for '", i, "':\n  * ", paste(warnings[[i]], collapse = "\n  * "))
+  for (i in names(warn)[warn]) warning("lme4 reported (at least) the following warnings for '", i, "':\n  * ", paste(warnings[[i]], collapse = "\n  * "), call. = FALSE)
 }
 
 check_likelihood <- function(object) {
+  
+   if (is.null(attr(object, "type"))) {
+    attr(object, "type") <- object$type
+  }
+  
   if (attr(object, "type") == 3 | attr(object, "type") == "III") {
     logLik_full <- as.numeric(logLik(object[["full.model"]]))
     logLik_restricted <- as.numeric(vapply(object[["restricted.models"]], logLik, 0))
@@ -562,7 +568,7 @@ lmer_alt <- function(formula, data, check.contrasts = FALSE, ...) {
 #' @export
 print.mixed <- function(x, ...) {
   if(!isREML(x[["full.model"]]) && !isTRUE(check_likelihood(x))) 
-    warning(paste("Following nested model(s) provide better fit than full model:", paste(check_likelihood(x), collapse = ", "), "\n  It is highly recommended to try different optimizer via lmerControl or allFit!"))
+    warning(paste("Following nested model(s) provide better fit than full model:", paste(check_likelihood(x), collapse = ", "), "\n  It is highly recommended to try different optimizer via lmerControl or allFit!"), call. = FALSE)
   get_mixed_warnings(x)
   tmp <- nice.mixed(x, ...)
   print(tmp)
@@ -591,7 +597,7 @@ anova.mixed <- function(object, ..., refit = FALSE) {
     return(do.call(anova, args = c(object = object, dots, model.names = list(model.names), refit = refit)))
   } else {
     if(!isREML(object[["full.model"]]) && !isTRUE(check_likelihood(object))) 
-      warning(paste("Following nested model(s) provide better fit than full model:", paste(check_likelihood(object), collapse = ", "), "\n  It is highly recommended to try different optimizer via lmerControl or allFit!"))
+      warning(paste("Following nested model(s) provide better fit than full model:", paste(check_likelihood(object), collapse = ", "), "\n  It is highly recommended to try different optimizer via lmerControl or allFit!"), call. = FALSE)
     get_mixed_warnings(object)
     object$anova_table
   }

@@ -1,4 +1,32 @@
                     *************************
+                    ** afex VERSION 0.16-x **
+                    *************************
+                    
+                    Changes in afex Version 0.16-x
+                    Released April 2016
+
+    Significant User Visible Changes and New Features
+
+    o   added "correction" and "observed" attributes to the anova_table slot of
+        afex_aov objects, which is used per default by nice(). This ensures 
+        that nice(object) and object always return the same data.frame.
+        Also added "nice_table" class to data.frame returned by nice which 
+        print the value of the slopts for information.
+        Both contributed by Frederik Aust (who was also promoted to author).
+        
+    o   added return="data" for mixed. This allows to obtain the data set used
+        for fitting a model. Can be useful in combination with expand.re=TRUE 
+        and allFit() or for obtaining predictions. See ?allFit for a simple 
+        example.
+        
+    Bugfixes
+    
+    o   increased required version of R (>= 3.1.0) and the following packages
+        to ensure afex runs with older versions of R: lme4 (>= 1.1-8), 
+        pbkrtest (>= 0.4-1), and Matrix (>= 1.1.1).
+
+        
+                    *************************
                     ** afex VERSION 0.15-x **
                     *************************
                     

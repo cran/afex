@@ -8,11 +8,11 @@ test_that("mixed: Maxell & Delaney (2004), Table 16.4, p. 842: Type 2", {
   md_16.4b <- md_16.4
   md_16.4b$cog <- scale(md_16.4b$cog, scale=FALSE)
   contrasts(md_16.4b$cond) <- "contr.sum"
-  suppressWarnings(mixed4_2 <- mixed(induct ~ cond*cog + (cog|room:cond), md_16.4b, type = 2, progress=FALSE))
+  mixed4_2 <- mixed(induct ~ cond*cog + (cog|room:cond), md_16.4b, type = 2, progress=FALSE, method = "nested-KR")
   lmer4_full <- lmer(induct ~ cond*cog + (cog|room:cond), md_16.4b)
   lmer4_small <- lmer(induct ~ cond+cog + (cog|room:cond), md_16.4b)
-  expect_that(fixef(mixed4_2$full.model[[2]]), equals(fixef(lmer4_full)))
-  expect_that(fixef(mixed4_2$full.model[[1]]), is_equivalent_to(fixef(lmer4_small)))  
+  expect_that(fixef(mixed4_2$full_model[[2]]), equals(fixef(lmer4_full)))
+  expect_that(fixef(mixed4_2$full_model[[1]]), is_equivalent_to(fixef(lmer4_small)))  
 })
 
 test_that("mixed: Maxell & Delaney (2004), Table 16.4, p. 842: Type 3", {
@@ -20,19 +20,20 @@ test_that("mixed: Maxell & Delaney (2004), Table 16.4, p. 842: Type 3", {
   md_16.4b <- md_16.4
   md_16.4b$cog <- scale(md_16.4b$cog, scale=FALSE)
   contrasts(md_16.4b$cond) <- "contr.sum"
-  suppressWarnings(mixed4_2 <- mixed(induct ~ cond*cog + (cog|room:cond), md_16.4b, type = 3, progress=FALSE))
+  mixed4_2 <- mixed(induct ~ cond*cog + (cog|room:cond), md_16.4b, type = 3, progress=FALSE, method = "nested-KR")
   lmer4_full <- lmer(induct ~ cond*cog + (cog|room:cond), md_16.4b)
   lmer4_small <- lmer(induct ~ cond+cog + (cog|room:cond), md_16.4b)
-  expect_that(fixef(mixed4_2$full.model), equals(fixef(lmer4_full)))
-  expect_that(mixed4_2$full.model, is_equivalent_to(lmer4_full))
-  expect_that(fixef(mixed4_2$restricted.models$`cond:cog`), is_equivalent_to(fixef(lmer4_small)))  
+  expect_that(fixef(mixed4_2$full_model), equals(fixef(lmer4_full)))
+  expect_that(mixed4_2$full_model, is_equivalent_to(lmer4_full))
+  expect_that(fixef(mixed4_2$restricted_models$`cond:cog`), is_equivalent_to(fixef(lmer4_small)))  
 })
 
 test_that("mixed, obk.long: type 2 and LRTs", {
   data(obk.long, package = "afex")
   contrasts(obk.long$treatment) <- "contr.sum"
   contrasts(obk.long$phase) <- "contr.sum"
-  suppressWarnings(t2 <- mixed(value ~ treatment*phase +(1|id), data = obk.long, method = "LRT", type = 2, progress=FALSE))
+  t2 <- mixed(value ~ treatment*phase +(1|id), data = obk.long, method = "LRT", type = 2, progress=FALSE)
+  expect_output(print(t2), "treatment")
   a2.f <- lmer(value ~ treatment*phase +(1|id), data = obk.long, REML=FALSE)
   a2.h <- lmer(value ~ treatment+phase +(1|id), data = obk.long, REML=FALSE)
   a2.t <- lmer(value ~ treatment +(1|id), data = obk.long, REML=FALSE)
@@ -57,20 +58,23 @@ test_that("mixed, obk.long: type 2 and LRTs", {
 })
 
 test_that("mixed, mlmRev: type 3 and 2 LRTs for GLMMs", {
-  require("mlmRev")
-  suppressWarnings(gm1 <- mixed(use ~ age*urban + (1 | district), family = binomial, data = Contraception, method = "LRT", progress=FALSE))
-  suppressWarnings(gm2 <- mixed(use ~ age*urban + (1 | district), family = binomial, data = Contraception, method = "LRT", type = 2, progress=FALSE))
-  expect_that(gm1, is_a("mixed"))
-  expect_that(gm1, is_a("mixed"))
+  if (require("mlmRev")) {
+    suppressWarnings(gm1 <- mixed(use ~ age*urban + (1 | district), family = binomial, data = Contraception, method = "LRT", progress=FALSE))
+    suppressWarnings(gm2 <- mixed(use ~ age*urban + (1 | district), family = binomial, data = Contraception, method = "LRT", type = 2, progress=FALSE))
+    expect_that(gm1, is_a("mixed"))
+    expect_that(gm1, is_a("mixed"))  
+  }
 })
 
 test_that("mixed, obk.long: LMM with method = PB", {
-  expect_that(mixed(value ~ treatment+phase*hour +(1|id), data = obk.long, method = "PB", args.test = list(nsim = 10), progress=FALSE), is_a("mixed"))
+  expect_that(mixed(value ~ treatment+phase*hour +(1|id), data = obk.long, method = "PB", args_test = list(nsim = 10), progress=FALSE), is_a("mixed"))
 })
 
 test_that("mixed, obk.long: multicore loads lme4 and produces the same results", {
-  if (packageVersion("testthat") >= "0.9") {
-    skip_on_cran()
+  #if (packageVersion("testthat") >= "0.9") {
+  if (FALSE) {  # that never seems to run...
+    testthat::skip_on_cran()
+    testthat::skip_on_travis()
     data(obk.long, package = "afex")
     require(parallel)
     cl <- makeCluster(rep("localhost", 2)) # make cluster
@@ -91,8 +95,8 @@ test_that("print(mixed) works: only 1 or 2 fixed effects with all methods", {
   expect_that(print(mixed(value ~ treatment+(1|id), data = obk.long, method = "LRT")), is_a("data.frame"))
   expect_that(print(mixed(value ~ treatment+phase+(1|id), data = obk.long, method = "LRT")), is_a("data.frame"))
   require("mlmRev") # for the data, see ?Contraception
-  expect_that(print(mixed(use ~ urban + (1 | district), method = "PB", family = binomial, data = Contraception, args.test=list(nsim=2))), is_a("data.frame"))
-  expect_that(print(mixed(use ~ urban + livch + (1 | district), method = "PB", family = binomial, data = Contraception, args.test=list(nsim=2))), is_a("data.frame"))  
+  expect_that(print(mixed(use ~ urban + (1 | district), method = "PB", family = binomial, data = Contraception, args_test=list(nsim=2))), is_a("data.frame"))
+  expect_that(print(mixed(use ~ urban + livch + (1 | district), method = "PB", family = binomial, data = Contraception, args_test=list(nsim=2))), is_a("data.frame"))  
 })
 
 # test_that("mixed, Maxell & Delaney (2004), Table 16.4, p. 842: bobyqa not fitting well", {
@@ -106,8 +110,8 @@ test_that("mixed: set.data.arg", {
   data(obk.long, package = "afex")
   suppressWarnings(m1 <- mixed(value ~ treatment*phase +(1|id), obk.long, method = "LRT", progress=FALSE))
   suppressWarnings(m2 <- mixed(value ~ treatment*phase +(1|id), obk.long, method = "LRT", progress=FALSE, set.data.arg = FALSE))
-  expect_that(m1$full.model@call[["data"]], is_identical_to(as.name("obk.long")))
-  expect_that(m2$full.model@call[["data"]], is_identical_to(as.name("data")))
+  expect_that(m1$full_model@call[["data"]], is_identical_to(as.name("obk.long")))
+  expect_that(m2$full_model@call[["data"]], is_identical_to(as.name("data")))
 })
 
 test_that("mixed: anova with multiple mixed objexts", {
@@ -119,6 +123,9 @@ test_that("mixed: anova with multiple mixed objexts", {
   sk_m3 <- lmer(response ~ instruction+(1|id)+(validity|content), sk2_aff, REML = FALSE)
   sk_m4 <- lmer(response ~ instruction+(1|id)+(validity|content), sk2_aff, REML = TRUE)
   t <- anova(sk_m1, sk_m2, sk_m3)
+  xx <- anova(sk_m1$full_model, sk_m2$full_model, sk_m3, model.names = c("sk_m1", "sk_m2", "sk_m3"))
+  expect_identical(rownames(xx), rownames(t))
+  expect_identical(rownames(xx), c("sk_m1", "sk_m2", "sk_m3"))
   expect_is(t, c("anova", "data.frame"))
   expect_is(anova(sk_m1, object = sk_m2, sk_m3), c("anova", "data.frame"))
   expect_is(anova(sk_m1, object = sk_m2, sk_m3, ks2013.3), c("anova", "data.frame"))
@@ -136,12 +143,12 @@ test_that("mixed: expand_re argument, return = 'merMod'", {
   expect_true(all.equal(unlist(summary(m2)$varcor), diag(summary(m3)$varcor$id), tolerance = 0.03, check.attributes = FALSE))
   l2 <- mixed(response ~ validity + (believability||id), ks2013.3, expand_re = TRUE, return = "merMod")
   expect_is(l2, "merMod")
-  expect_equivalent(m2$full.model, l2)
+  expect_equivalent(m2$full_model, l2)
   l3 <- lmer_alt(response ~ validity + (believability||id), ks2013.3)
   l4 <- lmer_alt(response ~ validity + (believability||id), ks2013.3, control = lmerControl(optimizer = "Nelder_Mead"))
   expect_equivalent(l2, l3) 
   expect_equal(l3, l4, check.attributes = FALSE)
-  l5 <- lmer_alt(response ~ validity + (believability||id), ks2013.3, control = lmerControl(optimizer = "Nelder_Mead"), check.contrasts = TRUE)
+  l5 <- lmer_alt(response ~ validity + (believability||id), ks2013.3, control = lmerControl(optimizer = "Nelder_Mead"), check_contrasts = TRUE)
   expect_equal(l2, l5, check.attributes = FALSE )
   expect_identical(names(coef(l2)$id), names(coef(l5)$id))  # parameter names need to be identical (same contrasts)
   expect_false(all(names(coef(l2)$id) == names(coef(l3)$id)))  # parameter names need to be different (different contrasts)
@@ -154,6 +161,7 @@ test_that("mixed: expand_re argument, return = 'merMod'", {
 test_that("mixed: expand_re argument (longer)", {
   if (packageVersion("testthat") >= "0.9") {
     testthat::skip_on_cran()
+    testthat::skip_on_travis()
     data("ks2013.3")
     m4 <- mixed(response ~ validity + (believability*validity||id) + (validity*condition|content), ks2013.3, expand_re = TRUE, method = "LRT", control = lmerControl(optCtrl = list(maxfun=1e6)), progress=FALSE)
     m5 <- suppressWarnings(mixed(response ~ validity + (believability*validity|id) + (validity*condition||content), ks2013.3, method = "LRT", control = lmerControl(optCtrl = list(maxfun=1e6)), expand_re = TRUE, progress=FALSE))
@@ -165,18 +173,24 @@ test_that("mixed: expand_re argument (longer)", {
 
 
 test_that("mixed: return=data, expand_re argument, and allFit", {
-  if (packageVersion("testthat") >= "0.9") {
-    testthat::skip_on_cran()
-    data("ks2013.3")
-    ks2013.3_tmp <- ks2013.3
-    m6 <- mixed(response ~ validity + (believability*validity||id), ks2013.3_tmp, expand_re = TRUE, method = "LRT", control = lmerControl(optCtrl = list(maxfun=1e6)), progress=FALSE, return = "merMod")
-    m6_all_1 <- allFit(m6, verbose = FALSE, data = ks2013.3_tmp)
-    expect_output(print(m6_all_1$`bobyqa.`), "object 're1.believability1' not found")
-    ks2013.3_tmp <- mixed(response ~ validity + (believability*validity||id), ks2013.3_tmp, expand_re = TRUE, method = "LRT", control = lmerControl(optCtrl = list(maxfun=1e6)), progress=FALSE, return = "data")
-    m6_all_2 <- suppressWarnings(allFit(m6, verbose = FALSE, data = ks2013.3_tmp))
-    expect_is(m6_all_2$`bobyqa.`, "merMod")
-    expect_is(m6_all_2$`Nelder_Mead.`, "merMod") 
-  }
+  #if (packageVersion("testthat") >= "0.9") {
+  #testthat::skip_on_cran()
+  #testthat::skip_on_travis()
+  testthat::skip_if_not_installed("optimx")
+  require(optimx)
+  data("ks2013.3")
+  ks2013.3_tmp <- ks2013.3
+  m6 <- mixed(response ~ validity + (believability*validity||id), ks2013.3_tmp, expand_re = TRUE, method = "LRT", control = lmerControl(optCtrl = list(maxfun=1e6)), progress=FALSE, return = "merMod")
+  m6_all_1 <- all_fit(m6, verbose = FALSE, data = ks2013.3_tmp)
+  expect_output(print(m6_all_1$`bobyqa.`), "object 're1.believability1' not found")
+  ks2013.3_tmp <- mixed(response ~ validity + (believability*validity||id), ks2013.3_tmp, expand_re = TRUE, method = "LRT", control = lmerControl(optCtrl = list(maxfun=1e6)), progress=FALSE, return = "data")
+  m6_all_2 <- suppressWarnings(all_fit(m6, verbose = FALSE, data = ks2013.3_tmp))
+  expect_is(m6_all_2$`bobyqa.`, "merMod")
+  expect_is(m6_all_2$`Nelder_Mead.`, "merMod") 
+  expect_is(m6_all_2$`nmkbw.`, "merMod")
+  expect_is(m6_all_2$optimx.nlminb, "merMod")
+  expect_is(m6_all_2$`optimx.L-BFGS-B`, "merMod")
+  expect_is(m6_all_2$nloptwrap.NLOPT_LN_NELDERMEAD, "merMod")
 })
 
 
@@ -187,4 +201,102 @@ test_that("mixed: return=data works", {
   expect_is(ks2013.3_tmp, "data.frame")
   if (packageVersion("testthat") >= "0.11.0.9000") expect_gt(ncol(ks2013.3_tmp), ncol(ks2013.3))
   expect_output(print(colnames(ks2013.3_tmp)), "re1.believability1_by_validity1")
+})
+
+
+test_that("mixed with all available methods", {
+  data("sk2011.2") # see example("mixed")
+  testthat::skip_on_travis()
+  sk2_aff <- droplevels(sk2011.2[sk2011.2$what == "affirmation",])
+  for (i in c(2, 3)) {
+    sk2_aff_kr <- mixed(response ~ instruction*type+(inference*type||id), sk2_aff,
+                        expand_re = TRUE, all_fit = FALSE, method = "KR", 
+                        progress=FALSE, type = i)
+    sk2_aff_s <- mixed(response ~ instruction*type+(inference*type||id), sk2_aff,
+                       expand_re = TRUE, all_fit = FALSE, method = "S", 
+                       progress=FALSE, type = i)
+    sk2_aff_nkr <- mixed(response ~ instruction*type+(inference*type||id), sk2_aff,
+                         progress = FALSE, type = i,
+                         expand_re = TRUE, all_fit = FALSE, method = "nested-KR")
+    sk2_aff_lrt <- mixed(response ~ instruction*type+(inference*type||id), sk2_aff,
+                         progress = FALSE, type = i,
+                         expand_re = TRUE, all_fit = FALSE, method = "LRT")
+    sk2_aff_pb <- mixed(response ~ instruction*type+(inference||id), sk2_aff,
+                        progress = FALSE, type = i, args_test = list(nsim = 10),
+                        expand_re = TRUE, all_fit = FALSE, method = "PB")
+    expect_is(sk2_aff_kr, "mixed")
+    expect_is(sk2_aff_s, "mixed")
+    expect_is(sk2_aff_nkr, "mixed")
+    expect_is(sk2_aff_lrt, "mixed")
+    expect_is(sk2_aff_pb, "mixed")
+    expect_is(anova(sk2_aff_kr), "anova")
+    expect_is(anova(sk2_aff_s), "anova")
+    expect_is(anova(sk2_aff_nkr), "anova")
+    expect_is(anova(sk2_aff_lrt), "anova")
+    expect_is(anova(sk2_aff_pb), "anova")
+    expect_output(print(sk2_aff_kr), "Effect")
+    expect_output(print(sk2_aff_kr), "F")
+    expect_output(print(sk2_aff_s), "Effect")
+    expect_output(print(sk2_aff_s), "F")
+    expect_output(print(sk2_aff_nkr), "Effect")
+    expect_output(print(sk2_aff_nkr), "F")
+    expect_output(print(sk2_aff_lrt), "Effect")
+    expect_output(print(sk2_aff_lrt), "Chisq")
+    expect_output(print(sk2_aff_pb), "Effect")
+    expect_output(print(sk2_aff_pb), "Chisq")
+  }
+})
+
+
+test_that("mixed all_fit = TRUE works with old methods", {
+  data("sk2011.2") # see example("mixed")
+  sk2_aff <- droplevels(sk2011.2[sk2011.2$what == "affirmation",])
+  sk2_aff_b <- mixed(response ~ instruction+(inference*type||id), sk2_aff,
+               expand_re = TRUE, all_fit = TRUE, method = "nested-KR")
+  sk2_aff_b2 <- mixed(response ~ instruction*type+(inference||id), sk2_aff,
+               type = 2, expand_re = TRUE, all_fit = TRUE, method = "nested-KR")
+  expect_is(sk2_aff_b, "mixed")
+  expect_length(attr(sk2_aff_b, "all_fit_selected"), 2)
+  expect_length(attr(sk2_aff_b, "all_fit_logLik"), 2)
+  expect_is(sk2_aff_b2, "mixed")
+  expect_length(attr(sk2_aff_b2, "all_fit_selected"), 5)
+  expect_length(attr(sk2_aff_b2, "all_fit_logLik"), 5)
+})
+
+
+
+test_that("mixed all_fit = TRUE works with new (KR) methods", {
+  data("sk2011.2") # see example("mixed")
+  sk2_aff <- droplevels(sk2011.2[sk2011.2$what == "affirmation",])
+  sk2_aff_b <- mixed(response ~ instruction+(inference*type||id), sk2_aff,
+               expand_re = TRUE, all_fit = TRUE, method = "KR")
+  sk2_aff_b2 <- mixed(response ~ instruction*type+(inference||id), sk2_aff,
+               type = 2, expand_re = TRUE, all_fit = TRUE, method = "KR")
+  expect_is(sk2_aff_b, "mixed")
+  expect_named(attr(sk2_aff_b, "all_fit_selected"), "full_model")
+  expect_false(is.null(attr(sk2_aff_b, "all_fit_logLik")))
+  expect_is(sk2_aff_b2, "mixed")
+  expect_named(attr(sk2_aff_b2, "all_fit_selected"), "full_model")
+  expect_false(is.null(attr(sk2_aff_b2, "all_fit_logLik")))
+})
+
+
+test_that("anova_table attributes", {
+  data(obk.long)
+  symbol_test <- mixed(value ~ treatment * phase + (1|id), obk.long, sig_symbols = c("", "a", "aa", "aaa"), return = "nice")
+  expect_output(print(symbol_test), "aaa")
+  
+  symbol_test <- mixed(value ~ treatment * phase + (1|id), obk.long, sig_symbols = c("", "a", "aa", "aaa"))
+  expect_output(print(symbol_test), "aaa")
+  expect_output(print(nice(symbol_test, sig_symbols = c("", "b", "bb", "bbb"))), "bbb")
+  
+  new_symbols <- c(" ", " b", " bb", " bbb")
+  symbol_test <- anova(symbol_test, sig_symbols = c(" ", " b", " bb", " bbb"))
+  expect_identical(attr(symbol_test, "sig_symbols"), new_symbols)
+  expect_output(print(nice(symbol_test)), "bbb")
+  
+  # Test support for old afex objects
+  old_afex_object <- default_options <- mixed(value ~ treatment * phase + (1|id), obk.long)
+  attr(old_afex_object$anova_table, "sig_symbols") <- NULL
+  expect_that(nice(old_afex_object), is_identical_to(nice(default_options)))
 })

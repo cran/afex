@@ -1,4 +1,84 @@
                     *************************
+                    ** afex VERSION 0.17-x **
+                    *************************
+                    
+                    Changes in afex Version 0.17-x
+                    Released April 2017
+
+    Significant User Visible Changes and New Features
+
+    o   Added Satterthwaite approximation (method="S") to mixed(), which is 
+        implemented via lmerTest. Satterthwaite approximates the degrees-of-
+        freedom of an F-test, similar to the default Kenward-Roger method, but
+        requires less RAM.
+    
+    o   mixed() methods "KR" and "S" are now obtained via tests on the full 
+        model directly. No restricted models are calculated for these methods. 
+        The former KR method is still available: method="nested-KR"
+    
+    o   mixed() now per default exports and uses lmerTest::lmer and not 
+        lme4::lmer(). This can be changed via calling 
+        afex_options(lmer_function = "lme4")
+        
+    o   afex does not depend on reshape2 any more. It is only imported.
+        
+    o   All arguments with "." in the name have been renamed to use "_". The old
+        names have been deprecated (i.e., still work, but should not be used).
+        check.contrasts = check_contrasts, test.intercept = test_intercept,
+        args.test = args_test, ...
+        
+    o   Names of slots of mixed model objects with "." have been renamed to have
+        a "_" instead: full.model = full_model and restricted.models = 
+        restricted_models
+        
+    o   afex_options() now uses the global R options accessible via options() 
+        (with prefix afex.) and allows to reset all options via list (i.e.,:
+        aop <- afex_options(); ...; afex_options(aov); works).
+        
+    o   renamed allFit() to all_fit() and argument meth.tab to meth_tab. 
+        Added method dfoptim::nmkb() to all_fit(). To use nmkb, dfoptim needs to
+        be loaded explicitly via library (see examples). 
+        
+    o   Added argument all_fit to mixed(). If TRUE, each model is fitted with 
+        all available optimizers and the best fit in each case selected.
+        
+    o   mixed objects have an additional slot, "data", that contains the data 
+        used for fitting.
+        
+    o   Added vignette with extensive mixed model example.
+    
+    o   Created forum for providing afex support: http://afex.singmann.science/
+        
+    Bugfixes
+
+    o   Sphericity correction now correctly displayed as none if all within-
+        factors have only two levels (bug removed by Frederik Aust).
+        
+    o   removed bug when calling nice() on afex_aov objects created with 
+        explicit effect size.
+        
+    o   aov_...(): anova_table = list(intercept = TRUE) now correctly suppresses
+        the intercept (bug removed by Frederik Aust).
+        
+    o   aov_...(): return = "nice" did not work (bug removed by Frederik Aust).
+    
+    o   aov_...() now supports column names with spaces (using backticks), see: 
+        https://github.com/singmann/afex/issues/22 Thx to Jonathan Love for fix.
+        
+    o   changed license to GPL >=2 (as it call some function from GPL >=2 
+        packages).
+        
+    o   removed bug that mixed() object with type=2 could not be printed.
+    
+    o   removed bug that model names for anova.mixed with multiple models were 
+        incorrect.
+        
+    o   all_fit() now uses a data argument correctly and passes it update(). 
+        This again allows to use it for data with suppressed correlations. 
+        all_fit(... verbose = TRUE) now correctly signals if a fit failed.
+
+
+                    *************************
                     ** afex VERSION 0.16-x **
                     *************************
                     
@@ -11,7 +91,7 @@
         afex_aov objects, which is used per default by nice(). This ensures 
         that nice(object) and object always return the same data.frame.
         Also added "nice_table" class to data.frame returned by nice which 
-        print the value of the slopts for information.
+        print the value of the slots for information.
         Both contributed by Frederik Aust (who was also promoted to author).
         
     o   added return="data" for mixed. This allows to obtain the data set used

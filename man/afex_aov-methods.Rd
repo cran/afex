@@ -3,15 +3,16 @@
 \name{afex_aov-methods}
 \alias{afex_aov-methods}
 \alias{anova.afex_aov}
-\alias{lsm.basis.afex_aov}
 \alias{print.afex_aov}
-\alias{recover.data.afex_aov}
 \alias{summary.afex_aov}
+\alias{recover.data.afex_aov}
+\alias{lsm.basis.afex_aov}
 \title{Methods for afex_aov objects}
 \usage{
 \method{anova}{afex_aov}(object, es = afex_options("es_aov"),
   observed = NULL, correction = afex_options("correction_aov"),
-  MSE = TRUE, intercept = FALSE, p.adjust.method = NULL, ...)
+  MSE = TRUE, intercept = FALSE, p_adjust_method = NULL,
+  sig_symbols = attr(object$anova_table, "sig_symbols"), ...)
 
 \method{print}{afex_aov}(x, ...)
 
@@ -34,7 +35,9 @@
 
 \item{intercept}{logical. Should intercept (if present) be included in the ANOVA table? Default is \code{FALSE} which hides the intercept.}
 
-\item{p.adjust.method}{\code{character} indicating if p-values for individual effects should be adjusted for multiple comparisons (see \link[stats]{p.adjust} and details).}
+\item{p_adjust_method}{\code{character} indicating if p-values for individual effects should be adjusted for multiple comparisons (see \link[stats]{p.adjust} and details).}
+
+\item{sig_symbols}{Character. What should be the symbols designating significance? When entering an vector with \code{length(sig.symbol) < 4} only those elements of the default (\code{c(" +", " *", " **", " ***")}) will be replaced. \code{sig_symbols = ""} will display the stars but not the \code{+}, \code{sig_symbols = rep("", 4)} will display no symbols. The default is given by \code{afex_options("sig_symbols")}.}
 
 \item{...}{further arguments passed through, see description of return value for details.}
 
@@ -53,10 +56,9 @@
 Methods defined for objects returned from the ANOVA functions \code{\link{aov_car}} et al. of class \code{afex_aov} containing both the ANOVA fitted via \code{car::Anova} and base R's \code{aov}.
 }
 \details{
-Exploratory ANOVA, for which no detailed hypotheses have been specified a priori, harbor a multiple comparison problem (Cramer et al., 2015). To avoid an inflation of familywise Type I error rate, results need to be corrected for multiple comparisons using \code{p.adjust.method}.
-\code{p.adjust.method} defaults to the method specified in the call to \code{\link{aov_car}} in \code{anova_table}. If no method was specified and \code{p.adjust.method = NULL} p-values are not adjusted.
+Exploratory ANOVA, for which no detailed hypotheses have been specified a priori, harbor a multiple comparison problem (Cramer et al., 2015). To avoid an inflation of familywise Type I error rate, results need to be corrected for multiple comparisons using \code{p_adjust_method}.
+\code{p_adjust_method} defaults to the method specified in the call to \code{\link{aov_car}} in \code{anova_table}. If no method was specified and \code{p_adjust_method = NULL} p-values are not adjusted.
 }
 \references{
-Cramer, A. O. J., van Ravenzwaaij, D., Matzke, D., Steingroever, H., Wetzels, R., Grasman, R. P. P. P., ... Wagenmakers, E.-J. (2015). Hidden multiplicity in exploratory multiway ANOVA: Prevalence and remedies.  \emph{Psychonomic Bulletin & Review}, 1–8. doi:\href{http://doi.org/10.3758/s13423-015-0913-5}{10.3758/s13423-015-0913-5}
+Cramer, A. O. J., van Ravenzwaaij, D., Matzke, D., Steingroever, H., Wetzels, R., Grasman, R. P. P. P., ... Wagenmakers, E.-J. (2015). Hidden multiplicity in exploratory multiway ANOVA: Prevalence and remedies.  \emph{Psychonomic Bulletin & Review}, 1-8. doi:\href{http://doi.org/10.3758/s13423-015-0913-5}{10.3758/s13423-015-0913-5}
 }
-

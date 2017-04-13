@@ -2,27 +2,27 @@
 % Please edit documentation in R/aov_car.R
 \encoding{UTF-8}
 \name{aov_car}
-\alias{aov_4}
 \alias{aov_car}
 \alias{aov_ez}
+\alias{aov_4}
 \title{Convenient ANOVA estimation for factorial designs}
 \usage{
 aov_ez(id, dv, data, between = NULL, within = NULL, covariate = NULL, 
-     observed = NULL, fun.aggregate = NULL, type = afex_options("type"), 
+     observed = NULL, fun_aggregate = NULL, type = afex_options("type"), 
      factorize = afex_options("factorize"), 
-     check.contrasts = afex_options("check.contrasts"), 
+     check_contrasts = afex_options("check_contrasts"), 
      return = afex_options("return_aov"), 
      anova_table = list(), ..., print.formula = FALSE)
      
-aov_car(formula, data, fun.aggregate = NULL, type = afex_options("type"), 
+aov_car(formula, data, fun_aggregate = NULL, type = afex_options("type"), 
      factorize = afex_options("factorize"), 
-     check.contrasts = afex_options("check.contrasts"), 
+     check_contrasts = afex_options("check_contrasts"), 
      return = afex_options("return_aov"), observed = NULL, 
      anova_table = list(), ...)
      
-aov_4(formula, data, observed = NULL, fun.aggregate = NULL, type = afex_options("type"),
+aov_4(formula, data, observed = NULL, fun_aggregate = NULL, type = afex_options("type"),
      factorize = afex_options("factorize"), 
-     check.contrasts = afex_options("check.contrasts"),
+     check_contrasts = afex_options("check_contrasts"),
      return = afex_options("return_aov"), 
      anova_table = list(), ..., print.formula = FALSE)
 }
@@ -31,13 +31,13 @@ aov_4(formula, data, observed = NULL, fun.aggregate = NULL, type = afex_options(
 
 \item{data}{A \code{data.frame} containing the data. Mandatory.}
 
-\item{fun.aggregate}{The function for aggregating the data before running the ANOVA if there is more than one observation per individual and cell of the design. The default \code{NULL} issues a warning if aggregation is necessary and uses \code{\link{mean}}. Pass \code{mean} directly to avoid the warning.}
+\item{fun_aggregate}{The function for aggregating the data before running the ANOVA if there is more than one observation per individual and cell of the design. The default \code{NULL} issues a warning if aggregation is necessary and uses \code{\link{mean}}. Pass \code{mean} directly to avoid the warning.}
 
 \item{type}{The type of sums of squares for the ANOVA. The default is given by \code{afex_options("type")}, which is \strong{initially set to 3}. Passed to \code{\link[car]{Anova}}. Possible values are \code{"II"}, \code{"III"}, \code{2}, or \code{3}.}
 
 \item{factorize}{logical. Should between subject factors be factorized (with note) before running the analysis. he default is given by \code{afex_options("factorize")}, which is initially \code{TRUE}. If one wants to run an ANCOVA, needs to be set to \code{FALSE} (in which case centering on 0 is checked on numeric variables).}
 
-\item{check.contrasts}{\code{logical}. Should contrasts for between-subject factors be checked and (if necessary) changed to be \code{"contr.sum"}. See details. The default is given by \code{afex_options("check.contrasts")}, which is initially \code{TRUE}.}
+\item{check_contrasts}{\code{logical}. Should contrasts for between-subject factors be checked and (if necessary) changed to be \code{"contr.sum"}. See details. The default is given by \code{afex_options("check_contrasts")}, which is initially \code{TRUE}.}
 
 \item{return}{What should be returned? The default is given by \code{afex_options("return_aov")}, which is initially \code{"afex_aov"}, returning an S3 object of class \code{afex_aov} for which various \link[=afex_aov-methods]{methods} exist (see there and below for more details). To avoid the (potentially costly) computation via \code{aov} set \code{return} to \code{"nice"} in which case only the nice ANOVA table is returned (produced by \code{\link{nice}}, this was the previous default return value). Other values are currently still supported for backward compatibility.}
 
@@ -45,7 +45,7 @@ aov_4(formula, data, observed = NULL, fun.aggregate = NULL, type = afex_options(
 
 \item{anova_table}{\code{list} of further arguments passed to function producing the ANOVA table.  Arguments such as \code{es} (effect size) or \code{correction}  are passed to either \code{anova.afex_aov} or \code{nice}. Note that those settings can also be changed once an object of class \code{afex_aov} is created by invoking the \code{anova} method directly.}
 
-\item{...}{Further arguments passed to \code{fun.aggregate}.}
+\item{...}{Further arguments passed to \code{fun_aggregate}.}
 
 \item{id}{\code{character} vector (of length 1) indicating the subject identifier column in \code{data}.}
 
@@ -87,13 +87,13 @@ To run an ANCOVA you need to set \code{factorize = FALSE} and make sure that all
 
 Note that the default behavior is to include calculation of the effect size generalized eta-squared for which \strong{all non-manipluated (i.e., observed)} variables need to be specified via the \code{observed} argument to obtain correct results. When changing the effect size to \code{"pes"} (partial eta-squared) or \code{"none"} via \code{anova_table} this becomes unnecessary.
 
-If \code{check.contrasts = TRUE}, contrasts will be set to \code{"contr.sum"} for all between-subject factors if default contrasts are not equal to \code{"contr.sum"} or \code{attrib(factor, "contrasts") != "contr.sum"}. (within-subject factors are hard-coded \code{"contr.sum"}.)
+If \code{check_contrasts = TRUE}, contrasts will be set to \code{"contr.sum"} for all between-subject factors if default contrasts are not equal to \code{"contr.sum"} or \code{attrib(factor, "contrasts") != "contr.sum"}. (within-subject factors are hard-coded \code{"contr.sum"}.)
 }
 
 \subsection{Statistical Issues}{
 \strong{Type 3 sums of squares are default in \pkg{afex}.} While some authors argue that so-called type 3 sums of squares are dangerous and/or problematic (most notably Venables, 2000), they are the default in many commercial statistical application such as SPSS or SAS. Furthermore, statisticians with an applied perspective recommend type 3 tests (e.g., Maxwell and Delaney, 2004). Consequently, they are the default for the ANOVA functions described here. For some more discussion on this issue see \href{http://stats.stackexchange.com/q/6208/442}{here}. 
 
-Note that lower order effects (e.g., main effects) in type 3 ANOVAs are only meaningful with \href{http://www.ats.ucla.edu/stat/mult_pkg/faq/general/effect.htm}{effects coding}. That is, contrasts should be set to \code{\link{contr.sum}} to obtain meaningful results. This is imposed automatically for the functions discussed here as long as \code{check.contrasts} is \code{TRUE} (the default). I nevertheless recommend to set the contrasts globally to \code{contr.sum} via running \code{\link{set_sum_contrasts}}. For a discussion of the other (non-recommended) coding schemes see \href{http://www.ats.ucla.edu/stat/r/library/contrast_coding.htm}{here}. 
+Note that lower order effects (e.g., main effects) in type 3 ANOVAs are only meaningful with \href{http://www.ats.ucla.edu/stat/mult_pkg/faq/general/effect.htm}{effects coding}. That is, contrasts should be set to \code{\link{contr.sum}} to obtain meaningful results. This is imposed automatically for the functions discussed here as long as \code{check_contrasts} is \code{TRUE} (the default). I nevertheless recommend to set the contrasts globally to \code{contr.sum} via running \code{\link{set_sum_contrasts}}. For a discussion of the other (non-recommended) coding schemes see \href{http://www.ats.ucla.edu/stat/r/library/contrast_coding.htm}{here}. 
 }
 
 \subsection{Follow-Up Contrasts and Post-Hoc Tests}{ 
@@ -107,7 +107,7 @@ The S3 object returned per default can be directly passed to \code{lsmeans::lsme
    \item To control for multiple testing p-value adjustments can be specified. For example the Bonferroni-Holm correction: \code{contrast(r, con1, adjust = "holm")}
  }
  
- Note that \pkg{lsmeans} allows for a variety of advanced settings and simplifiations, for example: all pairwise comparison of a single factor using one command (e.g., \code{lsmeans(x, "a", contr = "pairwise")}) or advanced control for multiple testing by passing objects to \pkg{multcomp}. A comprehensive overview of the functionality is provided in the accompanying vignettes (see \href{http://cran.r-project.org/package=lsmeans}{here}).
+ Note that \pkg{lsmeans} allows for a variety of advanced settings and simplifiations, for example: all pairwise comparison of a single factor using one command (e.g., \code{lsmeans(x, "a", contr = "pairwise")}) or advanced control for multiple testing by passing objects to \pkg{multcomp}. A comprehensive overview of the functionality is provided in the accompanying vignettes (see \href{https://CRAN.R-project.org/package=lsmeans}{here}).
  
  A caveat regarding the use of \pkg{lsmeans} concerns the assumption of sphericity for ANOVAs including within-subjects/repeated-measures factors (with more than two levels). While the ANOVA tables per default report results using the Greenhousse-Geisser correction, no such correction is available when using \pkg{lsmeans}. This may result in anti-conservative tests.
  
@@ -164,33 +164,35 @@ aov_ez("id", "value", obk.long, between = c("treatment", "gender"),
         within = c("phase", "hour"), observed = "gender")
 
 # the three calls return the same ANOVA table:
-## Anova Table (Type 3 tests)
-##
-## Response: value
-##                         Effect          df   MSE         F  ges p.value
-## 1                    treatment       2, 10 22.81    3.94 +  .20     .05
-## 2                       gender       1, 10 22.81    3.66 +  .11     .08
-## 3             treatment:gender       2, 10 22.81      2.86  .18     .10
-## 4                        phase 1.60, 15.99  5.02 16.13 ***  .15   .0003
-## 5              treatment:phase 3.20, 15.99  5.02    4.85 *  .10     .01
-## 6                 gender:phase 1.60, 15.99  5.02      0.28 .003     .71
-## 7       treatment:gender:phase 3.20, 15.99  5.02      0.64  .01     .61
-## 8                         hour 1.84, 18.41  3.39 16.69 ***  .13  <.0001
-## 9               treatment:hour 3.68, 18.41  3.39      0.09 .002     .98
-## 10                 gender:hour 1.84, 18.41  3.39      0.45 .004     .63
-## 11       treatment:gender:hour 3.68, 18.41  3.39      0.62  .01     .64
-## 12                  phase:hour 3.60, 35.96  2.67      1.18  .02     .33
-## 13        treatment:phase:hour 7.19, 35.96  2.67      0.35 .009     .93
-## 14           gender:phase:hour 3.60, 35.96  2.67      0.93  .01     .45
-## 15 treatment:gender:phase:hour 7.19, 35.96  2.67      0.74  .02     .65
-##
-## Sphericity correction method: GG 
+# Anova Table (Type 3 tests)
+# 
+# Response: value
+#                         Effect          df   MSE         F  ges p.value
+# 1                    treatment       2, 10 22.81    3.94 +  .20     .05
+# 2                       gender       1, 10 22.81    3.66 +  .11     .08
+# 3             treatment:gender       2, 10 22.81      2.86  .18     .10
+# 4                        phase 1.60, 15.99  5.02 16.13 ***  .15   .0003
+# 5              treatment:phase 3.20, 15.99  5.02    4.85 *  .10     .01
+# 6                 gender:phase 1.60, 15.99  5.02      0.28 .003     .71
+# 7       treatment:gender:phase 3.20, 15.99  5.02      0.64  .01     .61
+# 8                         hour 1.84, 18.41  3.39 16.69 ***  .13  <.0001
+# 9               treatment:hour 3.68, 18.41  3.39      0.09 .002     .98
+# 10                 gender:hour 1.84, 18.41  3.39      0.45 .004     .63
+# 11       treatment:gender:hour 3.68, 18.41  3.39      0.62  .01     .64
+# 12                  phase:hour 3.60, 35.96  2.67      1.18  .02     .33
+# 13        treatment:phase:hour 7.19, 35.96  2.67      0.35 .009     .93
+# 14           gender:phase:hour 3.60, 35.96  2.67      0.93  .01     .45
+# 15 treatment:gender:phase:hour 7.19, 35.96  2.67      0.74  .02     .65
+# 
+# Sphericity correction method: GG 
+# ---
+# Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘+’ 0.1 ‘ ’ 1
 
 # "numeric" variables are per default converted to factors (as long as factorize = TRUE):
 obk.long$hour2 <- as.numeric(as.character(obk.long$hour))
 
 # gives same results as calls before
-aov_car(value ~ treatment * gender + Error(id/hour2*phase), 
+aov_car(value ~ treatment * gender + Error(id/phase*hour2), 
         data = obk.long, observed = c("gender"))
 
 
@@ -236,7 +238,7 @@ aov_car(value ~ treatment * gender + Error(id/(phase*hour)),
 # add p-value adjustment for all effects (see Cramer et al., 2015, PB&R)
 aov_ez("id", "value", obk.long, between = "treatment", 
        within = c("phase", "hour"), 
-       anova_table = list(p.adjust.method = "holm"))
+       anova_table = list(p_adjust_method = "holm"))
 
 
 ###########################
@@ -286,13 +288,12 @@ obk_anova <- aov_car(value ~ treatment * gender + Error(id/(phase*hour)),
 # in contrast to aov you do not need the within-subject factors outside Error()
 
 str(obk_anova, 1, give.attr = FALSE)
-## List of 6
-##  $ anova_table:Classes 'anova' and 'data.frame':  15 obs. of  6 variables:
-##  $ aov        :List of 5
-##  $ Anova      :List of 14
-##  $ lm         :List of 13
-##  $ data       :List of 3
-##  $ information:List of 5
+# List of 5
+#  $ anova_table:Classes ‘anova’ and 'data.frame':	15 obs. of  6 variables:
+#  $ aov        :List of 5
+#  $ Anova      :List of 14
+#  $ lm         :List of 13
+#  $ data       :List of 3
 
 obk_anova$Anova
 ## Type II Repeated Measures MANOVA Tests: Pillai test statistic
@@ -317,13 +318,8 @@ obk_anova$Anova
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
 }
-\author{
-Henrik Singmann
-
-The design of these functions was influenced by \code{\link[ez]{ezANOVA}} from package \pkg{ez}.
-}
 \references{
-Cramer, A. O. J., van Ravenzwaaij, D., Matzke, D., Steingroever, H., Wetzels, R., Grasman, R. P. P. P., ... Wagenmakers, E.-J. (2015). Hidden multiplicity in exploratory multiway ANOVA: Prevalence and remedies.  \emph{Psychonomic Bulletin & Review}, 1–8. doi:\href{http://doi.org/10.3758/s13423-015-0913-5}{10.3758/s13423-015-0913-5} 
+Cramer, A. O. J., van Ravenzwaaij, D., Matzke, D., Steingroever, H., Wetzels, R., Grasman, R. P. P. P., ... Wagenmakers, E.-J. (2015). Hidden multiplicity in exploratory multiway ANOVA: Prevalence and remedies.  \emph{Psychonomic Bulletin & Review}, 1-8. doi:\href{http://doi.org/10.3758/s13423-015-0913-5}{10.3758/s13423-015-0913-5} 
 
 Maxwell, S. E., & Delaney, H. D. (2004). \emph{Designing Experiments and Analyzing Data: A Model-Comparisons Perspective}. Mahwah, N.J.: Lawrence Erlbaum Associates.
 
@@ -336,4 +332,8 @@ Various methods for objects of class \code{afex_aov} are available: \code{\link{
 
 \code{\link{mixed}} provides a (formula) interface for obtaining p-values for mixed-models via \pkg{lme4}.
 }
+\author{
+Henrik Singmann
 
+The design of these functions was influenced by \code{\link[ez]{ezANOVA}} from package \pkg{ez}.
+}

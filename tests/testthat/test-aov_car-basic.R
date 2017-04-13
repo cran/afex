@@ -27,7 +27,7 @@ test_that("purely within ANOVA, return='univ': Maxell & Delaney (2004), Table 12
 test_that("Analysis of Singmann & Klauer (2011, Exp. 1)", {
   data(sk2011.1, package = "afex")
 
-  out1 <-  aov_ez("id", "response", sk2011.1[ sk2011.1$what == "affirmation",], within = c("inference", "type"), between = "instruction", anova_table=(es = "pes"), fun.aggregate = mean, return = "afex_aov")
+  out1 <-  aov_ez("id", "response", sk2011.1[ sk2011.1$what == "affirmation",], within = c("inference", "type"), between = "instruction", anova_table=(es = "pes"), fun_aggregate = mean, return = "afex_aov")
   
   df_num <- rep(1, 7)
   df_den <- rep(38, 7)
@@ -86,7 +86,7 @@ test_that("Data from O'Brien & Kaiser replicates their paper (p. 328, Table 8, c
 
 test_that("Data from O'Brien & Kaiser adjusted for familywise error rate (p. 328, Table 8, column 'average'", {
   data(obk.long, package = "afex")
-  out1 <- aov_car(value ~ treatment * gender + Error(id/(phase*hour)), data = obk.long, observed = "gender", return = "afex_aov", anova_table = list(correction = "none", p.adjust.method = "bonferroni"))
+  out1 <- aov_car(value ~ treatment * gender + Error(id/(phase*hour)), data = obk.long, observed = "gender", return = "afex_aov", anova_table = list(correction = "none", p_adjust_method = "bonferroni"))
   
   expect_that(unname(unlist(out1[["anova_table"]]["treatment", c("num Df", "den Df", "F")])), equals(c(2, 10, 3.94), tolerance = 0.001))
   expect_that(unname(unlist(out1[["anova_table"]]["gender", c("num Df", "den Df", "F")])), equals(c(1, 10, 3.66), tolerance = 0.001))
@@ -122,3 +122,18 @@ test_that("Data from O'Brien & Kaiser adjusted for familywise error rate (p. 328
   expect_equal(out1[["anova_table"]], anova_tab, check.attributes = FALSE)
   
 })
+
+test_that("afex_aov printing", {
+  data(sk2011.1, package = "afex")
+  out_new <-  aov_ez("id", "response", sk2011.1[ sk2011.1$what == "affirmation",], within = c("inference", "type"), between = "instruction", anova_table=(es = "pes"), fun_aggregate = mean, return = "afex_aov")
+  
+  expect_output(print(out_new), "Signif. codes")
+  expect_output(print(anova(out_new)), "Signif. codes")
+  expect_output(print(nice(out_new)), "Anova")
+  
+  load("afex_aov_16_1.rda")
+  expect_output(print(out1), "Anova")
+  expect_output(print(anova(out1)), "Signif. codes")
+  expect_output(print(nice(out1)), "Anova")
+})
+

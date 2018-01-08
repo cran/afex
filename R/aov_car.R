@@ -1,6 +1,6 @@
 #' Convenient ANOVA estimation for factorial designs
 #'
-#' These functions allow convenient specification of any type of ANOVAs (i.e., purely within-subjects ANOVAs, purely between-subjects ANOVAs, and mixed between-within or split-plot ANOVAs) for data in the \strong{long} format (i.e., one observation per row). If the data has more than one observation per individual and cell of the design (e.g., multiple responses per condition), the data will by automatically aggregated. The default settings reproduce results from commercial statistical packages such as SPSS or SAS. \code{aov_ez} is called specifying the factors as character vectors, \code{aov_car} is called using a formula similar to \code{\link{aov}} specifying an error strata for the within-subject factor(s), and \code{aov_4} is called with a \pkg{lme4}-like formula (all ANOVA functions return identical results). The returned object contains the ANOVA also fitted via base R's \code{\link{aov}} which can be passed to e.g., \pkg{lsmeans} for further analysis (e.g., follow-up tests, contrasts, plotting, etc.). These functions employ \code{\link[car]{Anova}} (from the \pkg{car} package) to provide test of effects avoiding the somewhat unhandy format of \code{car::Anova}. 
+#' These functions allow convenient specification of any type of ANOVAs (i.e., purely within-subjects ANOVAs, purely between-subjects ANOVAs, and mixed between-within or split-plot ANOVAs) for data in the \strong{long} format (i.e., one observation per row). If the data has more than one observation per individual and cell of the design (e.g., multiple responses per condition), the data will by automatically aggregated. The default settings reproduce results from commercial statistical packages such as SPSS or SAS. \code{aov_ez} is called specifying the factors as character vectors, \code{aov_car} is called using a formula similar to \code{\link{aov}} specifying an error strata for the within-subject factor(s), and \code{aov_4} is called with a \pkg{lme4}-like formula (all ANOVA functions return identical results). The returned object contains the ANOVA also fitted via base R's \code{\link{aov}} which can be passed to e.g., \pkg{emmeans} for further analysis (e.g., follow-up tests, contrasts, plotting, etc.). These functions employ \code{\link[car]{Anova}} (from the \pkg{car} package) to provide test of effects avoiding the somewhat unhandy format of \code{car::Anova}. 
 #'
 #' @usage 
 #' aov_ez(id, dv, data, between = NULL, within = NULL, covariate = NULL, 
@@ -45,7 +45,7 @@
 #' 
 #' \describe{
 #'   \item{\code{"anova_table"}}{An ANOVA table of class \code{c("anova", "data.frame")}.}
-#'   \item{\code{"aov"}}{\code{aov} object returned from \code{\link{aov}} (should not be used to evaluate significance of effects, but can be passed to \code{lsmeans} for post-hoc tests).}
+#'   \item{\code{"aov"}}{\code{aov} object returned from \code{\link{aov}} (should not be used to evaluate significance of effects, but can be passed to \code{emmeans} for post-hoc tests).}
 #'   \item{\code{"Anova"}}{object returned from \code{\link[car]{Anova}}, an object of class \code{"Anova.mlm"} (if within-subjects factors are present) or of class \code{c("anova", "data.frame")}.}
 #'   \item{\code{"lm"}}{the object fitted with \code{lm} and passed to \code{Anova} (i.e., an object of class \code{"lm"} or \code{"mlm"}). Also returned if \code{return = "lm"}.}
 #'   \item{\code{"data"}}{a list containing: (1) \code{long} (the possibly aggregated data in long format used for \code{aov}), \code{wide} (the data used to fit the \code{lm} object), and \code{idata} (if within-subject factors are present, the \code{idata} argument passed to \code{car::Anova}). Also returned if \code{return = "data"}.}
@@ -76,21 +76,21 @@
 #' }
 #' 
 #' \subsection{Follow-Up Contrasts and Post-Hoc Tests}{ 
-#' The S3 object returned per default can be directly passed to \code{lsmeans::lsmeans} for further analysis. This allows to test any type of contrasts that might be of interest independent of whether or not this contrast involves between-subject variables, within-subject variables, or a combination thereof. The general procedure to run those contrasts is the following (see Examples for a full example):
+#' The S3 object returned per default can be directly passed to \code{emmeans::emmeans} for further analysis. This allows to test any type of contrasts that might be of interest independent of whether or not this contrast involves between-subject variables, within-subject variables, or a combination thereof. The general procedure to run those contrasts is the following (see Examples for a full example):
 #' 
 #'  \enumerate{
 #'    \item Estimate an \code{afex_aov} object with the function returned here. For example: \code{x <- aov_car(dv ~ a*b + (id/c), d)}
-#'    \item Obtain a \code{\link[lsmeans]{ref.grid}} object by running \code{\link[lsmeans]{lsmeans}} on the \code{afex_aov} object from step 1 using the factors involved in the contrast. For example: \code{r <- lsmeans(x, ~a:c)}
+#'    \item Obtain a \code{\link[emmeans]{emmGrid-class}} object by running \code{\link[emmeans]{emmeans}} on the \code{afex_aov} object from step 1 using the factors involved in the contrast. For example: \code{r <- emmeans(x, ~a:c)}
 #'    \item Create a list containing the desired contrasts on the reference grid object from step 2. For example: \code{con1 <- list(a_x = c(-1, 1, 0, 0, 0, 0), b_x = c(0, 0, -0.5, -0.5, 0, 1))}
-#'    \item Test the contrast on the reference grid using \code{\link[lsmeans]{contrast}}. For example: \code{contrast(r, con1)}
+#'    \item Test the contrast on the reference grid using \code{\link[emmeans]{contrast}}. For example: \code{contrast(r, con1)}
 #'    \item To control for multiple testing p-value adjustments can be specified. For example the Bonferroni-Holm correction: \code{contrast(r, con1, adjust = "holm")}
 #'  }
 #'  
-#'  Note that \pkg{lsmeans} allows for a variety of advanced settings and simplifiations, for example: all pairwise comparison of a single factor using one command (e.g., \code{lsmeans(x, "a", contr = "pairwise")}) or advanced control for multiple testing by passing objects to \pkg{multcomp}. A comprehensive overview of the functionality is provided in the accompanying vignettes (see \href{https://CRAN.R-project.org/package=lsmeans}{here}).
+#'  Note that \pkg{emmeans} allows for a variety of advanced settings and simplifiations, for example: all pairwise comparison of a single factor using one command (e.g., \code{emmeans(x, "a", contr = "pairwise")}) or advanced control for multiple testing by passing objects to \pkg{multcomp}. A comprehensive overview of the functionality is provided in the accompanying vignettes (see \href{https://CRAN.R-project.org/package=emmeans}{here}).
 #'  
-#'  A caveat regarding the use of \pkg{lsmeans} concerns the assumption of sphericity for ANOVAs including within-subjects/repeated-measures factors (with more than two levels). While the ANOVA tables per default report results using the Greenhousse-Geisser correction, no such correction is available when using \pkg{lsmeans}. This may result in anti-conservative tests.
+#'  A caveat regarding the use of \pkg{emmeans} concerns the assumption of sphericity for ANOVAs including within-subjects/repeated-measures factors (with more than two levels). While the ANOVA tables per default report results using the Greenhousse-Geisser correction, no such correction is available when using \pkg{emmeans}. This may result in anti-conservative tests.
 #'  
-#'  \pkg{lsmeans} is loaded/attached automatically when loading \pkg{afex} via \code{library} or \code{require}.
+#'  \pkg{emmeans} is loaded/attached automatically when loading \pkg{afex} via \code{library} or \code{require}.
 #' }  
 #' 
 #' \subsection{Methods for \code{afex_aov} Objects}{
@@ -142,9 +142,21 @@
 #' @encoding UTF-8
 #'
 
-aov_car <- function(formula, data, fun_aggregate = NULL, type = afex_options("type"), factorize = afex_options("factorize"), check_contrasts = afex_options("check_contrasts"), return = afex_options("return_aov"), observed = NULL, anova_table = list(), ...) {
-  return <- match.arg(return, c("Anova", "lm", "data", "nice", "afex_aov", "univariate", "marginal", "aov"))
+aov_car <- function(formula, 
+                    data, 
+                    fun_aggregate = NULL, 
+                    type = afex_options("type"), 
+                    factorize = afex_options("factorize"), 
+                    check_contrasts = afex_options("check_contrasts"), 
+                    return = afex_options("return_aov"), 
+                    observed = NULL, 
+                    anova_table = list(), 
+                    ...) {
+  return <- match.arg(return, 
+                      c("Anova", "lm", "data", "nice", "afex_aov", 
+                        "univariate", "marginal", "aov"))
   dots <- list(...)
+  
   ### deprercate old argument names:
   if("check.contrasts" %in% names(dots)) {  
     warn_deprecated_arg("check.contrasts", "check_contrasts")
@@ -156,20 +168,24 @@ aov_car <- function(formula, data, fun_aggregate = NULL, type = afex_options("ty
     fun_aggregate <- dots$fun.aggregate
     dots <- dots[names(dots) != "fun.aggregate"]
   }
+  
+  # transform to data.frame if necessary (e.g., when using dplyr)
+  data <- as.data.frame(data)
+  
   # stuff copied from aov:
   Terms <- terms(formula, "Error", data = data)
   indError <- attr(Terms, "specials")$Error
   if (length(indError) > 1L) 
-    stop(sprintf(ngettext(length(indError), "there are %d Error terms: only 1 is allowed", 
-                          "there are %d Error terms: only 1 is allowed"), length(indError)), 
+    stop(sprintf(ngettext(length(indError), 
+                          "there are %d Error terms: only 1 is allowed", 
+                          "there are %d Error terms: only 1 is allowed"), 
+                 length(indError)), 
          domain = NA)
+  
   # from here, code by Henrik Singmann:
   vars <- all.vars(formula)
   dv <- vars[1]
-  # transform to data.frame if necessary (e.g., when using dplyr)
-  data <- as.data.frame(data)
-  #check if dv is numeric:
-  if (!is.numeric(data[,dv])) stop("dv needs to be numeric.")
+  if (!is.numeric(data[,dv])) stop("dv needs to be numeric.") #check if dv is numeric
   vars <- vars[-1]
   parts <- attr(terms(formula, "Error", data = data), "term.labels")
   error.term <- parts[str_detect(parts, "^Error\\(")]
@@ -198,6 +214,7 @@ aov_car <- function(formula, data, fun_aggregate = NULL, type = afex_options("ty
   data <- droplevels(data) #remove empty levels.
   # make id and within variables to factors:
   if (!(is.factor(data[,id]))) data[,id] <- factor(data[,id])
+  
   # factorize if necessary
   if (factorize) {
     if (any(!vapply(data[, between, drop = FALSE], is.factor, TRUE))) {
@@ -211,39 +228,76 @@ aov_car <- function(formula, data, fun_aggregate = NULL, type = afex_options("ty
     # check if numeric variables are centered.
     c.ns <- between[vapply(data[, between, drop = FALSE], is.numeric, TRUE)]
     if (length(c.ns) > 0) {
-      non.null <- c.ns[!abs(vapply(data[, c.ns, drop = FALSE], mean, 0)) < .Machine$double.eps ^ 0.5]
-      if (length(non.null) > 0) warning(str_c("Numerical variables NOT centered on 0 (i.e., likely bogus results): ", str_c(non.null, collapse = ", ")), call. = FALSE)
+      non.null <- 
+        c.ns[!abs(vapply(data[, c.ns, drop = FALSE], mean, 0)) < .Machine$double.eps ^ 0.5]
+      if (length(non.null) > 0) 
+        warning(str_c("Numerical variables NOT centered on 0 (i.e., likely bogus results): ", 
+                      str_c(non.null, collapse = ", ")), call. = FALSE)
     }
   }
+  
   for (i in c(between, within)) {
-    if (is.factor(data[,i]) && length(unique(data[,i])) == 1) stop(paste0("Factor \"", i, "\" consists of one level only. Remove factor from model?"))
+    if (is.factor(data[,i]) && length(unique(data[,i])) == 1) 
+      stop(paste0("Factor \"", i, 
+                  "\" consists of one level only. Remove factor from model?"))
   }
+  
   # make formulas
-  rh2 <- if (length(between.escaped) > 0) str_c(effect.parts.no.within, collapse = "+") else "1"
-  lh1 <- str_c(id, if (length(between.escaped) > 0) str_c(between.escaped, collapse = "+") else NULL, sep = "+")
+  rh2 <- if (length(between.escaped) > 0) 
+    str_c(effect.parts.no.within, collapse = "+") 
+  else "1"
+  lh1 <- str_c(id, 
+               if (length(between.escaped) > 0) 
+                 str_c(between.escaped, collapse = "+") 
+               else NULL, 
+               sep = "+")
   rh1 <- str_c(within.escaped, collapse = "+")
   rh3 <- str_c(within.escaped, collapse = "*")
-  # converting all within subject factors to factors and adding a leading charcter (x) if starting with a digit.
+  
+  # converting all within subject factors to factors and 
+  # add a leading charcter (x) if starting with a digit.
   for (within.factor in within) {
-    if (is.factor(data[,within.factor])) levels(data[,within.factor]) <- make.names(levels(data[,within.factor]), unique = TRUE)
-    else data[,within.factor] <- factor(as.character(data[,within.factor]), levels = unique(as.character(data[,within.factor])), labels = make.names(unique(as.character(data[,within.factor])), unique=TRUE))
+    if (is.factor(data[,within.factor])) 
+      levels(data[,within.factor]) <- make.names(levels(data[,within.factor]), 
+                                                 unique = TRUE)
+    else 
+      data[,within.factor] <- 
+        factor(as.character(data[,within.factor]), 
+               levels = unique(as.character(data[,within.factor])), 
+               labels = make.names(unique(as.character(data[,within.factor])), 
+                                   unique=TRUE))
   }
+  
   # Check if each id is in only one between subjects cell.
   between.factors <- between[vapply(data[, between, drop = FALSE], is.factor, TRUE)]
   if (length(between.factors) > 0) {
     split.data <- split(data, lapply(between.factors, function(x) data[,x]))
     ids.per.condition <- lapply(split.data, function(x) unique(as.character(x[,id])))
-    ids.in.more.condition <- unique(unlist(lapply(seq_along(ids.per.condition), function(x) unique(unlist(lapply(ids.per.condition[-x], function(y, z = ids.per.condition[[x]]) intersect(z, y)))))))
-    if (length(ids.in.more.condition) > 0) stop(str_c("Following ids are in more than one between subjects condition:\n", str_c(ids.in.more.condition, collapse = ", ")))
+    ids.in.more.condition <- 
+      unique(unlist(
+        lapply(seq_along(ids.per.condition), 
+               function(x) unique(unlist(
+                 lapply(ids.per.condition[-x], 
+                        function(y, z = ids.per.condition[[x]]) intersect(z, y)))))))
+    if (length(ids.in.more.condition) > 0) {
+      stop(
+        str_c("Following ids are in more than one between subjects condition:\n", 
+              str_c(ids.in.more.condition, collapse = ", ")))
+    }
   }
+  
   # Is fun_aggregate NULL and aggregation necessary?
   if (is.null(fun_aggregate)) {
-    if (any(xtabs(as.formula(str_c("~", id.escaped, if (length(within) > 0) "+", rh1)), data = data) > 1)) {
+    if (any(xtabs(
+      as.formula(str_c("~", id.escaped, if (length(within) > 0) "+", rh1)), 
+      data = data) > 1)) {
       warning("More than one observation per cell, aggregating the data using mean (i.e, fun_aggregate = mean)!", call. = FALSE)
       fun_aggregate <- mean
     }
   } 
-  # if return = "lme4" return the (aggregated) data fitted with lmer!
+  
+  # if return = "lme4" return the (aggregated) data fitted with lmer! 
+  # (might consider to add later)
   #   if (return == "lme4") {
   #     warning("lme4 return is experimental!\nAlso: Missing values and contrasts not checked for return = 'lme4'!")
   #     n.dat <- dcast(data, formula = as.formula(str_c(lh1, if (length(within) > 0) paste0("+", rh1) else "", "~ .", sep = "")), fun.aggregate = fun.aggregate, ..., value.var = dv)
@@ -251,59 +305,85 @@ aov_car <- function(formula, data, fun_aggregate = NULL, type = afex_options("ty
   #     f.within.new <- str_replace_all(rh1, pattern="\\+", replacement="*")
   #     return(lmer(as.formula(str_c("value~", rh2, if (length(within) > 0) paste0("*", f.within.new) else "", "+ (1", if (length(within) > 0) paste0("+", f.within.new) else "", "|", id, ")" , sep = "")), data = n.dat))
   #   }
+  
   # prepare the data:
-  tmp.dat <- do.call(dcast, args = c(data = list(data), formula = as.formula(str_c(lh1, if (length(within) > 0) rh1 else ".", sep = "~")), fun.aggregate = fun_aggregate, dots, value.var = dv))
+  
+  tmp.dat <- do.call(
+    dcast, 
+    args = 
+      c(data = list(data), 
+        formula = as.formula(str_c(lh1, 
+                                   if (length(within) > 0) rh1 
+                                   else ".", sep = "~")), 
+        fun.aggregate = fun_aggregate, dots, value.var = dv))
+  
   # check for missing values:
   if (any(is.na(tmp.dat))) {
     missing.values <- apply(tmp.dat, 1, function(x) any(is.na(x)))
-    warning(str_c("Missing values for following ID(s):\n", str_c(tmp.dat[missing.values,1], collapse = ", "), "\nRemoving those cases from the analysis."), call. = FALSE)        
+    missing_ids <- unique(tmp.dat[missing.values,1])
+    warning(str_c("Missing values for following ID(s):\n", 
+                  str_c(missing_ids, collapse = ", "), 
+                  "\nRemoving those cases from the analysis."), call. = FALSE) 
+    tmp.dat <- tmp.dat[!missing.values,]
+    data <- data[ !(data[,id] %in% missing_ids),]
   }
+
   #   if (length(between) > 0) {
   #     n_data_points <- xtabs(as.formula(paste("~", paste(between, collapse = "+"))), data = tmp.dat)
   #     if (any(n_data_points == 0)) warning("Some cells of the fully crossed between-subjects design are empty. A full model might not be estimable.")
   #   }
-  # marginals: (disabled in April 2015)
-  dat.ret <- do.call(dcast, args = c(data = list(data), formula = as.formula(str_c(str_c(lh1, if (length(within) > 0) rh1 else NULL, sep = "+"), "~.")), fun.aggregate = fun_aggregate, dots, value.var = dv))
+  
+  # marginals: (disabled in April 2015), dat.ret is now used for aov()
+  dat.ret <- do.call(
+    dcast, 
+    args = c(data = list(data), 
+             formula = as.formula(str_c(str_c(lh1, 
+                                              if (length(within) > 0) rh1 
+                                              else NULL, sep = "+"), "~.")), 
+             fun.aggregate = fun_aggregate, 
+             dots, 
+             value.var = dv))
   colnames(dat.ret)[length(colnames(dat.ret))] <- dv
-  #   full.formula <- as.formula(str_c(dv, " ~ ", str_c(c(between.factors, within), collapse = "*")))
-  #   all.terms <- attr(terms(full.formula), "term.labels")
-  #   marginals.out <- lapply(all.terms, function(x) aggregate(as.formula(str_c(dv, " ~ ", x)), dat.ret, mean))
-  #   names(marginals.out) <- all.terms
-  #   grand.mean <- data.frame(mean(dat.ret[,dv]))
-  #   colnames(grand.mean) <- dv
-  #   marginals.out <- c(grand_mean = list(grand.mean), marginals.out)
-  #   if (return == "marginal") {
-  #     return(marginals.out)
-  #   }
+  
   if (length(between) > 0) {
     if (check_contrasts) {
       resetted <- NULL
       for (i in between) {
         if (is.factor(tmp.dat[,i])) {
-          if (is.null(attr(tmp.dat[,i], "contrasts")) & (options("contrasts")[[1]][1] != "contr.sum")) {
+          if (is.null(attr(tmp.dat[,i], "contrasts")) & 
+              (options("contrasts")[[1]][1] != "contr.sum")) {
             contrasts(tmp.dat[,i]) <- "contr.sum"
             resetted  <- c(resetted, i)
           }
-          else if (!is.null(attr(tmp.dat[,i], "contrasts")) && attr(tmp.dat[,i], "contrasts") != "contr.sum") {
+          else if (!is.null(attr(tmp.dat[,i], "contrasts")) && 
+                   attr(tmp.dat[,i], "contrasts") != "contr.sum") {
             contrasts(tmp.dat[,i]) <- "contr.sum"
             resetted  <- c(resetted, i)
           }
         }
       }
-      if (!is.null(resetted)) message(str_c("Contrasts set to contr.sum for the following variables: ", str_c(resetted, collapse=", ")))
+      if (!is.null(resetted)) 
+        message(str_c("Contrasts set to contr.sum for the following variables: ", 
+                      str_c(resetted, collapse=", ")))
     } else {
       non_sum_contrast <- c()
       for (i in between) {
         if (is.factor(tmp.dat[,i])) {
-          if (is.null(attr(tmp.dat[,i], "contrasts")) & (options("contrasts")[[1]][1] != "contr.sum")) {
+          if (is.null(attr(tmp.dat[,i], "contrasts")) & 
+              (options("contrasts")[[1]][1] != "contr.sum")) {
             non_sum_contrast <- c(non_sum_contrast, between)
           }
-          else if (!is.null(attr(tmp.dat[,i], "contrasts")) && attr(tmp.dat[,i], "contrasts") != "contr.sum") {
+          else if (!is.null(attr(tmp.dat[,i], "contrasts")) && 
+                   attr(tmp.dat[,i], "contrasts") != "contr.sum") {
             non_sum_contrast <- c(non_sum_contrast, between)
           }
         }
       }
-      if((type == 3 | type == "III") && (length(non_sum_contrast)>0)) warning(str_c("Calculating Type 3 sums with contrasts != 'contr.sum' for: ", paste0(non_sum_contrast, collapse=", "), "\n  Results likely bogus or not interpretable!\n  You probably want check_contrasts = TRUE or options(contrasts=c('contr.sum','contr.poly'))"), call. = FALSE)
+      if((type == 3 | type == "III") && (length(non_sum_contrast)>0)) 
+        warning(str_c("Calculating Type 3 sums with contrasts != 'contr.sum' for: ", 
+                      paste0(non_sum_contrast, collapse=", "), 
+                      "\n  Results likely bogus or not interpretable!\n  You probably want check_contrasts = TRUE or options(contrasts=c('contr.sum','contr.poly'))"), 
+                call. = FALSE)
     }
   }
   if (return %in% c("aov", "afex_aov")) include.aov <- TRUE
@@ -314,12 +394,16 @@ aov_car <- function(formula, data, fun_aggregate = NULL, type = afex_options("ty
       contrasts <- as.list(rep("contr.sum", sum(factor_vars)))
       names(contrasts) <- c(within, between)[factor_vars]
     }
-    #return(aov(formula(paste(dv, "~", paste(c(between, within), collapse = "*"),  if (length(within) > 0) paste0("+Error(", id, "/(",paste(within, collapse="*"), "))") else NULL)), data=dat.ret, contrasts = contrasts))
-    aov <- aov(formula(paste(dv.escaped, "~", paste(c(between.escaped, within.escaped), collapse = "*"),  if (length(within) > 0) paste0("+Error(", id.escaped, "/(",paste(within.escaped, collapse="*"), "))") else NULL)), data=dat.ret, contrasts = contrasts)
+    aov <- aov(formula(paste(
+      dv.escaped, "~", paste(c(between.escaped, within.escaped), collapse = "*"),  
+      if (length(within) > 0) 
+        paste0("+Error(", id.escaped, "/(",paste(within.escaped, collapse="*"), "))") 
+      else NULL)), data=dat.ret, contrasts = contrasts)
   }
   if(return == "aov") return(aov)
   data.l <- list(long = dat.ret, wide = tmp.dat)
   if (return == "data") return(tmp.dat)
+  
   # branching based on type of ANOVA
   if (length(within) > 0) {  # if within-subject factors are present:
     # make idata argument
@@ -330,17 +414,30 @@ aov_car <- function(formula, data, fun_aggregate = NULL, type = afex_options("ty
       idata <- data.frame(levels(data[,within]))
       colnames(idata) <- within
     }
-    # print(as.formula(str_c("cbind(",str_c(colnames(tmp.dat[-(seq_along(c(id, between)))]), collapse = ", "), ") ~ ", rh2)))
-    # browser()
-    tmp.lm <- do.call("lm", list(formula = as.formula(str_c("cbind(",str_c(colnames(tmp.dat[-(seq_along(c(id, between)))]), collapse = ", "), ") ~ ", rh2)), data = tmp.dat))
-    # browser()
-    if (any(is.na(coef(tmp.lm)))) stop("Some parameters are not estimable, most likely due to empty cells of the design (i.e., structural missings). Check your data.")
+    tmp.lm <- do.call(
+      "lm", 
+      list(formula = 
+             as.formula(str_c("cbind(", 
+                              str_c(colnames(tmp.dat[-(seq_along(c(id, between)))]), 
+                                    collapse = ", "), 
+                              ") ~ ", 
+                              rh2)), 
+           data = tmp.dat))
+    if (any(is.na(coef(tmp.lm)))) 
+      stop("Some parameters are not estimable, most likely due to empty cells of the design (i.e., structural missings). Check your data.")
     if (return == "lm") return(tmp.lm)
-    Anova.out <- Anova(tmp.lm, idata = idata, idesign = as.formula(str_c("~", rh3)), type = type)
+    
+    Anova.out <- Anova(tmp.lm, 
+                       idata = idata, 
+                       idesign = as.formula(str_c("~", rh3)), 
+                       type = type)
     data.l <- c(data.l, idata = list(idata))
+    
   } else { # if NO within-subjetc factors are present (i.e., purley between ANOVA):
     colnames(tmp.dat)[ncol(tmp.dat)] <- "dv"
-    tmp.lm <- do.call("lm", list(formula = as.formula(str_c("dv ~ ", rh2)), data = tmp.dat))
+    tmp.lm <- do.call("lm", 
+                      list(formula = as.formula(str_c("dv ~ ", rh2)), 
+                           data = tmp.dat))
     if (return == "lm") return(tmp.lm)
     Anova.out <- Anova(tmp.lm, type = type)
   }
@@ -358,14 +455,18 @@ aov_car <- function(formula, data, fun_aggregate = NULL, type = afex_options("ty
     attr(afex_aov, "within") <- within
     attr(afex_aov, "between") <- between
     attr(afex_aov, "type") <- type
-    afex_aov$anova_table <- do.call("anova", args = c(object = list(afex_aov), observed = list(observed), anova_table))
+    afex_aov$anova_table <- 
+      do.call("anova", 
+              args = c(object = list(afex_aov), observed = list(observed), 
+                       anova_table))
     return(afex_aov)
   }
   if (return == "Anova") return(Anova.out)
   else if (return == "univariate") {
-    #if (class(Anova.out) == "Anova.mlm") return(summary(Anova.out, multivariate = FALSE))
-    if (inherits(Anova.out, "Anova.mlm")) return(summary(Anova.out, multivariate = FALSE))
-    else return(Anova.out)
+    if (inherits(Anova.out, "Anova.mlm")) 
+      return(summary(Anova.out, multivariate = FALSE))
+    else 
+      return(Anova.out)
   }
   else if (return == "nice") {
      afex_aov <- list(
@@ -378,14 +479,30 @@ aov_car <- function(formula, data, fun_aggregate = NULL, type = afex_options("ty
     attr(afex_aov, "within") <- within
     attr(afex_aov, "between") <- between
     attr(afex_aov, "type") <- type
-    afex_aov$anova_table <- do.call("anova", args = c(object = list(afex_aov), observed = list(observed), anova_table))
-    #afex_aov$anova_table <- do.call("anova", args = c(object = list(afex_aov), observed = list(observed), args.return))
-    return(do.call("nice", args = c(object = list(afex_aov), observed = list(observed), anova_table)))
+    afex_aov$anova_table <- 
+      do.call("anova", 
+              args = c(object = list(afex_aov), 
+                       observed = list(observed), 
+                       anova_table))
+    return(do.call("nice", 
+                   args = c(object = list(afex_aov), 
+                            observed = list(observed), 
+                            anova_table)))
   }
 }
 
-aov_4 <- function(formula, data, observed = NULL, fun_aggregate = NULL, type = afex_options("type"), factorize = afex_options("factorize"), check_contrasts = afex_options("check_contrasts"), return = afex_options("return_aov"), anova_table = list(), ..., print.formula = FALSE) {
-  #browser()
+aov_4 <- function(formula, 
+                  data, 
+                  observed = NULL, 
+                  fun_aggregate = NULL, 
+                  type = afex_options("type"), 
+                  factorize = afex_options("factorize"), 
+                  check_contrasts = afex_options("check_contrasts"), 
+                  return = afex_options("return_aov"), 
+                  anova_table = list(), 
+                  ..., 
+                  print.formula = FALSE) {
+
   barterms <- findbars(formula)
   if (length(barterms) > 1) stop("aov_4 only allows one random effect term")
   within <- all.vars(barterms[[1]][[2]])
@@ -394,7 +511,11 @@ aov_4 <- function(formula, data, observed = NULL, fun_aggregate = NULL, type = a
   id <- escape_vars(id)
   within <- escape_vars(within)
   
-  error <- str_c(" + Error(", id, if (length(within) > 0) "/(" else "", str_c(within, collapse = " * "), if (length(within) > 0) ")" else "", ")")
+  error <- str_c(" + Error(", 
+                 id, 
+                 if (length(within) > 0) "/(" else "", str_c(within, collapse = " * "), 
+                 if (length(within) > 0) ")" else "", 
+                 ")")
   lh <- as.character(nobars(formula))
   if (length(lh) == 1) {
    dv <- lh
@@ -405,27 +526,66 @@ aov_4 <- function(formula, data, observed = NULL, fun_aggregate = NULL, type = a
   }
   formula <- str_c(dv, " ~ ", rh, error)
   if (print.formula) message(str_c("Formula send to aov_car: ", formula))
-  aov_car(formula = as.formula(formula), data = data, fun_aggregate = fun_aggregate, type = type, return = return, factorize = factorize, check_contrasts = check_contrasts, observed = observed, anova_table = anova_table, ...)
+  aov_car(formula = as.formula(formula), 
+          data = data, 
+          fun_aggregate = fun_aggregate, 
+          type = type, 
+          return = return, 
+          factorize = factorize, 
+          check_contrasts = check_contrasts, 
+          observed = observed, 
+          anova_table = anova_table, 
+          ...)
 }
 
 
 
-aov_ez <- function(id, dv, data, between = NULL, within = NULL, covariate = NULL, observed = NULL, fun_aggregate = NULL, type = afex_options("type"), factorize = afex_options("factorize"), check_contrasts = afex_options("check_contrasts"), return = afex_options("return_aov"), anova_table = list(), ..., print.formula = FALSE) {
-  if (is.null(between) & is.null(within)) stop("Either between or within need to be non-NULL!")
+aov_ez <- function(id, 
+                   dv, 
+                   data, 
+                   between = NULL, 
+                   within = NULL, 
+                   covariate = NULL, 
+                   observed = NULL, 
+                   fun_aggregate = NULL, 
+                   type = afex_options("type"), 
+                   factorize = afex_options("factorize"), 
+                   check_contrasts = afex_options("check_contrasts"), 
+                   return = afex_options("return_aov"), 
+                   anova_table = list(), 
+                   ..., 
+                   print.formula = FALSE) {
+  if (is.null(between) & is.null(within)) 
+    stop("Either between or within need to be non-NULL!")
   if (!is.null(covariate)) {
     covariate <- escape_vars(covariate)
     covariate <- str_c(covariate, collapse = "+")
   }
-  #browser()
   id        <- escape_vars(id)
   dv        <- escape_vars(dv)
   between   <- escape_vars(between)
   within    <- escape_vars(within)
-  rh <- if (!is.null(between) || !is.null(covariate)) str_c(if (!is.null(between)) str_c(between, collapse = " * ") else NULL, covariate, sep = " + ") else "1"
-  error <- str_c(" + Error(", id, if (!is.null(within)) "/(" else "", str_c(within, collapse = " * "), if (length(within) > 0) ")" else "", ")")
+  rh <- if (!is.null(between) || !is.null(covariate)) 
+    str_c(if (!is.null(between)) str_c(between, collapse = " * ") else NULL, 
+          covariate, sep = " + ") else "1"
+  error <- str_c(" + Error(", 
+                 id, 
+                 if (!is.null(within)) "/(" else "", 
+                 str_c(within, collapse = " * "), 
+                 if (length(within) > 0) ")" else "", 
+                 ")")
   formula <- str_c(dv, " ~ ", rh, error)
   if (print.formula) message(str_c("Formula send to aov_car: ", formula))
-  aov_car(formula = as.formula(formula), data = data, fun_aggregate = fun_aggregate, type = type, return = return, factorize = factorize, check_contrasts = check_contrasts, observed = observed, anova_table = anova_table, ...)
+  aov_car(formula = as.formula(formula), 
+          data = data, 
+          fun_aggregate = fun_aggregate, 
+          type = type, 
+          return = return, 
+          factorize = factorize, 
+          check_contrasts = check_contrasts, 
+          observed = observed, 
+          anova_table = anova_table, 
+          ...)
 }
 
 

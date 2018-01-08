@@ -1,6 +1,12 @@
 
 context("ANOVAs: known bugs")
 
+test_that("aov does not throw 'Error() model is singular' warning for missing values", {
+  data(md_12.1)
+  md_12.1b <- md_12.1[-1,]
+  expect_warning(aov_ez("id", "rt", md_12.1b, within = c("angle", "noise")), "Missing values", all = TRUE)
+})
+
 test_that("regex works correctly in aov_car when also having within factors outside the Error term", {
   data(obk.long)
   expect_is(aov_car(value ~ treatment * gender*phase*hour + Error(id/phase*hour), data = obk.long), "afex_aov")
@@ -225,4 +231,17 @@ test_that("aov_ez works with multiple covariates", {
   msq2$condition <- msq2$condition-mean(msq2$condition) # that is somewhat stupid
   expect_is(aov_ez(data=msq2, dv="Extraversion", id = "ID", between = "condition", 
     covariate=c("TOD", "MSQ_Time"), factorize=FALSE, fun_aggregate = mean), "afex_aov")
+})
+
+test_that("aov_car works with p.val adjustment == NA for HF as well as GG", {
+  # see: https://github.com/singmann/afex/issues/36
+  load("anova_hf_error.rda")
+  expect_is(nice(aov_ez("Snum", "RT", demo, within=c("DistF", "WidthF", "AngleF"))), 
+            "nice_table")
+  expect_is(nice(aov_ez("Snum", "RT", demo, within=c("DistF", "WidthF", "AngleF"), 
+                   anova_table = list(correction = "GG"))),
+            "nice_table")
+  expect_is(nice(aov_ez("Snum", "RT", demo, within=c("DistF", "WidthF", "AngleF"), 
+                   anova_table = list(correction = "HF"))),
+            "nice_table")
 })

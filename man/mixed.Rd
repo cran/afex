@@ -36,7 +36,7 @@ lmer_alt(formula, data, check_contrasts = FALSE, ...)
 
 \item{all_fit}{logical. Should \code{\link{all_fit}} be used to fit each model with each available optimization algorithm and the results that provided the best fit in each case be used? Warning: This can dramatically increase the optimization time. Adds two new attributes to the returned object designating which algorithm was selected and the log-likelihoods for each algorithm. Note that only warnings from the initial fit are emitted during fitting. The warnings of the chosen models are emitted when printing the returned object.}
 
-\item{set_data_arg}{\code{logical}. Should the data argument in the slot \code{call} of the \code{merMod} object returned from \code{lmer} be set to the passed data argument? Otherwise the name will be \code{data}. Helpful if fitted objects are used afterwards (e.g., using \pkg{lsmeans}). Default is \code{TRUE}.}
+\item{set_data_arg}{\code{logical}. Should the data argument in the slot \code{call} of the \code{merMod} object returned from \code{lmer} be set to the passed data argument? Otherwise the name will be \code{data}. Helpful if fitted objects are used afterwards (e.g., using \pkg{emmeans}). Default is \code{TRUE}.}
 
 \item{progress}{if \code{TRUE}, shows progress with a text progress bar and other status messages during fitting.}
 
@@ -181,14 +181,19 @@ sk_m2
 
 # recreates basically Figure 4 (S&K, 2011, upper panel)
 # only the 4th and 6th x-axis position are flipped
-lsmip(sk_m1, instruction~type+inference)
+emmip(sk_m1, instruction~type+inference)
+
+# use lattice instead of ggplot2:
+emm_options(graphics.engine = "lattice") 
+emmip(sk_m1, instruction~type+inference)
+emm_options(graphics.engine = "ggplot") # reset options 
 
 # set up reference grid for custom contrasts:
 # this can be made faster via:
-lsm.options(lmer.df = "Kenward-Roger") # set df for lsmeans to KR
-# lsm.options(lmer.df = "Satterthwaite") # the default
-# lsm.options(lmer.df = "asymptotic") # the fastest, no df
-(rg1 <- lsmeans(sk_m1, c("instruction", "type", "inference")))
+emm_options(lmer.df = "Kenward-Roger") # set df for lsmeans to KR
+# emm_options(lmer.df = "Satterthwaite") # the default
+# emm_options(lmer.df = "asymptotic") # the fastest, no df
+(rg1 <- emmeans(sk_m1, c("instruction", "type", "inference")))
 
 # set up contrasts on reference grid:
 contr_sk2 <- list(
@@ -287,18 +292,25 @@ summary(mixed4_orig)
 data(obk.long)
 mixed(value ~ treatment * phase + (1|id), obk.long)
 
-# Examples for using the per.parammeter argument:
+# Examples for using the per.parameter argument 
+# note, require method = "nested-KR", "LRT", or "PB" 
+# also we use custom contrasts
 data(obk.long, package = "afex")
 obk.long$hour <- ordered(obk.long$hour)
+contrasts(obk.long$phase) <- "contr.sum"
+contrasts(obk.long$treatment) <- "contr.sum" 
 
 # tests only the main effect parameters of hour individually per parameter.
-mixed(value ~ treatment*phase*hour +(1|id), per_parameter = "^hour$", data = obk.long)
+mixed(value ~ treatment*phase*hour +(1|id), per_parameter = "^hour$", 
+      data = obk.long, method = "nested-KR", check_contrasts = FALSE)
 
 # tests all parameters including hour individually
-mixed(value ~ treatment*phase*hour +(1|id), per_parameter = "hour", data = obk.long)
+mixed(value ~ treatment*phase*hour +(1|id), per_parameter = "hour", 
+      data = obk.long, method = "nested-KR", check_contrasts = FALSE)
 
 # tests all parameters individually
-mixed(value ~ treatment*phase*hour +(1|id), per_parameter = ".", data = obk.long)
+mixed(value ~ treatment*phase*hour +(1|id), per_parameter = ".", 
+      data = obk.long, method = "nested-KR", check_contrasts = FALSE)
 
 # example data from package languageR:
 # Lexical decision latencies elicited from 21 subjects for 79 English concrete nouns, 

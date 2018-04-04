@@ -10,8 +10,9 @@ mixed(formula, data, type = afex_options("type"),
   method = afex_options("method_mixed"), per_parameter = NULL,
   args_test = list(), test_intercept = FALSE,
   check_contrasts = afex_options("check_contrasts"), expand_re = FALSE,
-  all_fit = FALSE, set_data_arg = TRUE, progress = TRUE, cl = NULL,
-  return = "mixed", sig_symbols = afex_options("sig_symbols"), ...)
+  all_fit = FALSE, set_data_arg = afex_options("set_data_arg"),
+  progress = TRUE, cl = NULL, return = "mixed",
+  sig_symbols = afex_options("sig_symbols"), ...)
 
 lmer_alt(formula, data, check_contrasts = FALSE, ...)
 }
@@ -36,13 +37,13 @@ lmer_alt(formula, data, check_contrasts = FALSE, ...)
 
 \item{all_fit}{logical. Should \code{\link{all_fit}} be used to fit each model with each available optimization algorithm and the results that provided the best fit in each case be used? Warning: This can dramatically increase the optimization time. Adds two new attributes to the returned object designating which algorithm was selected and the log-likelihoods for each algorithm. Note that only warnings from the initial fit are emitted during fitting. The warnings of the chosen models are emitted when printing the returned object.}
 
-\item{set_data_arg}{\code{logical}. Should the data argument in the slot \code{call} of the \code{merMod} object returned from \code{lmer} be set to the passed data argument? Otherwise the name will be \code{data}. Helpful if fitted objects are used afterwards (e.g., using \pkg{emmeans}). Default is \code{TRUE}.}
+\item{set_data_arg}{\code{logical}. Should the data argument in the slot \code{call} of the \code{merMod} object returned from \code{lmer} be set to the passed data argument? If \code{FALSE} (currently the default) the name will be \code{data}. \code{TRUE} may be helpful when fitted objects are used afterwards (e.g., compared using \code{anova} or when using the \code{effects} package, see examples). \pkg{emmeans} functions appear to work better with \code{FALSE}. Default is given by afex_options("set_data_arg").}
 
-\item{progress}{if \code{TRUE}, shows progress with a text progress bar and other status messages during fitting.}
+\item{progress}{if \code{TRUE}, shows progress with a text progress bar and other status messages during estimation}
 
-\item{cl}{A vector identifying a cluster; used for distributing the estimation of the different models using several cores (if seveal models are calculated). See examples. If \code{ckeck.contrasts}, mixed sets the current contrasts (\code{getOption("contrasts")}) at the nodes. Note this does \emph{not} distribute calculation of p-values (e.g., when using \code{method = "PB"}) across the cluster. Use \code{args_test} for this.}
+\item{cl}{A vector identifying a cluster; used for distributing the estimation of the different models using several cores (if seveal models are calculated). See examples. If \code{ckeck_contrasts = TRUE}, mixed sets the current contrasts (\code{getOption("contrasts")}) at the nodes. Note this does \emph{not} distribute calculation of p-values (e.g., when using \code{method = "PB"}) across the cluster. Use \code{args_test} for this.}
 
-\item{return}{the default is to return an object of class \code{"mixed"}. \code{return = "merMod"} will skip the calculation of all submodels and p-values and simply return the full model fitted with lmer. Can be useful in combination with \code{expand_re = TRUE} which allows to use "||" with factors. \code{return = "data"} will not fit any models but just return the data that would have been used for fitting the model (note that the data is also part of the returned object).}
+\item{return}{the default is to return an object of class \code{"mixed"}. \code{return = "merMod"} will skip the calculation of all submodels and p-values and simply return the full model fitted with lmer. Can be useful in combination with \code{expand_re = TRUE} which allows to use "||" with factors. \code{return = "data"} will not fit any models but just return the data that would have been used for estimating the model (note that the data is also part of the returned object).}
 
 \item{sig_symbols}{Character. What should be the symbols designating significance? When entering an vector with \code{length(sig.symbol) < 4} only those elements of the default (\code{c(" +", " *", " **", " ***")}) will be replaced. \code{sig_symbols = ""} will display the stars but not the \code{+}, \code{sig_symbols = rep("", 4)} will display no symbols. The default is given by \code{afex_options("sig_symbols")}.}
 
@@ -95,18 +96,20 @@ The \code{summary} method for objects of class \code{mixed} simply calls \code{\
 If \code{return = "merMod"}, an object of class \code{"merMod"}, as returned from \code{g/lmer}, is returned.
 }
 \description{
-Calculates p-values for all fixed effects in a mixed model. The default method \code{"KR"} (= Kenward-Roger) as well as  \code{method="S"} (Satterthwaite) support LMMs and fit the model with \code{\link[lme4]{lmer}}) and then pass it to either \code{\link[lmerTest]{anova.merModLmerTest}} (or \code{\link[car]{Anova}}). The other methods (\code{"LRT"} = likelihood-ratio tests and \code{"PB"} = parametric bootstrap) support both LMMs and GLMMs (i.e., with \code{family} argument) and fit a full model and restricted models in which the parameters corresponding to the effect (i.e., model term) are withhold (i.e., fixed to 0) and tests statistics are based on comparing the full model with the restricted models. The default is tests based on Type 3 sums of squares. \code{print}, \code{summary}, and \code{anova} methods for the returned object of class \code{"mixed"} are available (the last two return the same data.frame). \code{lmer_alt} is simply a wrapper for mixed that only returns the \code{"merMod"} object and correctly uses the \code{||} notation to remove correlation among factors, but otherwise behaves like \code{g/lmer} (as for \code{mixed}, it calls \code{glmer} as soon as a \code{family} argument is present).
+Estimates mixed models with \pkg{lme4} and calculates p-values for all fixed effects. The default method \code{"KR"} (= Kenward-Roger) as well as  \code{method="S"} (Satterthwaite) support LMMs and estimate the model with \code{\link[lme4]{lmer}} and then pass it to the \code{\link[lmerTest]{lmerTest}} \code{anova} method (or \code{\link[car]{Anova}}). The other methods (\code{"LRT"} = likelihood-ratio tests and \code{"PB"} = parametric bootstrap) support both LMMs (estimated via \code{\link[lme4]{lmer}}) and GLMMs (i.e., with \code{family} argument which invokes estimation via \code{\link[lme4]{glmer}}) and estimate a full model and restricted models in which the parameters corresponding to one effect (i.e., model term) are withhold (i.e., fixed to 0). Tests statistics are based on comparing the full model with the restricted models. The default is tests based on Type 3 sums of squares. \code{print}, \code{nice}, \code{anova}, and \code{summary} methods for the returned object of class \code{"mixed"} are available. Note that \code{summary} produces shows the parameters instead of effects (i.e., use the other methods)!
 }
 \details{
+\code{lmer_alt} is simply a wrapper for mixed that only returns the \code{"merMod"} object and correctly uses the \code{||} notation to remove correlation among factors, but otherwise behaves like \code{g/lmer} (as for \code{mixed}, it calls \code{glmer} as soon as a \code{family} argument is present).
+
 For an introduction to mixed-modeling for experimental designs see Barr, Levy, Scheepers, & Tily (2013; I highly recommend reading this paper if you use this function), arguments for using the Kenward-Roger approximation for obtaining p-values are given by Judd, Westfall, and Kenny (2012). Further introductions to mixed-modeling for experimental designs are given by Baayen and colleagues (Baayen, 2008; Baayen, Davidson & Bates, 2008; Baayen & Milin, 2010). Specific recommendations on which random effects structure to specify for confirmatory tests can be found in Barr and colleagues (2013) and Barr (2013), but also see Bates et al. (2015).
 
 \subsection{p-value Calculations}{
 
-When \code{method = "KR"} (the default, implemented via \code{\link[pbkrtest]{KRmodcomp}}), the Kenward-Roger approximation for degrees-of-freedom is calculated using \code{\link[lmerTest]{anova.merModLmerTest}} (if \code{test_intercept=FALSE}) or \code{\link[car]{Anova}} (if \code{test_intercept=TRUE}), which is only applicable to linear-mixed models (LMMs). The test statistic in the output is an F-value (\code{F}). A similar method that requires less RAM is \code{method = "S"} which calculates the Satterthwaite approximation for degrees-of-freedom via \code{\link[lmerTest]{anova.merModLmerTest}} and is also only applicable to LMMs. \code{method = "KR"} or \code{method = "S"} provide the best control for Type 1 errors for LMMs (Luke, 2017).
+When \code{method = "KR"} (the default, implemented via \code{\link[pbkrtest]{KRmodcomp}}), the Kenward-Roger approximation for degrees-of-freedom is calculated using \code{\link[lmerTest]{lmerTest}} (if \code{test_intercept=FALSE}) or \code{\link[car]{Anova}} (if \code{test_intercept=TRUE}), which is only applicable to linear-mixed models (LMMs). The test statistic in the output is an F-value (\code{F}). A similar method that requires less RAM is \code{method = "S"} which calculates the Satterthwaite approximation for degrees-of-freedom via \code{\link[lmerTest]{lmerTest}} and is also only applicable to LMMs. \code{method = "KR"} or \code{method = "S"} provide the best control for Type 1 errors for LMMs (Luke, 2017).
 
 \code{method = "PB"} calculates p-values using parametric bootstrap using \code{\link[pbkrtest]{PBmodcomp}}. This can be used for linear and also generalized linear mixed models (GLMMs) by specifying a \code{\link[stats]{family}} argument to \code{mixed}. Note that you should specify further arguments to \code{PBmodcomp} via \code{args_test}, especially \code{nsim} (the number of simulations to form the reference distribution) or \code{cl} (for using multiple cores). For other arguments see \code{\link[pbkrtest]{PBmodcomp}}. Note that \code{REML} (argument to \code{[g]lmer}) will be set to \code{FALSE} if method is \code{PB}.
 
-\code{method = "LRT"} calculates p-values via likelihood ratio tests implemented in the \code{anova} method for \code{"merMod"} objects. This is the method recommended by Barr et al. (2013; which did not test the other methods implemented here). Using likelihood ratio tests is only recommended for models with many levels for the random effects (> 50), but can be pretty helpful in case the other methods fail (due to memory and/or time limitations). The \href{http://glmm.wikidot.com/faq}{lme4 faq} also recommends the other methods over likelihood ratio tests.
+\code{method = "LRT"} calculates p-values via likelihood ratio tests implemented in the \code{anova} method for \code{"merMod"} objects. This is the method recommended by Barr et al. (2013; which did not test the other methods implemented here). Using likelihood ratio tests is only recommended for models with many levels for the random effects (> 50), but can be pretty helpful in case the other methods fail (due to memory and/or time limitations). The \href{http://bbolker.github.io/mixedmodels-misc/glmmFAQ.html}{lme4 faq} also recommends the other methods over likelihood ratio tests.
 }
 
 \subsection{Implementation Details}{
@@ -141,71 +144,88 @@ Please report bugs or unexpected behavior by opening a guthub issue: \url{https:
 }
 \examples{
 
-###########################
-## Full Analysis Example ##
-###########################
+##################################
+## Simple Examples (from MEMSS) ##
+##################################
+
+data("Machines", package = "MEMSS") 
+
+# simple model with random-slopes for repeated-measures factor
+m1 <- mixed(score ~ Machine + (Machine|Worker), data=Machines)
+m1
+
+# suppress correlation among random effect parameters with expand_re = TRUE
+m2 <- mixed(score ~ Machine + (Machine||Worker), data=Machines, expand_re = TRUE)
+m2
+
+## compare:
+summary(m1)$varcor
+summary(m2)$varcor
+# for wrong solution see: 
+# summary(lmer(score ~ Machine + (Machine||Worker), data=Machines))$varcor
+
+# follow-up tests
+(emm1 <- emmeans(m1, "Machine"))
+pairs(emm1, adjust = "holm") # all pairwise comparisons
+con1 <- list(
+  c1 = c(1, -0.5, -0.5), # 1 versus other 2
+  c2 = c(0.5, -1, 0.5) # 1 and 3 versus  2
+)
+contrast(emm1, con1, adjust = "holm")
+
+# plotting 
+emmip(m1, ~Machine, CIs = TRUE)
+emmip(m2, ~Machine, CIs = TRUE)
+
 
 \dontrun{
-### split-plot experiment (Singmann & Klauer, 2011, Exp. 2)
-## between-factor: instruction
-## within-factor: inference & type
-## hypothesis: three-way interaction
-data("sk2011.2")
+#######################
+### Further Options ###
+#######################
 
-# use only affirmation problems (S&K also splitted the data like this)
+## Multicore:
+
+require(parallel)
+(nc <- detectCores()) # number of cores
+cl <- makeCluster(rep("localhost", nc)) # make cluster
+# to keep track of what the function is doindg redirect output to outfile:
+# cl <- makeCluster(rep("localhost", nc), outfile = "cl.log.txt")
+
+data("Machines", package = "MEMSS") 
+## There are two ways to use multicore:
+
+# 1. Obtain fits with multicore:
+mixed(score ~ Machine + (Machine|Worker), data=Machines, cl = cl)
+
+# 2. Obtain PB samples via multicore: 
+mixed(score ~ Machine + (Machine|Worker), data=Machines,
+ method = "PB", args_test = list(nsim = 50, cl = cl)) # better use 500 or 1000 
+
+## Both ways can be combined:
+# 2. Obtain PB samples via multicore: 
+mixed(score ~ Machine + (Machine|Worker), data=Machines, cl = cl,
+ method = "PB", args_test = list(nsim = 50, cl = cl))
+
+#### use all_fit = TRUE and expand_re = TRUE:
+data("sk2011.2") # data described in more detail below
 sk2_aff <- droplevels(sk2011.2[sk2011.2$what == "affirmation",])
 
-# set up model with maximal by-participant random slopes 
-sk_m1 <- mixed(response ~ instruction*inference*type+(inference*type|id), sk2_aff)
+require(optimx) # uses two more algorithms
+sk2_aff_b <- mixed(response ~ instruction*type+(inference*type||id), sk2_aff,
+               expand_re = TRUE, all_fit = TRUE)
+attr(sk2_aff_b, "all_fit_selected")
+attr(sk2_aff_b, "all_fit_logLik")
 
-sk_m1 # prints ANOVA table with nicely rounded numbers (i.e., as characters)
-nice(sk_m1)  # returns the same but without printing potential warnings
-anova(sk_m1) # returns and prints numeric ANOVA table (i.e., not-rounded)
-summary(sk_m1) # lmer summary of full model
+# considerably faster with multicore:
+clusterEvalQ(cl, library(optimx)) # need to load optimx in cluster
+sk2_aff_b2 <- mixed(response ~ instruction*type+(inference*type||id), sk2_aff,
+               expand_re = TRUE, all_fit = TRUE, cl=cl)
+attr(sk2_aff_b2, "all_fit_selected")
+attr(sk2_aff_b2, "all_fit_logLik")
 
-# same model but using Satterthwaite approximation of df
-# very similar results but faster
-sk_m1b <- mixed(response ~ instruction*inference*type+(inference*type|id), 
-                sk2_aff, method="S")
-nice(sk_m1b)
-# identical results as:
-lmerTest::anova(sk_m1$full_model)
 
-# suppressing correlation among random slopes:
-# very similar results, but significantly faster and often less convergence warnings. 
-sk_m2 <- mixed(response ~ instruction*inference*type+(inference*type||id), sk2_aff,
-               expand_re = TRUE)
-sk_m2
+stopCluster(cl)
 
-## mixed objects can be passed to lsmeans directly:
-
-# recreates basically Figure 4 (S&K, 2011, upper panel)
-# only the 4th and 6th x-axis position are flipped
-emmip(sk_m1, instruction~type+inference)
-
-# use lattice instead of ggplot2:
-emm_options(graphics.engine = "lattice") 
-emmip(sk_m1, instruction~type+inference)
-emm_options(graphics.engine = "ggplot") # reset options 
-
-# set up reference grid for custom contrasts:
-# this can be made faster via:
-emm_options(lmer.df = "Kenward-Roger") # set df for lsmeans to KR
-# emm_options(lmer.df = "Satterthwaite") # the default
-# emm_options(lmer.df = "asymptotic") # the fastest, no df
-(rg1 <- emmeans(sk_m1, c("instruction", "type", "inference")))
-
-# set up contrasts on reference grid:
-contr_sk2 <- list(
-  ded_validity_effect = c(rep(0, 4), 1, rep(0, 5), -1, 0),
-  ind_validity_effect = c(rep(0, 5), 1, rep(0, 5), -1),
-  counter_MP = c(rep(0, 4), 1, -1, rep(0, 6)),
-  counter_AC = c(rep(0, 10), 1, -1)
-)
-
-# test the main double dissociation (see S&K, p. 268)
-contrast(rg1, contr_sk2, adjust = "holm")
-# only plausibility effect is not significant here.
 }
 
 ###################################################
@@ -282,6 +302,73 @@ md_16.4b$cog <- scale(md_16.4b$cog, scale=FALSE)
 # parameters are again almost perfectly recovered:
 summary(mixed4_orig)
 
+###########################
+## Full Analysis Example ##
+###########################
+
+\dontrun{
+### split-plot experiment (Singmann & Klauer, 2011, Exp. 2)
+## between-factor: instruction
+## within-factor: inference & type
+## hypothesis: three-way interaction
+data("sk2011.2")
+
+# use only affirmation problems (S&K also splitted the data like this)
+sk2_aff <- droplevels(sk2011.2[sk2011.2$what == "affirmation",])
+
+# set up model with maximal by-participant random slopes 
+sk_m1 <- mixed(response ~ instruction*inference*type+(inference*type|id), sk2_aff)
+
+sk_m1 # prints ANOVA table with nicely rounded numbers (i.e., as characters)
+nice(sk_m1)  # returns the same but without printing potential warnings
+anova(sk_m1) # returns and prints numeric ANOVA table (i.e., not-rounded)
+summary(sk_m1) # lmer summary of full model
+
+# same model but using Satterthwaite approximation of df
+# very similar results but faster
+sk_m1b <- mixed(response ~ instruction*inference*type+(inference*type|id), 
+                sk2_aff, method="S")
+nice(sk_m1b)
+# identical results as:
+anova(sk_m1$full_model)
+
+# suppressing correlation among random slopes:
+# very similar results, but significantly faster and often less convergence warnings. 
+sk_m2 <- mixed(response ~ instruction*inference*type+(inference*type||id), sk2_aff,
+               expand_re = TRUE)
+sk_m2
+
+## mixed objects can be passed to emmeans directly:
+
+# recreates basically Figure 4 (S&K, 2011, upper panel)
+# only the 4th and 6th x-axis position are flipped
+emmip(sk_m1, instruction~type+inference)
+
+# use lattice instead of ggplot2:
+emm_options(graphics.engine = "lattice") 
+emmip(sk_m1, instruction~type+inference)
+emm_options(graphics.engine = "ggplot") # reset options 
+
+# set up reference grid for custom contrasts:
+# this can be made faster via:
+emm_options(lmer.df = "Kenward-Roger") # set df for emmeans to KR
+# emm_options(lmer.df = "Satterthwaite") # the default
+# emm_options(lmer.df = "asymptotic") # the fastest, no df
+(rg1 <- emmeans(sk_m1, c("instruction", "type", "inference")))
+
+# set up contrasts on reference grid:
+contr_sk2 <- list(
+  ded_validity_effect = c(rep(0, 4), 1, rep(0, 5), -1, 0),
+  ind_validity_effect = c(rep(0, 5), 1, rep(0, 5), -1),
+  counter_MP = c(rep(0, 4), 1, -1, rep(0, 6)),
+  counter_AC = c(rep(0, 10), 1, -1)
+)
+
+# test the main double dissociation (see S&K, p. 268)
+contrast(rg1, contr_sk2, adjust = "holm")
+# only plausibility effect is not significant here.
+}
+
 ####################
 ## Other Examples ##
 ####################
@@ -346,50 +433,41 @@ gm1 <- mixed(use ~ age + I(age^2) + urban + livch + (1 | district), method = "PB
  family = binomial, data = Contraception, args_test = list(nsim = 10))
 ## note that nsim = 10 is way too low for all real examples!
 
-#######################
-### Using Multicore ###
-#######################
+}
 
-require(parallel)
-(nc <- detectCores()) # number of cores
-cl <- makeCluster(rep("localhost", nc)) # make cluster
-# to keep track of what the function is doindg redirect output to outfile:
-# cl <- makeCluster(rep("localhost", nc), outfile = "cl.log.txt")
+\dontrun{
+#####################################
+## Interplay with effects packages ##
+#####################################
 
-## There are two ways to use multicore:
+data("Machines", package = "MEMSS") 
+# simple model with random-slopes for repeated-measures factor
+m1 <- mixed(score ~ Machine + (Machine|Worker), data=Machines)
+  
+library("effects")
 
-# 1. Obtain fits with multicore:
-mixed(value ~ treatment*phase*hour +(1|id), data = obk.long, method = "LRT", cl = cl)
+Effect("Machine", m1$full_model) # not correct:
+#  Machine effect
+# Machine
+#        A        B        C 
+# 59.65000 52.35556 60.32222 
 
-# 2. Obtain PB samples via multicore: 
-mixed(use ~ age + I(age^2) + urban + livch + (1 | district), family = binomial,
- method = "PB", data = Contraception, args_test = list(nsim = 10, cl = cl))
+# compare:
+emmeans(m1, "Machine")
+ # Machine   emmean       SE  df asymp.LCL asymp.UCL
+ # A       52.35556 1.680711 Inf  49.06142  55.64969
+ # B       60.32222 3.528546 Inf  53.40640  67.23804
+ # C       66.27222 1.806273 Inf  62.73199  69.81245
 
-## Both ways can be combined:
-mixed(use ~ age + I(age^2) + urban + livch + (1 | district), family = binomial, 
- method = "PB", data = Contraception, args_test = list(nsim = 10, cl = cl), cl = cl)
+## necessary to set contr.sum globally:
+set_sum_contrasts()
+Effect("Machine", m1$full_model)
+#  Machine effect
+# Machine
+#        A        B        C 
+# 52.35556 60.32222 66.27222 
 
-
-#### use all_fit = TRUE and expand_re = TRUE:
-data("sk2011.2") 
-sk2_aff <- droplevels(sk2011.2[sk2011.2$what == "affirmation",])
-
-require(optimx) # uses two more algorithms
-sk2_aff_b <- mixed(response ~ instruction*type+(inference*type||id), sk2_aff,
-               expand_re = TRUE, all_fit = TRUE)
-attr(sk2_aff_b, "all_fit_selected")
-attr(sk2_aff_b, "all_fit_logLik")
-
-# considerably faster with multicore:
-clusterEvalQ(cl, library(optimx)) # need to load optimx in cluster
-sk2_aff_b2 <- mixed(response ~ instruction*type+(inference*type||id), sk2_aff,
-               expand_re = TRUE, all_fit = TRUE, cl=cl)
-attr(sk2_aff_b2, "all_fit_selected")
-attr(sk2_aff_b2, "all_fit_logLik")
-
-
-stopCluster(cl)
-
+plot(Effect("Machine", m1$full_model))
 }
 }
 \references{

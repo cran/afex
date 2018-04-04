@@ -8,7 +8,8 @@
 \title{Convenient ANOVA estimation for factorial designs}
 \usage{
 aov_ez(id, dv, data, between = NULL, within = NULL, covariate = NULL, 
-     observed = NULL, fun_aggregate = NULL, type = afex_options("type"), 
+     observed = NULL, fun_aggregate = NULL, transformation,
+     type = afex_options("type"), 
      factorize = afex_options("factorize"), 
      check_contrasts = afex_options("check_contrasts"), 
      return = afex_options("return_aov"), 
@@ -35,7 +36,7 @@ aov_4(formula, data, observed = NULL, fun_aggregate = NULL, type = afex_options(
 
 \item{type}{The type of sums of squares for the ANOVA. The default is given by \code{afex_options("type")}, which is \strong{initially set to 3}. Passed to \code{\link[car]{Anova}}. Possible values are \code{"II"}, \code{"III"}, \code{2}, or \code{3}.}
 
-\item{factorize}{logical. Should between subject factors be factorized (with note) before running the analysis. he default is given by \code{afex_options("factorize")}, which is initially \code{TRUE}. If one wants to run an ANCOVA, needs to be set to \code{FALSE} (in which case centering on 0 is checked on numeric variables).}
+\item{factorize}{logical. Should between subject factors be factorized (with note) before running the analysis. The default is given by \code{afex_options("factorize")}, which is initially \code{TRUE}. If one wants to run an ANCOVA, this needs to be set to \code{FALSE} (in which case centering on 0 is checked on numeric variables).}
 
 \item{check_contrasts}{\code{logical}. Should contrasts for between-subject factors be checked and (if necessary) changed to be \code{"contr.sum"}. See details. The default is given by \code{afex_options("check_contrasts")}, which is initially \code{TRUE}.}
 
@@ -56,6 +57,12 @@ aov_4(formula, data, observed = NULL, fun_aggregate = NULL, type = afex_options(
 \item{within}{\code{character} vector indicating the \strong{within}-subject(s)(or repeated-measures) factor(s)/column(s) in \code{data}.  Default is \code{NULL} indicating no within-subjects factors.}
 
 \item{covariate}{\code{character} vector indicating the between-subject(s) covariate(s) (i.e., column(s)) in \code{data}. Default is \code{NULL} indicating no covariates.}
+
+\item{transformation}{In \code{aov_ez}, a \code{character} vector (of length
+1) indicating the name of a transformation to apply to \code{dv} before
+fitting the model. If missing, no transformation is applied. In
+\code{aov_car} and \code{aov_4}, a response transformation may be
+incorporated in the left-hand side of \code{formula}.}
 
 \item{print.formula}{\code{aov_ez} and \code{aov_4} are wrapper for \code{aov_car}. This boolean argument indicates whether the formula in the call to \code{car.aov} should be printed.}
 }
@@ -109,17 +116,19 @@ The S3 object returned per default can be directly passed to \code{emmeans::emme
  
  Note that \pkg{emmeans} allows for a variety of advanced settings and simplifiations, for example: all pairwise comparison of a single factor using one command (e.g., \code{emmeans(x, "a", contr = "pairwise")}) or advanced control for multiple testing by passing objects to \pkg{multcomp}. A comprehensive overview of the functionality is provided in the accompanying vignettes (see \href{https://CRAN.R-project.org/package=emmeans}{here}).
  
- A caveat regarding the use of \pkg{emmeans} concerns the assumption of sphericity for ANOVAs including within-subjects/repeated-measures factors (with more than two levels). While the ANOVA tables per default report results using the Greenhousse-Geisser correction, no such correction is available when using \pkg{emmeans}. This may result in anti-conservative tests.
+ A caveat regarding the use of \pkg{emmeans} concerns the assumption of sphericity for ANOVAs including within-subjects/repeated-measures factors (with more than two levels). The current default for follow-up tests uses a univariate model (\code{model = "univariate"} in the call to \code{emmeans}), which does not adequately control for violations of sphericity. This may result in anti-conservative tests and contrasts somewhat with the default ANOVA table which reports results based on the Greenhousse-Geisser correction. An alternative is to use a multivariate model (\code{model = "multivariate"} in the call to \code{emmeans}) which should handle violations of sphericity better. The default will likely change to multivariate tests in one of the next versions of the package.
  
  \pkg{emmeans} is loaded/attached automatically when loading \pkg{afex} via \code{library} or \code{require}.
 }  
 
 \subsection{Methods for \code{afex_aov} Objects}{
-A full overview over the methods provided for \code{afex_aov} objects is provided in the corresponding help page: \code{\link{afex_aov-methods}}. The probably most important ones for end-users are \code{summary} and \code{anova}.
+A full overview over the methods provided for \code{afex_aov} objects is provided in the corresponding help page: \code{\link{afex_aov-methods}}. The probably most important ones for end-users are \code{summary}, \code{anova}, and \code{\link{nice}}.
 
 The \code{summary} method returns, for ANOVAs containing within-subject (repeated-measures) factors with more than two levels, the complete univariate analysis: Results without df-correction, the Greenhouse-Geisser corrected results, the Hyunh-Feldt corrected results, and the results of the Mauchly test for sphericity.
 
 The \code{anova} method returns a \code{data.frame} of class \code{"anova"} containing the ANOVA table in numeric form (i.e., the one in slot \code{anova_table} of a \code{afex_aov}). This method has arguments such as \code{correction} and \code{es} and can be used to obtain an ANOVA table with different correction than the one initially specified.
+
+The \code{\link{nice}} method also returns a \code{data.frame}, but rounds most values and transforms them into characters for nice printing. Also has arguments like \code{correction} and \code{es} which can be used to obtain an ANOVA table with different correction than the one initially specified.
 }
 }
 \note{
@@ -255,14 +264,26 @@ a1 <- aov_ez("id", "value", obk.long, between = c("treatment", "gender"),
 # 1b. plot data (per default with ggplot2):
 emmip(a1, gender ~ hour | treatment+phase)
 
-# use lattice instead of ggplot2:
+## add univariate CIs:
+emmip(a1, gender ~ hour | treatment+phase, CIs = TRUE)
+
+## add multivariate CIs
+emmip(a1, gender ~ hour | treatment+phase, CIs = TRUE, 
+      model = "multivariate")
+
+# use lattice instead of ggplot2 (which has no CIs):
 emm_options(graphics.engine = "lattice") 
 emmip(a1, gender ~ hour | treatment+phase)
 emm_options(graphics.engine = "ggplot") # reset options 
 
-# 2. obtain reference grid object:
+# 2. obtain reference grid object (default is uses univariate model):
 r1 <- emmeans(a1, ~treatment +phase)
 r1
+
+# multivariate model may be more appropriate
+r1 <- emmeans(a1, ~treatment +phase, model = "multivariate")
+r1
+
 
 # 3. create list of contrasts on the reference grid:
 c1 <- list(
@@ -280,7 +301,10 @@ contrast(r1, c1)
 contrast(r1, c1, adjust = "holm")
 
 # 2. (alternative): all pairwise comparisons of treatment:
-emmeans(a1, "treatment", contr = "pairwise")
+emmeans(a1, "treatment", contr = "pairwise", model = "multivariate")
+
+## set multivariate models globally:
+# afex_options(emmeans_model = "multivariate")
 
 #######################
 ## 3: Other examples ##

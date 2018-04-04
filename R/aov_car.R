@@ -4,7 +4,8 @@
 #'
 #' @usage 
 #' aov_ez(id, dv, data, between = NULL, within = NULL, covariate = NULL, 
-#'      observed = NULL, fun_aggregate = NULL, type = afex_options("type"), 
+#'      observed = NULL, fun_aggregate = NULL, transformation,
+#'      type = afex_options("type"), 
 #'      factorize = afex_options("factorize"), 
 #'      check_contrasts = afex_options("check_contrasts"), 
 #'      return = afex_options("return_aov"), 
@@ -32,8 +33,13 @@
 #' @param formula A formula specifying the ANOVA model similar to \code{\link{aov}} (for \code{aov_car} or similar to \code{lme4:lmer} for \code{aov_4}). Should include an error term (i.e., \code{Error(id/...)} for \code{aov_car} or \code{(...|id)} for \code{aov_4}). Note that the within-subject factors do not need to be outside the Error term (this contrasts with \code{aov}). See Details.
 #' @param data A \code{data.frame} containing the data. Mandatory.
 #' @param fun_aggregate The function for aggregating the data before running the ANOVA if there is more than one observation per individual and cell of the design. The default \code{NULL} issues a warning if aggregation is necessary and uses \code{\link{mean}}. Pass \code{mean} directly to avoid the warning.
+#' @param transformation In \code{aov_ez}, a \code{character} vector (of length
+#'   1) indicating the name of a transformation to apply to \code{dv} before
+#'   fitting the model. If missing, no transformation is applied. In
+#'   \code{aov_car} and \code{aov_4}, a response transformation may be
+#'   incorporated in the left-hand side of \code{formula}.
 #' @param type The type of sums of squares for the ANOVA. The default is given by \code{afex_options("type")}, which is \strong{initially set to 3}. Passed to \code{\link[car]{Anova}}. Possible values are \code{"II"}, \code{"III"}, \code{2}, or \code{3}.
-#' @param factorize logical. Should between subject factors be factorized (with note) before running the analysis. he default is given by \code{afex_options("factorize")}, which is initially \code{TRUE}. If one wants to run an ANCOVA, needs to be set to \code{FALSE} (in which case centering on 0 is checked on numeric variables).
+#' @param factorize logical. Should between subject factors be factorized (with note) before running the analysis. The default is given by \code{afex_options("factorize")}, which is initially \code{TRUE}. If one wants to run an ANCOVA, this needs to be set to \code{FALSE} (in which case centering on 0 is checked on numeric variables).
 #' @param check_contrasts \code{logical}. Should contrasts for between-subject factors be checked and (if necessary) changed to be \code{"contr.sum"}. See details. The default is given by \code{afex_options("check_contrasts")}, which is initially \code{TRUE}.
 #' @param print.formula \code{aov_ez} and \code{aov_4} are wrapper for \code{aov_car}. This boolean argument indicates whether the formula in the call to \code{car.aov} should be printed. 
 #' @param return What should be returned? The default is given by \code{afex_options("return_aov")}, which is initially \code{"afex_aov"}, returning an S3 object of class \code{afex_aov} for which various \link[=afex_aov-methods]{methods} exist (see there and below for more details). To avoid the (potentially costly) computation via \code{aov} set \code{return} to \code{"nice"} in which case only the nice ANOVA table is returned (produced by \code{\link{nice}}, this was the previous default return value). Other values are currently still supported for backward compatibility.
@@ -88,17 +94,19 @@
 #'  
 #'  Note that \pkg{emmeans} allows for a variety of advanced settings and simplifiations, for example: all pairwise comparison of a single factor using one command (e.g., \code{emmeans(x, "a", contr = "pairwise")}) or advanced control for multiple testing by passing objects to \pkg{multcomp}. A comprehensive overview of the functionality is provided in the accompanying vignettes (see \href{https://CRAN.R-project.org/package=emmeans}{here}).
 #'  
-#'  A caveat regarding the use of \pkg{emmeans} concerns the assumption of sphericity for ANOVAs including within-subjects/repeated-measures factors (with more than two levels). While the ANOVA tables per default report results using the Greenhousse-Geisser correction, no such correction is available when using \pkg{emmeans}. This may result in anti-conservative tests.
+#'  A caveat regarding the use of \pkg{emmeans} concerns the assumption of sphericity for ANOVAs including within-subjects/repeated-measures factors (with more than two levels). The current default for follow-up tests uses a univariate model (\code{model = "univariate"} in the call to \code{emmeans}), which does not adequately control for violations of sphericity. This may result in anti-conservative tests and contrasts somewhat with the default ANOVA table which reports results based on the Greenhousse-Geisser correction. An alternative is to use a multivariate model (\code{model = "multivariate"} in the call to \code{emmeans}) which should handle violations of sphericity better. The default will likely change to multivariate tests in one of the next versions of the package.
 #'  
 #'  \pkg{emmeans} is loaded/attached automatically when loading \pkg{afex} via \code{library} or \code{require}.
 #' }  
 #' 
 #' \subsection{Methods for \code{afex_aov} Objects}{
-#' A full overview over the methods provided for \code{afex_aov} objects is provided in the corresponding help page: \code{\link{afex_aov-methods}}. The probably most important ones for end-users are \code{summary} and \code{anova}.
+#' A full overview over the methods provided for \code{afex_aov} objects is provided in the corresponding help page: \code{\link{afex_aov-methods}}. The probably most important ones for end-users are \code{summary}, \code{anova}, and \code{\link{nice}}.
 #' 
 #' The \code{summary} method returns, for ANOVAs containing within-subject (repeated-measures) factors with more than two levels, the complete univariate analysis: Results without df-correction, the Greenhouse-Geisser corrected results, the Hyunh-Feldt corrected results, and the results of the Mauchly test for sphericity.
 #' 
 #' The \code{anova} method returns a \code{data.frame} of class \code{"anova"} containing the ANOVA table in numeric form (i.e., the one in slot \code{anova_table} of a \code{afex_aov}). This method has arguments such as \code{correction} and \code{es} and can be used to obtain an ANOVA table with different correction than the one initially specified.
+#' 
+#' The \code{\link{nice}} method also returns a \code{data.frame}, but rounds most values and transforms them into characters for nice printing. Also has arguments like \code{correction} and \code{es} which can be used to obtain an ANOVA table with different correction than the one initially specified.
 #' }
 #' 
 #' @author Henrik Singmann
@@ -141,7 +149,6 @@
 #' 
 #' @encoding UTF-8
 #'
-
 aov_car <- function(formula, 
                     data, 
                     fun_aggregate = NULL, 
@@ -181,12 +188,26 @@ aov_car <- function(formula,
                           "there are %d Error terms: only 1 is allowed"), 
                  length(indError)), 
          domain = NA)
-  
+
   # from here, code by Henrik Singmann:
   vars <- all.vars(formula)
-  dv <- vars[1]
-  if (!is.numeric(data[,dv])) stop("dv needs to be numeric.") #check if dv is numeric
-  vars <- vars[-1]
+  #--- Russ Lenth added/modified code to detect transformed responses:
+  lhs <- all.names(formula[[2]])
+  transf <- setdiff(lhs, all.vars(formula[[2]]))
+  if (length(transf) == 0)
+    transf = NULL
+  if (!is.null(transf)) {
+     origdv <- setdiff(lhs, transf)
+     dv <- paste0(transf[1], ".", origdv)
+     data[[dv]] <- eval(formula[[2]], envir = data)  # add transformed version
+     vars <- vars[!(vars %in% lhs)]
+  }
+  else {
+    dv <- vars[1]
+    if (!is.numeric(data[,dv])) stop("dv needs to be numeric.") #check if dv is numeric
+    vars <- vars[-1]
+  }
+  #--- end RL changes
   parts <- attr(terms(formula, "Error", data = data), "term.labels")
   error.term <- parts[str_detect(parts, "^Error\\(")]
   id <- all.vars(parse(text = error.term))[1]
@@ -229,9 +250,11 @@ aov_car <- function(formula,
     c.ns <- between[vapply(data[, between, drop = FALSE], is.numeric, TRUE)]
     if (length(c.ns) > 0) {
       non.null <- 
-        c.ns[!abs(vapply(data[, c.ns, drop = FALSE], mean, 0)) < .Machine$double.eps ^ 0.5]
+        c.ns[!abs(vapply(data[, c.ns, drop = FALSE], mean, 0)) < 
+               .Machine$double.eps ^ 0.5]
       if (length(non.null) > 0) 
-        warning(str_c("Numerical variables NOT centered on 0 (i.e., likely bogus results): ", 
+        warning(str_c(
+          "Numerical variables NOT centered on 0 (i.e., likely bogus results): ", 
                       str_c(non.null, collapse = ", ")), call. = FALSE)
     }
   }
@@ -272,13 +295,15 @@ aov_car <- function(formula,
   between.factors <- between[vapply(data[, between, drop = FALSE], is.factor, TRUE)]
   if (length(between.factors) > 0) {
     split.data <- split(data, lapply(between.factors, function(x) data[,x]))
-    ids.per.condition <- lapply(split.data, function(x) unique(as.character(x[,id])))
+    ids.per.condition <- 
+      lapply(split.data, function(x) unique(as.character(x[,id])))
     ids.in.more.condition <- 
       unique(unlist(
         lapply(seq_along(ids.per.condition), 
                function(x) unique(unlist(
                  lapply(ids.per.condition[-x], 
-                        function(y, z = ids.per.condition[[x]]) intersect(z, y)))))))
+                        function(y, z = ids.per.condition[[x]]) 
+                          intersect(z, y)))))))
     if (length(ids.in.more.condition) > 0) {
       stop(
         str_c("Following ids are in more than one between subjects condition:\n", 
@@ -291,7 +316,8 @@ aov_car <- function(formula,
     if (any(xtabs(
       as.formula(str_c("~", id.escaped, if (length(within) > 0) "+", rh1)), 
       data = data) > 1)) {
-      warning("More than one observation per cell, aggregating the data using mean (i.e, fun_aggregate = mean)!", call. = FALSE)
+      warning("More than one observation per cell, aggregating the data using mean (i.e, fun_aggregate = mean)!", 
+              call. = FALSE)
       fun_aggregate <- mean
     }
   } 
@@ -326,6 +352,8 @@ aov_car <- function(formula,
                   "\nRemoving those cases from the analysis."), call. = FALSE) 
     tmp.dat <- tmp.dat[!missing.values,]
     data <- data[ !(data[,id] %in% missing_ids),]
+  } else {
+    missing_ids <- NULL
   }
 
   #   if (length(between) > 0) {
@@ -380,7 +408,8 @@ aov_car <- function(formula,
         }
       }
       if((type == 3 | type == "III") && (length(non_sum_contrast)>0)) 
-        warning(str_c("Calculating Type 3 sums with contrasts != 'contr.sum' for: ", 
+        warning(
+          str_c("Calculating Type 3 sums with contrasts != 'contr.sum' for: ", 
                       paste0(non_sum_contrast, collapse=", "), 
                       "\n  Results likely bogus or not interpretable!\n  You probably want check_contrasts = TRUE or options(contrasts=c('contr.sum','contr.poly'))"), 
                 call. = FALSE)
@@ -390,14 +419,16 @@ aov_car <- function(formula,
   else include.aov <- FALSE
   if(include.aov){
     if (check_contrasts) {
-      factor_vars <- vapply(dat.ret[,c(within, between), drop = FALSE], is.factor, NA)
+      factor_vars <- 
+        vapply(dat.ret[,c(within, between), drop = FALSE], is.factor, NA)
       contrasts <- as.list(rep("contr.sum", sum(factor_vars)))
       names(contrasts) <- c(within, between)[factor_vars]
     }
     aov <- aov(formula(paste(
       dv.escaped, "~", paste(c(between.escaped, within.escaped), collapse = "*"),  
       if (length(within) > 0) 
-        paste0("+Error(", id.escaped, "/(",paste(within.escaped, collapse="*"), "))") 
+        paste0("+Error(", id.escaped, "/(",paste(within.escaped, 
+                                                 collapse="*"), "))") 
       else NULL)), data=dat.ret, contrasts = contrasts)
   }
   if(return == "aov") return(aov)
@@ -411,14 +442,15 @@ aov_car <- function(formula,
       within.levels <- lapply(lapply(data[,within], levels), factor)
       idata <- rev(expand.grid(rev(within.levels)))
     } else {
-      idata <- data.frame(levels(data[,within]))
+      idata <- data.frame(levels(data[,within]), stringsAsFactors = TRUE)
       colnames(idata) <- within
     }
     tmp.lm <- do.call(
       "lm", 
       list(formula = 
              as.formula(str_c("cbind(", 
-                              str_c(colnames(tmp.dat[-(seq_along(c(id, between)))]), 
+                              str_c(colnames(
+                                tmp.dat[-(seq_along(c(id, between)))]), 
                                     collapse = ", "), 
                               ") ~ ", 
                               rh2)), 
@@ -452,9 +484,15 @@ aov_car <- function(formula,
     class(afex_aov) <- "afex_aov"
     attr(afex_aov, "dv") <- dv
     attr(afex_aov, "id") <- id
-    attr(afex_aov, "within") <- within
-    attr(afex_aov, "between") <- between
+    attr(afex_aov, "within") <- 
+      if (length(within) > 0) lapply(data[, within, drop = FALSE], 
+                                     levels) else list()
+    attr(afex_aov, "between") <- 
+      if (length(between) > 0) lapply(data[, between, drop = FALSE], 
+                                      levels) else list()
     attr(afex_aov, "type") <- type
+    attr(afex_aov, "transf") <- transf
+    attr(afex_aov, "incomplete_cases") <- missing_ids
     afex_aov$anova_table <- 
       do.call("anova", 
               args = c(object = list(afex_aov), observed = list(observed), 
@@ -476,8 +514,12 @@ aov_car <- function(formula,
     class(afex_aov) <- "afex_aov"
     attr(afex_aov, "dv") <- dv
     attr(afex_aov, "id") <- id
-    attr(afex_aov, "within") <- within
-    attr(afex_aov, "between") <- between
+    attr(afex_aov, "within") <- 
+      if (length(within) > 0) lapply(data[,within, drop = FALSE], 
+                                     levels) else list()
+    attr(afex_aov, "between") <- 
+      if (length(between) > 0) lapply(data[,between,drop=FALSE], 
+                                      levels) else list()
     attr(afex_aov, "type") <- type
     afex_aov$anova_table <- 
       do.call("anova", 
@@ -513,7 +555,8 @@ aov_4 <- function(formula,
   
   error <- str_c(" + Error(", 
                  id, 
-                 if (length(within) > 0) "/(" else "", str_c(within, collapse = " * "), 
+                 if (length(within) > 0) "/(" else "", 
+                 str_c(within, collapse = " * "), 
                  if (length(within) > 0) ")" else "", 
                  ")")
   lh <- as.character(nobars(formula))
@@ -548,6 +591,7 @@ aov_ez <- function(id,
                    covariate = NULL, 
                    observed = NULL, 
                    fun_aggregate = NULL, 
+                   transformation,
                    type = afex_options("type"), 
                    factorize = afex_options("factorize"), 
                    check_contrasts = afex_options("check_contrasts"), 
@@ -574,6 +618,8 @@ aov_ez <- function(id,
                  str_c(within, collapse = " * "), 
                  if (length(within) > 0) ")" else "", 
                  ")")
+  if (!missing(transformation))
+    dv <- paste0(transformation, "(", dv, ")")
   formula <- str_c(dv, " ~ ", rh, error)
   if (print.formula) message(str_c("Formula send to aov_car: ", formula))
   aov_car(formula = as.formula(formula), 

@@ -3,8 +3,9 @@ Type: Package
 Title: Analysis of Factorial Experiments
 Depends: R (>= 3.1.0), lme4 (>= 1.1-8), emmeans
 Suggests: xtable, parallel, plyr, optimx, nloptr, knitr, rmarkdown,
-        lattice, latticeExtra, multcomp, testthat, mlmRev, dplyr,
-        tidyr, dfoptim, Matrix, psych, ggplot2
+        R.rsp, lattice, latticeExtra, multcomp, testthat, mlmRev,
+        dplyr, tidyr, dfoptim, Matrix, psych, ggplot2, MEMSS, effects,
+        carData
 Imports: stringr, coin, pbkrtest (>= 0.4-1), lmerTest, car, reshape2,
         stats, methods
 Description: Convenience functions for analyzing factorial
@@ -24,7 +25,7 @@ URL: http://afex.singmann.science/, https://github.com/singmann/afex
 BugReports: https://github.com/singmann/afex/issues
 License: GPL (>= 2)
 Encoding: UTF-8
-VignetteBuilder: knitr
+VignetteBuilder: knitr, R.rsp
 Authors@R: c(person(given="Henrik", family="Singmann",
        role=c("aut", "cre"), email="singmann+afex@gmail.com",
        comment=c(ORCID="0000-0002-4842-3657")),
@@ -36,13 +37,15 @@ Authors@R: c(person(given="Henrik", family="Singmann",
        person(given="John", family="Fox", role=c("ctb")),
        person(given="Michael A.", family="Lawrence",
        role=c("ctb")), person(given="Ulf", family="Mertens",
-       role=c("ctb")), person(given="Jonathan", family="Love",
-       role=c("ctb")) )
-Version: 0.19-1
-Date: 2018-01-08
+       role=c("ctb")), person(given="Jonathon", family="Love",
+       role=c("ctb")), person(given="Russell", family="Lenth",
+       role=c("ctb")), person(given="Rune", family="Haubo Bojesen
+       Christensen", role=c("ctb")) )
+Version: 0.20-2
+Date: 2018-04-03
 RoxygenNote: 6.0.1
 NeedsCompilation: no
-Packaged: 2018-01-08 08:54:39 UTC; henrik
+Packaged: 2018-04-03 09:16:37 UTC; henrik
 Author: Henrik Singmann [aut, cre] (<https://orcid.org/0000-0002-4842-3657>),
   Ben Bolker [aut],
   Jake Westfall [aut],
@@ -51,7 +54,9 @@ Author: Henrik Singmann [aut, cre] (<https://orcid.org/0000-0002-4842-3657>),
   John Fox [ctb],
   Michael A. Lawrence [ctb],
   Ulf Mertens [ctb],
-  Jonathan Love [ctb]
+  Jonathon Love [ctb],
+  Russell Lenth [ctb],
+  Rune Haubo Bojesen Christensen [ctb]
 Maintainer: Henrik Singmann <singmann+afex@gmail.com>
 Repository: CRAN
-Date/Publication: 2018-01-08 14:06:07 UTC
+Date/Publication: 2018-04-04 12:40:23 UTC

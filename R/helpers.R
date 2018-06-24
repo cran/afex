@@ -44,20 +44,20 @@ afex_options <- function(...) {
   #browser()
   if (length(dots) == 0) {  # branch to get all afex options
     op <- options()
-    afex_op <- op[str_detect(names(op), "^afex.")]
-    names(afex_op) <- str_replace(names(afex_op), "^afex.", "")
+    afex_op <- op[grepl("^afex.", names(op))]
+    names(afex_op) <- sub("^afex.", "", names(afex_op))
     return(afex_op)
   } else if (is.list(dots[[1]])) {  # set several afex options as a list:
     newop <- dots[[1]]
-    names(newop) <- str_c("afex.", names(newop))
+    names(newop) <- paste0("afex.", names(newop))
     options(newop)
   } else if (!is.null(names(dots))) {
     newop <- dots
-    names(newop) <- str_c("afex.", names(newop))
+    names(newop) <- paste0("afex.", names(newop))
     options(newop)
   } else if (is.null(names(dots))) {  # get a single afex options
     if (length(dots) > 1) stop("afex_options() can only return the value of a single option.", call. = FALSE)
-    return(getOption(str_c("afex.", unlist(dots))))
+    return(getOption(paste0("afex.", unlist(dots))))
   } else {
     warning("Unsopported command to afex_options(), nothing done.", call. = FALSE)
   }

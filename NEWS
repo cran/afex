@@ -1,8 +1,30 @@
                     *************************
+                    ** afex VERSION 0.21-x **
+                    *************************
+                    
+                    Changes in afex Version 0.21-x
+                    Released June 2018
+                    
+    Significant User Visible Changes and New Features
+    
+    o   Smaller package footprint: 
+        The stringr package is not imported any more, all calls to stringr 
+        functions were replaced with calls to base R functions.
+        The coin package (used in compare.2.vectors) was moved from Imports to 
+        Suggests.
+    
+    Bugfixes
+
+    o   ANOVA functions produce accurate emmeans even for ANCOVAs, see: 
+        https://afex.singmann.science/forums/topic/precise-estimates-from-emmeans-across-lm-and-aov_ez
+
+    
+    
+                    *************************
                     ** afex VERSION 0.20-x **
                     *************************
                     
-                    Changes in afex Version 0.20-0
+                    Changes in afex Version 0.20-x
                     Released April 2018
                     
     Significant User Visible Changes and New Features

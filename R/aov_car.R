@@ -139,7 +139,6 @@
 #' @aliases aov_ez aov_car aov_4
 #' @export aov_ez aov_car  aov_4
 #' @importFrom car Anova
-#' @importFrom stringr str_c str_detect str_replace_all str_extract
 #' @importFrom reshape2 dcast
 #' @importFrom lme4 findbars nobars 
 #' @importFrom stats terms as.formula xtabs contrasts<- coef
@@ -209,7 +208,8 @@ aov_car <- function(formula,
   }
   #--- end RL changes
   parts <- attr(terms(formula, "Error", data = data), "term.labels")
-  error.term <- parts[str_detect(parts, "^Error\\(")]
+  error.term <- parts[grepl("^Error\\(", parts)]
+  
   id <- all.vars(parse(text = error.term))[1]
   within <- all.vars(parse(text = error.term))[-1]
   between <- vars[!(vars %in% c(id, within))]
@@ -219,7 +219,7 @@ aov_car <- function(formula,
   within.escaped  <- escape_vars(within)
   between.escaped <- escape_vars(between)
   
-  effect.parts <- parts[!str_detect(parts, "^Error\\(")]
+  effect.parts <- parts[!grepl("^Error\\(", parts)]
 
   if (length(within) > 0) {
     effect.parts.no.within <- character()
@@ -240,7 +240,7 @@ aov_car <- function(formula,
   if (factorize) {
     if (any(!vapply(data[, between, drop = FALSE], is.factor, TRUE))) {
       to.factor <- between[!vapply(data[,between, drop = FALSE], is.factor, TRUE)]
-      message(str_c("Converting to factor: ", str_c(to.factor, collapse = ", ")))
+      message(paste0("Converting to factor: ", paste0(to.factor, collapse = ", ")))
       for (tmp.c in to.factor) {
         data[,tmp.c] <- factor(data[,tmp.c])
       }
@@ -253,9 +253,9 @@ aov_car <- function(formula,
         c.ns[!abs(vapply(data[, c.ns, drop = FALSE], mean, 0)) < 
                .Machine$double.eps ^ 0.5]
       if (length(non.null) > 0) 
-        warning(str_c(
+        warning(paste0(
           "Numerical variables NOT centered on 0 (i.e., likely bogus results): ", 
-                      str_c(non.null, collapse = ", ")), call. = FALSE)
+                      paste0(non.null, collapse = ", ")), call. = FALSE)
     }
   }
   
@@ -267,15 +267,15 @@ aov_car <- function(formula,
   
   # make formulas
   rh2 <- if (length(between.escaped) > 0) 
-    str_c(effect.parts.no.within, collapse = "+") 
+    paste0(effect.parts.no.within, collapse = "+") 
   else "1"
-  lh1 <- str_c(id, 
+  lh1 <- mypaste(id, 
                if (length(between.escaped) > 0) 
-                 str_c(between.escaped, collapse = "+") 
+                 paste0(between.escaped, collapse = "+") 
                else NULL, 
                sep = "+")
-  rh1 <- str_c(within.escaped, collapse = "+")
-  rh3 <- str_c(within.escaped, collapse = "*")
+  rh1 <- paste0(within.escaped, collapse = "+")
+  rh3 <- paste0(within.escaped, collapse = "*")
   
   # converting all within subject factors to factors and 
   # add a leading charcter (x) if starting with a digit.
@@ -306,15 +306,15 @@ aov_car <- function(formula,
                           intersect(z, y)))))))
     if (length(ids.in.more.condition) > 0) {
       stop(
-        str_c("Following ids are in more than one between subjects condition:\n", 
-              str_c(ids.in.more.condition, collapse = ", ")))
+        paste0("Following ids are in more than one between subjects condition:\n", 
+              paste0(ids.in.more.condition, collapse = ", ")))
     }
   }
   
   # Is fun_aggregate NULL and aggregation necessary?
   if (is.null(fun_aggregate)) {
     if (any(xtabs(
-      as.formula(str_c("~", id.escaped, if (length(within) > 0) "+", rh1)), 
+      as.formula(paste0("~", id.escaped, if (length(within) > 0) "+", rh1)), 
       data = data) > 1)) {
       warning("More than one observation per cell, aggregating the data using mean (i.e, fun_aggregate = mean)!", 
               call. = FALSE)
@@ -322,23 +322,13 @@ aov_car <- function(formula,
     }
   } 
   
-  # if return = "lme4" return the (aggregated) data fitted with lmer! 
-  # (might consider to add later)
-  #   if (return == "lme4") {
-  #     warning("lme4 return is experimental!\nAlso: Missing values and contrasts not checked for return = 'lme4'!")
-  #     n.dat <- dcast(data, formula = as.formula(str_c(lh1, if (length(within) > 0) paste0("+", rh1) else "", "~ .", sep = "")), fun.aggregate = fun.aggregate, ..., value.var = dv)
-  #     colnames(n.dat)[length(colnames(n.dat))] <- "value"
-  #     f.within.new <- str_replace_all(rh1, pattern="\\+", replacement="*")
-  #     return(lmer(as.formula(str_c("value~", rh2, if (length(within) > 0) paste0("*", f.within.new) else "", "+ (1", if (length(within) > 0) paste0("+", f.within.new) else "", "|", id, ")" , sep = "")), data = n.dat))
-  #   }
-  
   # prepare the data:
   
   tmp.dat <- do.call(
     dcast, 
     args = 
       c(data = list(data), 
-        formula = as.formula(str_c(lh1, 
+        formula = as.formula(paste(lh1, 
                                    if (length(within) > 0) rh1 
                                    else ".", sep = "~")), 
         fun.aggregate = fun_aggregate, dots, value.var = dv))
@@ -347,8 +337,8 @@ aov_car <- function(formula,
   if (any(is.na(tmp.dat))) {
     missing.values <- apply(tmp.dat, 1, function(x) any(is.na(x)))
     missing_ids <- unique(tmp.dat[missing.values,1])
-    warning(str_c("Missing values for following ID(s):\n", 
-                  str_c(missing_ids, collapse = ", "), 
+    warning(paste0("Missing values for following ID(s):\n", 
+                  paste0(missing_ids, collapse = ", "), 
                   "\nRemoving those cases from the analysis."), call. = FALSE) 
     tmp.dat <- tmp.dat[!missing.values,]
     data <- data[ !(data[,id] %in% missing_ids),]
@@ -365,7 +355,7 @@ aov_car <- function(formula,
   dat.ret <- do.call(
     dcast, 
     args = c(data = list(data), 
-             formula = as.formula(str_c(str_c(lh1, 
+             formula = as.formula(paste0(mypaste(lh1, 
                                               if (length(within) > 0) rh1 
                                               else NULL, sep = "+"), "~.")), 
              fun.aggregate = fun_aggregate, 
@@ -391,8 +381,8 @@ aov_car <- function(formula,
         }
       }
       if (!is.null(resetted)) 
-        message(str_c("Contrasts set to contr.sum for the following variables: ", 
-                      str_c(resetted, collapse=", ")))
+        message(paste0("Contrasts set to contr.sum for the following variables: ", 
+                      paste0(resetted, collapse=", ")))
     } else {
       non_sum_contrast <- c()
       for (i in between) {
@@ -409,7 +399,7 @@ aov_car <- function(formula,
       }
       if((type == 3 | type == "III") && (length(non_sum_contrast)>0)) 
         warning(
-          str_c("Calculating Type 3 sums with contrasts != 'contr.sum' for: ", 
+          paste0("Calculating Type 3 sums with contrasts != 'contr.sum' for: ", 
                       paste0(non_sum_contrast, collapse=", "), 
                       "\n  Results likely bogus or not interpretable!\n  You probably want check_contrasts = TRUE or options(contrasts=c('contr.sum','contr.poly'))"), 
                 call. = FALSE)
@@ -424,12 +414,17 @@ aov_car <- function(formula,
       contrasts <- as.list(rep("contr.sum", sum(factor_vars)))
       names(contrasts) <- c(within, between)[factor_vars]
     }
-    aov <- aov(formula(paste(
-      dv.escaped, "~", paste(c(between.escaped, within.escaped), collapse = "*"),  
-      if (length(within) > 0) 
-        paste0("+Error(", id.escaped, "/(",paste(within.escaped, 
-                                                 collapse="*"), "))") 
-      else NULL)), data=dat.ret, contrasts = contrasts)
+    tmp_formula <- formula(paste(dv.escaped, "~", 
+      if (length(within) > 0) {
+        paste(
+          if (rh2 == "1") {
+            paste(within.escaped, collapse="*")
+          } else {
+            paste("(" ,rh2, ")*(", paste(within.escaped, collapse="*"), ")")
+          }, "+Error(", id.escaped, "/(", 
+            paste(within.escaped, collapse="*"), "))")
+      } else rh2))
+    aov <- aov(tmp_formula, data=dat.ret, contrasts = contrasts)
   }
   if(return == "aov") return(aov)
   data.l <- list(long = dat.ret, wide = tmp.dat)
@@ -448,8 +443,8 @@ aov_car <- function(formula,
     tmp.lm <- do.call(
       "lm", 
       list(formula = 
-             as.formula(str_c("cbind(", 
-                              str_c(colnames(
+             as.formula(paste0("cbind(", 
+                              paste0(colnames(
                                 tmp.dat[-(seq_along(c(id, between)))]), 
                                     collapse = ", "), 
                               ") ~ ", 
@@ -461,14 +456,14 @@ aov_car <- function(formula,
     
     Anova.out <- Anova(tmp.lm, 
                        idata = idata, 
-                       idesign = as.formula(str_c("~", rh3)), 
+                       idesign = as.formula(paste0("~", rh3)), 
                        type = type)
     data.l <- c(data.l, idata = list(idata))
     
   } else { # if NO within-subjetc factors are present (i.e., purley between ANOVA):
     colnames(tmp.dat)[ncol(tmp.dat)] <- "dv"
     tmp.lm <- do.call("lm", 
-                      list(formula = as.formula(str_c("dv ~ ", rh2)), 
+                      list(formula = as.formula(paste0("dv ~ ", rh2)), 
                            data = tmp.dat))
     if (return == "lm") return(tmp.lm)
     Anova.out <- Anova(tmp.lm, type = type)
@@ -553,10 +548,10 @@ aov_4 <- function(formula,
   id <- escape_vars(id)
   within <- escape_vars(within)
   
-  error <- str_c(" + Error(", 
+  error <- paste0(" + Error(", 
                  id, 
                  if (length(within) > 0) "/(" else "", 
-                 str_c(within, collapse = " * "), 
+                 paste0(within, collapse = " * "), 
                  if (length(within) > 0) ")" else "", 
                  ")")
   lh <- as.character(nobars(formula))
@@ -567,8 +562,8 @@ aov_4 <- function(formula,
     dv <- lh[2]
     rh <- lh[3]
   }
-  formula <- str_c(dv, " ~ ", rh, error)
-  if (print.formula) message(str_c("Formula send to aov_car: ", formula))
+  formula <- paste0(dv, " ~ ", rh, error)
+  if (print.formula) message(paste0("Formula send to aov_car: ", formula))
   aov_car(formula = as.formula(formula), 
           data = data, 
           fun_aggregate = fun_aggregate, 
@@ -603,25 +598,25 @@ aov_ez <- function(id,
     stop("Either between or within need to be non-NULL!")
   if (!is.null(covariate)) {
     covariate <- escape_vars(covariate)
-    covariate <- str_c(covariate, collapse = "+")
+    covariate <- paste0(covariate, collapse = "+")
   }
   id        <- escape_vars(id)
   dv        <- escape_vars(dv)
   between   <- escape_vars(between)
   within    <- escape_vars(within)
   rh <- if (!is.null(between) || !is.null(covariate)) 
-    str_c(if (!is.null(between)) str_c(between, collapse = " * ") else NULL, 
-          covariate, sep = " + ") else "1"
-  error <- str_c(" + Error(", 
+    mypaste(if (!is.null(between)) paste0(between, collapse = " * ") else NULL, 
+          covariate, sep = "+") else "1"
+  error <- paste0(" + Error(", 
                  id, 
                  if (!is.null(within)) "/(" else "", 
-                 str_c(within, collapse = " * "), 
+                 paste0(within, collapse = " * "), 
                  if (length(within) > 0) ")" else "", 
                  ")")
   if (!missing(transformation))
     dv <- paste0(transformation, "(", dv, ")")
-  formula <- str_c(dv, " ~ ", rh, error)
-  if (print.formula) message(str_c("Formula send to aov_car: ", formula))
+  formula <- paste0(dv, " ~ ", rh, error)
+  if (print.formula) message(paste0("Formula send to aov_car: ", formula))
   aov_car(formula = as.formula(formula), 
           data = data, 
           fun_aggregate = fun_aggregate, 

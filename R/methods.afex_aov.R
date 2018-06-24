@@ -117,9 +117,9 @@ anova.afex_aov <- function(object,
     if(!is.null(observed) & length(observed) > 0){
       obs <- rep(FALSE,nrow(tmp2))
       for(i in observed){
-        if (!any(str_detect(rownames(tmp2),str_c("\\b",i,"\\b")))) 
-          stop(str_c("Observed variable not in data: ", i))
-        obs <- obs | str_detect(rownames(tmp2),str_c("\\b",i,"\\b"))
+        if (!any(grepl(paste0("\\b",i,"\\b"), rownames(tmp2)))) 
+          stop(paste0("Observed variable not in data: ", i))
+        obs <- obs | grepl(paste0("\\b",i,"\\b"), rownames(tmp2))
       }
       obs_SSn1 <- sum(tmp2$SS*obs)
       obs_SSn2 <- tmp2$SS*obs

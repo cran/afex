@@ -73,16 +73,16 @@ test_that("mixed plots are produced", {
   #                                    c(NA, fhch$id[-length(fhch$id)])), 
   #                            function(x) 0:29 + x)),]
   mrt <- mixed(log_rt ~ task*stimulus*frequency + (1|id), 
-               fhch, method = "S")
+               fhch, method = "S", progress = FALSE)
 
   expect_is(afex_plot(mrt, "task", 
-                      random = "id"), "ggplot")
+                      id = "id"), "ggplot")
   expect_is(afex_plot(mrt, x = "stimulus", panel = "task", 
-                      random = "id"), "ggplot")
+                      id = "id"), "ggplot")
   expect_is(afex_plot(mrt, x = "stimulus", trace = "task", 
-                      random = "id"), "ggplot")
+                      id = "id"), "ggplot")
   expect_is(afex_plot(mrt, x = "stimulus", trace =  "frequency", panel = "task", 
-                      random = "id"), "ggplot")
+                      id = "id"), "ggplot")
 })
 
 test_that("lme4::merMod plots are produced", {
@@ -91,11 +91,25 @@ test_that("lme4::merMod plots are produced", {
   Oats.lmer <- lmer(yield ~ Variety * factor(nitro) + (1|VarBlock) + (1|Block),
                     data = Oats)
   expect_is(afex_plot(Oats.lmer, "nitro", 
-                      random = "VarBlock"), "ggplot")
+                      id = "VarBlock"), "ggplot")
   expect_is(afex_plot(Oats.lmer, "nitro", "Variety", 
-                      random = "VarBlock"), "ggplot")
+                      id = "VarBlock"), "ggplot")
   expect_is(afex_plot(Oats.lmer, "nitro", panel = "Variety", 
-                      random = "VarBlock"), "ggplot")
+                      id = "VarBlock"), "ggplot")
+  
+  ## check that id argument works:
+  d1 <- afex_plot(Oats.lmer, "nitro", 
+                  id = "VarBlock", 
+                  return = "data")
+  d2 <- afex_plot(Oats.lmer, "nitro", 
+                  id = "Block", 
+                  return = "data")
+  d3 <- afex_plot(Oats.lmer, "nitro", 
+                  id = c("Block", "VarBlock"), 
+                  return = "data")
+  expect_lt(nrow(d2$data), nrow(d1$data))
+  expect_lt(nrow(d2$data), nrow(d3$data))
+  expect_identical(nrow(d1$data), nrow(d3$data))
 })
 
 test_that("afex_plot works with various geoms (from examples)", {
@@ -176,4 +190,20 @@ test_that("afex_plot works with various geoms (from examples)", {
                   line_arg = list(linetype = 0),
                   error_arg = list(size = 1.5, width = 0))
   expect_is(p8, "ggplot")
+})
+
+test_that("relabeling of factors and legend works", {
+  data(md_12.1)
+  aw <- aov_ez("id", "rt", md_12.1, within = c("angle", "noise"))
+  ## relabel factor levels via new_levels
+  p1 <- afex_plot(aw, x = "noise", trace = "angle", error = "within",
+                  factor_levels = list(angle = c("0", "4", "8"),
+                                       noise = c("Absent", "Present")))
+  expect_equal(levels(p1$data$noise), c("Absent", "Present"))
+  expect_equal(levels(p1$data$angle), c("0", "4", "8"))
+
+  p2 <- afex_plot(aw, x = "noise", trace = "angle", error = "within",
+                  legend_title = "Noise Condition")
+  expect_equal(p2$guides$shape$title, "Noise Condition")
+  expect_equal(p2$guides$linetype$title, "Noise Condition")
 })

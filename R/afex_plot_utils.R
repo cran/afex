@@ -81,12 +81,18 @@ get_emms <- function(object,
   emms <- as.data.frame(do.call(emmeans::emmeans, 
                                 args = c(object = list(object), 
                                          specs = list(all_vars), 
+                                         type = list("response"),
                                          emmeans_arg)))
   for (i in seq_along(factor_levels)) {
     levels(emms[[names(factor_levels)[i]]]) <- factor_levels[[i]]
   }
   emms$x <- interaction(emms[x], sep = "\n")
-  colnames(emms)[colnames(emms) == "emmean"] <- "y"
+  #col_y <- colnames(emms)[which(colnames(emms) == "SE")-1]
+  if (any(colnames(emms) == "SE")) {
+    colnames(emms)[which(colnames(emms) == "SE")-1] <- "y"
+  } else {
+    colnames(emms)[grep("CL|HPD", colnames(emms))[1]-1] <- "y"
+  }
   attr(emms, "dv") <- attr(object, "dv")
   attr(emms, "x") <- paste(x, sep = "\n")
   if (length(panel) > 0) {
@@ -110,6 +116,10 @@ prep_data <- function(data,
     levels(data[[names(factor_levels)[i]]]) <- factor_levels[[i]]
   }
   colnames(data)[colnames(data) == dv_col] <- "y"
+  if (!is.numeric(data$y)) {
+    message("transforming dv to numerical scale")
+    data$y <- as.numeric(data$y)
+  }
   data <- aggregate(data$y, by = data[c(all_vars,id)], 
                     FUN = mean, drop = TRUE)
   data$y <- data$x
@@ -145,7 +155,7 @@ get_data_based_cis <- function(emms, data, error,
     emms$error <- emms$SE
     # emms$lower <- emms$lower.CL
     # emms$upper <- emms$upper.CL
-    col_cis <- grep("CL", colnames(emms), value = TRUE)
+    col_cis <- grep("CL|HPD", colnames(emms), value = TRUE)
     col_cis <- col_cis[!(col_cis %in% all_vars)]
     emms$lower <- emms[,col_cis[1]]
     emms$upper <- emms[,col_cis[2]]

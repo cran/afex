@@ -378,7 +378,7 @@ aov_ez("id", "value", obk.long, between = c("treatment", "gender"),
 # 
 # Sphericity correction method: GG 
 # ---
-# Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘+’ 0.1 ‘ ’ 1
+# Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '+' 0.1 ' ' 1
 
 # "numeric" variables are per default converted to factors (as long as factorize = TRUE):
 obk.long$hour2 <- as.numeric(as.character(obk.long$hour))
@@ -503,7 +503,7 @@ obk_anova <- aov_car(value ~ treatment * gender + Error(id/(phase*hour)),
 
 str(obk_anova, 1, give.attr = FALSE)
 # List of 5
-#  $ anova_table:Classes ‘anova’ and 'data.frame':	15 obs. of  6 variables:
+#  $ anova_table:Classes 'anova' and 'data.frame':	15 obs. of  6 variables:
 #  $ aov        :List of 5
 #  $ Anova      :List of 14
 #  $ lm         :List of 13

@@ -74,15 +74,26 @@ test_that("mixed plots are produced", {
   #                            function(x) 0:29 + x)),]
   mrt <- mixed(log_rt ~ task*stimulus*frequency + (1|id), 
                fhch, method = "S", progress = FALSE)
+  
+  p1 <- afex_plot(mrt, "task", id = "id")
 
-  expect_is(afex_plot(mrt, "task", 
-                      id = "id"), "ggplot")
-  expect_is(afex_plot(mrt, x = "stimulus", panel = "task", 
-                      id = "id"), "ggplot")
-  expect_is(afex_plot(mrt, x = "stimulus", trace = "task", 
-                      id = "id"), "ggplot")
-  expect_is(afex_plot(mrt, x = "stimulus", trace =  "frequency", panel = "task", 
-                      id = "id"), "ggplot")
+  expect_is(p1, "ggplot")
+  expect_equal(p1$labels$y, "log_rt")
+  
+  p2 <- afex_plot(mrt, x = "stimulus", panel = "task", 
+                      id = "id")
+  expect_is(p2, "ggplot")
+  expect_equal(p2$labels$y, "log_rt")
+  
+  p3 <- afex_plot(mrt, x = "stimulus", trace = "task", 
+                      id = "id")
+  expect_is(p3, "ggplot")
+  expect_equal(p3$labels$y, "log_rt")
+  
+  p4 <- afex_plot(mrt, x = "stimulus", trace =  "frequency", panel = "task", 
+                      id = "id")
+  expect_is(p4, "ggplot")
+  expect_equal(p4$labels$y, "log_rt")
 })
 
 test_that("lme4::merMod plots are produced", {
@@ -90,8 +101,11 @@ test_that("lme4::merMod plots are produced", {
   Oats$VarBlock <- Oats$Variety:Oats$Block
   Oats.lmer <- lmer(yield ~ Variety * factor(nitro) + (1|VarBlock) + (1|Block),
                     data = Oats)
-  expect_is(afex_plot(Oats.lmer, "nitro", 
-                      id = "VarBlock"), "ggplot")
+  p1 <- afex_plot(Oats.lmer, "nitro", 
+                      id = "VarBlock")
+  expect_is(p1, "ggplot")
+  expect_equal(p1$labels$y, "yield")
+  
   expect_is(afex_plot(Oats.lmer, "nitro", "Variety", 
                       id = "VarBlock"), "ggplot")
   expect_is(afex_plot(Oats.lmer, "nitro", panel = "Variety", 
@@ -206,4 +220,21 @@ test_that("relabeling of factors and legend works", {
                   legend_title = "Noise Condition")
   expect_equal(p2$guides$shape$title, "Noise Condition")
   expect_equal(p2$guides$linetype$title, "Noise Condition")
+})
+
+test_that("labels are correct in case variables are of lenth > 1", {
+  data(obk.long, package = "afex")
+  # estimate mixed ANOVA on the full design:
+  a1 <- aov_car(value ~ treatment * gender + Error(id/(phase*hour)), 
+                data = obk.long, observed = "gender")
+  
+  p1 <- afex_plot(a1, c("phase", "hour"), c("treatment", "gender"), 
+                  error = "none")
+  p2 <- afex_plot(a1, c("phase", "hour"), error = "none")
+  expect_match(p1$labels$x, "phase")
+  expect_match(p1$labels$x, "hour")
+  expect_match(p1$guides$shape$title, "treatment")
+  expect_match(p1$guides$shape$title, "gender")
+  expect_match(p2$labels$x, "phase")
+  expect_match(p2$labels$x, "hour")
 })

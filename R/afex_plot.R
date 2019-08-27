@@ -32,7 +32,11 @@
 #'   \code{"shape"}, \code{"color"}, \code{"linetype"}, or also \code{"fill"} 
 #'   (see examples). The default (i.e., missing) uses \code{c("shape", 
 #'   "linetype")} if \code{trace} is specified and \code{""} otherwise (i.e., no
-#'   additional aesthetic).
+#'   additional aesthetic). If specific mappings should not be applied to
+#'   specific graphical elements, one can override those via the corresponding
+#'   further arguments. For example, for \code{data_arg} the default is
+#'   \code{list(color = "darkgrey")} which prevents that \code{"color"} is
+#'   mapped onto points in the background.
 #' @param error A scalar \code{character} vector specifying on which standard 
 #'   error the error bars should be based. Default is \code{"model"}, which
 #'   plots model-based standard errors. Further options are: \code{"none"} (or 
@@ -254,7 +258,7 @@
 #'   https://doi.org/10.1198/000313001317097960
 #'   
 #'   
-#' @importFrom stats aggregate sd qt
+#' @importFrom stats aggregate sd qt formula
 #' 
 #' @example examples/examples.afex_plot.R
 #'   
@@ -453,6 +457,7 @@ afex_plot.mixed <- function(object,
                    emmeans_arg = emmeans_arg, 
                    factor_levels = factor_levels,
                    level = error_level)
+  attr(emms, "dv") <- deparse(object$full_model@call[["formula"]][[2]])
   
   if (length(id) == 1) {
     all_within <- lapply(lme4::findbars(object$call), all.vars)
@@ -576,6 +581,7 @@ afex_plot.merMod <- function(object,
                    emmeans_arg = emmeans_arg, 
                    factor_levels = factor_levels,
                    level = error_level)
+  attr(emms, "dv") <- deparse(object@call[["formula"]][[2]])
   
   if (length(id) == 1) {
     all_within <- lapply(lme4::findbars(object@call), all.vars)
@@ -675,10 +681,14 @@ afex_plot.default <- function(object,
   }
   ## prepare raw (i.e., participant by cell) data if missing
   if (missing(data)) {
-    data <- emmeans::recover_data(
+    data <- tryCatch(emmeans::recover_data(
+      object = object, 
+      #trms = terms(object)
+      trms = terms(lme4::subbars(formula(object)))
+    ), error = function(e) emmeans::recover_data(
       object = object, 
       trms = terms(object)
-    )
+    ))
   }
   if (missing(id)) {
     message("No id column passed. ", 
@@ -786,6 +796,12 @@ interaction_plot <- function(means,
   }
   tmp_list <- as.list(rep(col_trace, length(mapping)))
   names(tmp_list) <- mapping
+  
+  error_mapping <- mapping[!(mapping %in% c("linetype", "shape", "fill"))]
+  tmp_list_error <- as.list(rep(col_trace, length(error_mapping)))
+  names(tmp_list_error) <- error_mapping
+  
+  
   plot_out <- ggplot2::ggplot(data = means, 
                               mapping = do.call(
                                 what = ggplot2::aes_string, 
@@ -821,33 +837,50 @@ interaction_plot <- function(means,
               )
       )
   }
-  
-  plot_out <- plot_out + 
-    do.call(what = ggplot2::geom_point, 
-            args = c(
-              position = list(
-                ggplot2::position_dodge(width = dodge)
-              ),
-              point_arg
-            )) +
-    do.call(what = ggplot2::geom_line, 
-            args = c(
-              position = list(
-                ggplot2::position_dodge(width = dodge)
-              ),
-              line_arg
-            ))
-
-  if (error_plot) {
+  for (i in levels(data$trace)) {
+    tmp_means <- means
+    tmp_means[means$trace != i, c(col_y, col_lower, col_upper)] <- NA
+    #tmp_means <- tmp_means[means$trace == i,]
     plot_out <- plot_out + 
-      do.call(what = ggplot2::geom_errorbar, 
+      do.call(what = ggplot2::geom_point, 
               args = c(
-                mapping = list(ggplot2::aes_string(
-                  ymin = col_lower,
-                  ymax = col_upper)),
-                position = list(ggplot2::position_dodge(width = dodge)),
-                error_arg
+                data = list(tmp_means),
+                position = list(
+                  ggplot2::position_dodge(width = dodge)
+                ),
+                point_arg, 
+                na.rm = list(TRUE)
+              )) +
+      do.call(what = ggplot2::geom_line, 
+              args = c(
+                data = list(tmp_means),
+                position = list(
+                  ggplot2::position_dodge(width = dodge)
+                ),
+                line_arg, 
+                na.rm = list(TRUE)
               ))
+    
+    if (error_plot) {
+      plot_out <- plot_out + 
+        do.call(what = ggplot2::geom_errorbar, 
+                args = c(
+                  data = list(tmp_means),
+                  mapping = list(do.call(
+                    what = ggplot2::aes_string, 
+                    args = c(list(
+                      x = col_x, 
+                      ymin = col_lower,
+                      ymax = col_upper,
+                      group = col_trace),
+                      tmp_list_error))),
+                  position = list(ggplot2::position_dodge(width = dodge)),
+                  error_arg, 
+                  na.rm = list(TRUE), 
+                  inherit.aes = list(FALSE)
+                ))
+    }
+    
   }
   
   if (length(unique(means$panel)) > 1) {
@@ -865,6 +898,7 @@ interaction_plot <- function(means,
       ggplot2::xlab(attr(means, "x"))
   }
   if (!missing(legend_title)) {
+    legend_title <- paste(legend_title, collapse = "\n")
     tmp_list <- rep(list(ggplot2::guide_legend(title = legend_title)), 
                     length(mapping))
     names(tmp_list) <- mapping
@@ -904,8 +938,17 @@ oneway_plot <- function(means,
     mapping <- ""
   }
   
-  tmp_list <- as.list(rep(col_x, length(mapping)))
-  names(tmp_list) <- mapping
+  if (length(mapping) > 1 || mapping[1] != "") {
+    tmp_list <- as.list(rep(col_x, length(mapping)))
+    names(tmp_list) <- mapping
+
+    error_mapping <- mapping[!(mapping %in% c("linetype", "shape", "fill"))]
+    tmp_list_error <- as.list(rep(col_x, length(error_mapping)))
+    names(tmp_list_error) <- error_mapping
+  } else {
+    tmp_list <- list()
+    tmp_list_error <- list()
+  }
   
   plot_out <- ggplot2::ggplot(data = means, 
                               mapping = do.call(
@@ -942,10 +985,15 @@ oneway_plot <- function(means,
     plot_out <- plot_out + 
       do.call(what = ggplot2::geom_errorbar, 
               args = c(
-                mapping = list(ggplot2::aes_string(
-                  ymin = col_lower,
-                  ymax = col_upper)),
-                error_arg
+                mapping = list(do.call(
+                    what = ggplot2::aes_string, 
+                    args = c(list(
+                      x = col_x, 
+                      ymin = col_lower,
+                      ymax = col_upper),
+                      tmp_list_error))),
+                error_arg,
+                inherit.aes = list(FALSE)
               ))
   }
   
@@ -964,6 +1012,7 @@ oneway_plot <- function(means,
       ggplot2::xlab(attr(means, "x"))
   }
   if (!missing(legend_title)) {
+    legend_title <- paste(legend_title, collapse = "\n")
     tmp_list <- rep(list(ggplot2::guide_legend(title = legend_title)), 
                     length(mapping))
     names(tmp_list) <- mapping

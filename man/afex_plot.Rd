@@ -83,7 +83,11 @@ specified) or the \code{x} factors. Useful options are any combination of
 \code{"shape"}, \code{"color"}, \code{"linetype"}, or also \code{"fill"} 
 (see examples). The default (i.e., missing) uses \code{c("shape", 
 "linetype")} if \code{trace} is specified and \code{""} otherwise (i.e., no
-additional aesthetic).}
+additional aesthetic). If specific mappings should not be applied to
+specific graphical elements, one can override those via the corresponding
+further arguments. For example, for \code{data_arg} the default is
+\code{list(color = "darkgrey")} which prevents that \code{"color"} is
+mapped onto points in the background.}
 
 \item{error}{A scalar \code{character} vector specifying on which standard 
 error the error bars should be based. Default is \code{"model"}, which

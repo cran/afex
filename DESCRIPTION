@@ -5,7 +5,7 @@ Depends: R (>= 3.1.0), lme4 (>= 1.1-8)
 Suggests: emmeans (>= 1.4), coin, xtable, parallel, plyr, optimx,
         nloptr, knitr, rmarkdown, R.rsp, lattice, latticeExtra,
         multcomp, testthat, mlmRev, dplyr, tidyr, dfoptim, Matrix,
-        psych, ggplot2, MEMSS, effects, carData, ggbeeswarm, nlme,
+        psychTools, ggplot2, MEMSS, effects, carData, ggbeeswarm, nlme,
         cowplot, jtools, ggpubr, ggpol, MASS, glmmTMB, brms, rstanarm
 Imports: pbkrtest (>= 0.4-1), lmerTest (>= 3.0-0), car, reshape2,
         stats, methods, utils
@@ -27,7 +27,7 @@ License: GPL (>= 2)
 Encoding: UTF-8
 VignetteBuilder: knitr, R.rsp
 Authors@R: c(person(given="Henrik", family="Singmann", role=c("aut", "cre"),
-          email="singmann+afex@gmail.com", comment=c(ORCID="0000-0002-4842-3657")),
+          email="singmann@gmail.com", comment=c(ORCID="0000-0002-4842-3657")),
          person(given="Ben", family="Bolker", role=c("aut")), 
          person(given="Jake",family="Westfall", role=c("aut")), 
          person(given="Frederik", family="Aust", role=c("aut"), 
@@ -40,11 +40,11 @@ Authors@R: c(person(given="Henrik", family="Singmann", role=c("aut", "cre"),
          person(given="Jonathon", family="Love", role=c("ctb")), 
          person(given="Russell", family="Lenth", role=c("ctb")), 
          person(given="Rune", family="Haubo Bojesen Christensen", role=c("ctb")))
-Version: 0.25-1
-RoxygenNote: 6.1.1
+Version: 0.26-0
+RoxygenNote: 7.0.2
 LazyData: true
 NeedsCompilation: no
-Packaged: 2019-08-27 16:58:58 UTC; henrik
+Packaged: 2020-01-15 21:03:10 UTC; henrik
 Author: Henrik Singmann [aut, cre] (<https://orcid.org/0000-0002-4842-3657>),
   Ben Bolker [aut],
   Jake Westfall [aut],
@@ -57,6 +57,6 @@ Author: Henrik Singmann [aut, cre] (<https://orcid.org/0000-0002-4842-3657>),
   Jonathon Love [ctb],
   Russell Lenth [ctb],
   Rune Haubo Bojesen Christensen [ctb]
-Maintainer: Henrik Singmann <singmann+afex@gmail.com>
+Maintainer: Henrik Singmann <singmann@gmail.com>
 Repository: CRAN
-Date/Publication: 2019-08-27 18:10:02 UTC
+Date/Publication: 2020-01-16 05:40:03 UTC

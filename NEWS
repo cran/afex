@@ -1,4 +1,27 @@
                     *************************
+                    ** afex VERSION 0.26-x **
+                    *************************
+                    
+                    Changes in afex Version 0.26-x
+                    Released January 2020
+                    
+    Significant User Visible Changes and New Features
+    
+    o   factor_levels argument of afex_plot() now accepts named character vectors
+        which allows: 
+        (1) renaming only a subset of factor levels (if only a subset of levels 
+            is specified) 
+        (2) reordering in which order factor levels are shown in the plot (order
+            of names within a list element determine order that will be used for
+            plotting)
+
+    Bugfixes
+
+    o   msq data set is now part of psychTools and not of psych. 
+        Fixes CRAN check issues.
+
+
+                    *************************
                     ** afex VERSION 0.25-x **
                     *************************
                     

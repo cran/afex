@@ -29,13 +29,13 @@ plot_grid(
   p_an + theme_bw() + theme(legend.position="bottom"),
   p_an + theme_light() + theme(legend.position="bottom"),
   p_an + theme_minimal() + theme(legend.position="bottom"),
-  p_an + jtools::theme_apa() + theme(legend.position="bottom"),
+  p_an + jtools::theme_nice() + theme(legend.position="bottom"),
   p_an + ggpubr::theme_pubr(),
   p_an + theme_cowplot() + theme(legend.position="bottom"),
   labels = "AUTO"
 )  
 
-## ----fig.width=3.5, fig.height=3, dpi = 150, out.width='50%'----------------------------
+## ----fig.width=3.5, fig.height=3, dpi = 100, out.width='50%'----------------------------
 p_an + 
   scale_y_continuous(breaks=seq(400, 900, length.out = 3)) +
   theme_bw(base_size = 15) + 
@@ -50,13 +50,13 @@ theme_set(theme_bw(base_size = 15) +
 ## ---- eval=FALSE------------------------------------------------------------------------
 #  ggsave("my_plot.png", device = "png",
 #         width = 9, height = 8, units = "cm",
-#         dpi = 600) ## the higher the dpi, the better the resolution
+#         dpi = 600) ## the larger the dpi, the better the resolution
 
 ## ---- eval=FALSE------------------------------------------------------------------------
 #  ggsave("my_plot.pdf", device = "pdf",
 #         width = 9, height = 8, units = "cm")
 
-## ----fig.width=8.5, fig.height=12, dpi = 150--------------------------------------------
+## ----fig.width=8.5, fig.height=12, dpi = 125--------------------------------------------
 p1 <- afex_plot(aw, x = "noise", trace = "angle", error = "within", dodge = 0.3,
                 data_arg = list(
                   position = 
@@ -91,7 +91,7 @@ p6 <- afex_plot(aw, x = "noise", trace = "angle", error = "within", dodge = 0.7,
                 error_arg = list(size = 1.5, width = 0))
 plot_grid(p1, p2, p3, p4, p5, p6, ncol = 2, labels = 1:6)  
 
-## ----fig.width=8.5, fig.height=8, dpi = 150---------------------------------------------
+## ----fig.width=8.5, fig.height=8, dpi = 125---------------------------------------------
 p2 <- afex_plot(aw, x = "noise", trace = "angle", error = "within", dodge = 0.5,
                 mapping = c("shape", "color"),
                 data_geom = ggbeeswarm::geom_beeswarm,

@@ -1,4 +1,60 @@
                     *************************
+                    ** afex VERSION 0.28-x **
+                    *************************
+                    
+                    Changes in afex Version 0.28-x
+                    Released August 2020
+                    
+    Significant User Visible Changes and New Features
+    
+    o   Added residuals() and fitted() methods for afex_aov objects. 
+        Thanks to a pull request by Mattan S. Ben-Shachar.
+    
+    o   Added new data set, stroop, which contains the accuracy and response 
+        time data from Lin, Saunders, Friese, Evans, and Inzlicht (2020, Psych. 
+        Science, https://doi.org/10.1177/0956797620904990).
+        
+    o   Added new vignette, "Analysis of Accuracy Data using ANOVA and binomial 
+        GLMMs" which uses the new Stroop data.
+        
+    o   afex_plot introduction vignette and help page now refer to 
+        ggbeeswarm::geom_quasirandom as a good alternative to the bee swarm 
+        plot.
+        
+    o   Updated the mixed model vignette which now discusses going from the 
+        maximal to the final model, singular fits, and is based on latest lme4.
+        
+    o   Mixed model chapter uses better layout and added final reference.
+
+    Bugfixes (most bugs in this updated were reported by Frantisek Bartos)
+
+    o   objects estimated with mixed(..., all_fit = TRUE) should now work
+        again with emmeans.
+        
+    o   afex_plot() works with mixed models estimated with mixed(..., type = 2) 
+        (i.e., mixed models with Type II sums of squares).
+        
+    o   afex_plot() did not work if data had a column called 'y' that appeared
+        before the response/DV column in data.
+        
+    o   Better error message if afex_plot() is called with variable/factor 'y' 
+        for plotting (which is not supported, 'y' can only be the name of the 
+        response variable).
+        
+    o   Better error message if afex_plot() fails to recover the dv from the 
+        formula (e.g., for brms models).
+    
+    o   Better error messages in case of NAs in the response variable for 
+        ANOVAs and mixed models.
+        
+    o   afex_plot.merMod() method does not fail any more for models with missing
+        data. 
+        
+    o   afex_plot() correctly plots data in the background if DV is a factor in 
+        a binomial model.
+
+
+                    *************************
                     ** afex VERSION 0.27-x **
                     *************************
                     
@@ -22,7 +78,7 @@
     o   mixed(): check_contrasts = TRUE now works when the formula is not a 
         formula (but e.g., a character string).
         
-    o   Better error message when ANOVA formula does not include an errror term.
+    o   Better error message when ANOVA formula does not include an error term.
     
     o   Should work with both lme4 1.1-22 and later.
 

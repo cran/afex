@@ -64,10 +64,11 @@
 #'   the error bar.
 #' @param data_plot \code{logical}. Should raw data be plotted in the 
 #'   background? Default is \code{TRUE}.
-#' @param data_geom Geom \code{function} used for plotting data in background. 
-#'   The default (missing) uses \code{\link[ggplot2]{geom_point}} if 
-#'   \code{trace} is specified, otherwise 
-#'   \code{\link[ggbeeswarm]{geom_beeswarm}}. See examples fo further options.
+#' @param data_geom Geom \code{function} used for plotting data in background.
+#'   The default (missing) uses \code{\link[ggplot2]{geom_point}} if
+#'   \code{trace} is specified, otherwise
+#'   \code{\link[ggbeeswarm]{geom_beeswarm}} (a good alternative is
+#'   \code{ggbeeswarm::geom_quasirandom}) . See examples fo further options.
 #' @param data_alpha numeric \code{alpha} value between 0 and 1 passed to 
 #'   \code{data_geom}. Default is \code{0.5} which correspond to semitransparent
 #'   data points in the background such that overlapping data points are plotted
@@ -143,15 +144,16 @@
 #'   confidence intervals (if \code{error_ci = TRUE}, the default) or standard 
 #'   errors (if \code{error_ci = FALSE}).
 #'   
-#'   A further complication is that readers routinely misinterpret confidence 
-#'   intervals. The most common error is to assume that non-overlapping error 
-#'   bars indicate a significant difference (e.g., Belia et al., 2005). This is 
-#'   rarely the case (see e.g., Cumming & Finch, 2005; Knol et al., 2011; 
-#'   Schenker & Gentleman, 2005). For example, in a fully between-subjects design
-#'   in which the error bars depict 95\% confidence intervals and groups are of 
-#'   approximately equal size and have equal variance, even error bars that 
-#'   overlap by as much as 50\% still correspond to \emph{p} < .05. Error bars 
-#'   that are just touching roughly correspond to \emph{p} = .01.
+#'   A further complication is that readers routinely misinterpret confidence
+#'   intervals. The most common error is to assume that non-overlapping error
+#'   bars indicate a significant difference (e.g., Belia et al., 2005). This is
+#'   often too strong an assumption. (see e.g., Cumming & Finch, 2005; Knol et
+#'   al., 2011; Schenker & Gentleman, 2005). For example, in a fully
+#'   between-subjects design in which the error bars depict 95\% confidence
+#'   intervals and groups are of approximately equal size and have equal
+#'   variance, even error bars that overlap by as much as 50\% still correspond
+#'   to \emph{p} < .05. Error bars that are just touching roughly correspond to
+#'   \emph{p} = .01.
 #'   
 #'   In the case of designs involving repeated-measures factors the usual
 #'   confidence intervals or standard errors (i.e., model-based confidence
@@ -263,6 +265,9 @@
 #'   \emph{The American Statistician}, 55(3), 182-186.
 #'   https://doi.org/10.1198/000313001317097960
 #'   
+#' @note Only the DV/response variable can be called \code{y}, but no
+#'   factor/variable used for plotting.
+#'   
 #'   
 #' @importFrom stats aggregate sd qt formula
 #' 
@@ -313,6 +318,10 @@ afex_plot.afex_aov <- function(object,
   trace <- get_plot_var(trace)
   panel <- get_plot_var(panel)
   all_vars <- c(x, trace, panel)
+  if ("y" %in% all_vars) {
+    stop("Variable 'y' cannot be used for plotting. Rename variable and refit.",
+         call. = FALSE)
+  }
   
   emms <- get_emms(object = object, 
                    x = x,
@@ -430,13 +439,24 @@ afex_plot.mixed <- function(object,
             paste(names(dots), collapse = ", "), call. = FALSE)
   }
   
+  if (attr(object, "type") %in% c("II", 2) & 
+      attr(object, "method") %in% c("LRT", "nested-KR", "PB") ) {
+    full_model <- object$full_model[[1]]
+  } else (
+    full_model <- object$full_model
+  )
+  
   x <- get_plot_var(x)
   trace <- get_plot_var(trace)
   panel <- get_plot_var(panel)
   all_vars <- c(x, trace, panel)
+  if ("y" %in% all_vars) {
+    stop("Variable 'y' cannot be used for plotting. Rename variable and refit.",
+         call. = FALSE)
+  }
   
   if (missing(id)) {
-    id <- unique(names(lme4::ranef(object$full_model)))
+    id <- unique(names(lme4::ranef(full_model)))
     message("Aggregating data over: ", paste(id, collapse = ", "))
   }
   ## prepare raw (i.e., participant by cell) data
@@ -445,7 +465,7 @@ afex_plot.mixed <- function(object,
                     trace = trace,
                     panel = panel,
                     factor_levels = factor_levels,
-                    dv_col = deparse(object$full_model@call[["formula"]][[2]]),
+                    dv_col = deparse(full_model@call[["formula"]][[2]]),
                     id = id)
   data$afex_id <- interaction(data[id], sep = ".")
   
@@ -463,7 +483,7 @@ afex_plot.mixed <- function(object,
                    emmeans_arg = emmeans_arg, 
                    factor_levels = factor_levels,
                    level = error_level)
-  attr(emms, "dv") <- deparse(object$full_model@call[["formula"]][[2]])
+  attr(emms, "dv") <- deparse(full_model@call[["formula"]][[2]])
   
   if (length(id) == 1) {
     all_within <- lapply(lme4::findbars(object$call), all.vars)
@@ -553,6 +573,10 @@ afex_plot.merMod <- function(object,
   trace <- get_plot_var(trace)
   panel <- get_plot_var(panel)
   all_vars <- c(x, trace, panel)
+  if ("y" %in% all_vars) {
+    stop("Variable 'y' cannot be used for plotting. Rename variable and refit.",
+         call. = FALSE)
+  }
   
   
   if (missing(id)) {
@@ -562,8 +586,9 @@ afex_plot.merMod <- function(object,
   ## prepare raw (i.e., participant by cell) data
   data <- prep_data(
     data = emmeans::recover_data(
-      object = object, 
-      trms = terms(object, fixed.only = FALSE)
+      object = object@call, 
+      trms = terms(object, fixed.only = FALSE), 
+      na.action = attr(object@frame, ".na.action")
       ), 
     x = x,
     trace = trace,
@@ -679,22 +704,47 @@ afex_plot.default <- function(object,
   trace <- get_plot_var(trace)
   panel <- get_plot_var(panel)
   all_vars <- c(x, trace, panel)
+  if ("y" %in% all_vars) {
+    stop("Variable 'y' cannot be used for plotting. Rename variable and refit.",
+         call. = FALSE)
+  }
   
   if (missing(dv)) {
-    formula_name <- names(object$call)[2]
+    tryCatch({
+      formula_name <- names(object$call)[2]
+    }, error = function(e) stop(
+      "Could not detect dv column. Please specify via dv argument.", 
+      call. = FALSE
+    ))
+    if (is.null(formula_name)) stop(
+      "Could not detect dv column. Please specify via dv argument.", 
+      call. = FALSE
+    )
     message("dv column detected: ", deparse(object$call[[formula_name]][[2]]))
     dv <- deparse(object$call[[formula_name]][[2]])
+    
   }
   ## prepare raw (i.e., participant by cell) data if missing
   if (missing(data)) {
-    data <- tryCatch(emmeans::recover_data(
+    try(data <- emmeans::recover_data(
       object = object, 
       #trms = terms(object)
       trms = terms(lme4::subbars(formula(object)))
-    ), error = function(e) emmeans::recover_data(
-      object = object, 
-      trms = terms(object)
-    ))
+    ), silent = TRUE)
+    if (!exists("data", mode = "list")) {
+      try(data <- emmeans::recover_data(
+        object = object, 
+        trms = terms(object)
+      ), silent = TRUE)
+    }
+    if (!exists("data", mode = "list")) {
+      try(data <- model.frame(object), silent = TRUE)
+    }
+    
+    if (!exists("data", mode = "list")) {
+      stop("data could not be recovered. Please pass data via data argument.", 
+           call. = FALSE)
+    }
   }
   if (missing(id)) {
     message("No id column passed. ", 
@@ -769,263 +819,4 @@ afex_plot.default <- function(object,
 }
 
 
-###if(getRversion() >= "2.15.1")  utils::globalVariables(c("error", "y", "x"))
-#' @rdname afex_plot
-#' @export
-interaction_plot <- function(means, 
-                             data, 
-                             mapping = c("shape", "lineytpe"), 
-                             error_plot = TRUE,
-                             error_arg = list(width = 0),
-                             data_plot = TRUE,
-                             data_geom = ggplot2::geom_point,
-                             data_alpha = 0.5,
-                             data_arg = list(color = "darkgrey"),
-                             point_arg = list(),
-                             line_arg = list(),
-                             dodge = 0.5, 
-                             legend_title,
-                             col_x = "x",
-                             col_y = "y",
-                             col_trace = "trace",
-                             col_panel = "panel",
-                             col_lower = "lower",
-                             col_upper = "upper") {
-  if (!requireNamespace("ggplot2", quietly = TRUE)) {
-    stop("package ggplot2 is required.", call. = FALSE)
-  }
-  if (missing(mapping)) {
-    mapping <- c('shape', 'linetype')
-  } else if (length(mapping) == 0) {
-    stop("mapping cannot be empty. Possible values: 'shape', 'color', 'linetype'.", 
-         call. = FALSE)
-  }
-  tmp_list <- as.list(rep(col_trace, length(mapping)))
-  names(tmp_list) <- mapping
-  
-  error_mapping <- mapping[!(mapping %in% c("linetype", "shape", "fill"))]
-  tmp_list_error <- as.list(rep(col_trace, length(error_mapping)))
-  names(tmp_list_error) <- error_mapping
-  
-  
-  plot_out <- ggplot2::ggplot(data = means, 
-                              mapping = do.call(
-                                what = ggplot2::aes_string, 
-                                args = c(list(
-                                  y = col_y, 
-                                  x = col_x, 
-                                  group = col_trace),
-                                  tmp_list)))
-  
-  if (data_plot) {
-    if (missing(data_geom)) {
-      data_geom <- ggplot2::geom_point
-    }
-    data_arg$alpha <- data_alpha
-    if (!("position" %in% names(data_arg)) & 
-        ("position" %in% names(formals(data_geom)))) {
-      data_arg$position = ggplot2::position_dodge(width = dodge)
-    }
-    plot_out <- plot_out +
-      do.call(what = data_geom,
-              args = c(
-                #mapping = list(ggplot2::aes(group = interaction(x, trace))),
-                mapping = 
-                  list(
-                    ggplot2::aes_string(
-                      group = 
-                        paste0("interaction(", 
-                               paste0(c(col_x, col_trace), collapse =  ", "), 
-                               ")")
-                    )),
-                data = list(data),
-                data_arg
-              )
-      )
-  }
-  for (i in levels(data$trace)) {
-    tmp_means <- means
-    tmp_means[means$trace != i, c(col_y, col_lower, col_upper)] <- NA
-    #tmp_means <- tmp_means[means$trace == i,]
-    plot_out <- plot_out + 
-      do.call(what = ggplot2::geom_point, 
-              args = c(
-                data = list(tmp_means),
-                position = list(
-                  ggplot2::position_dodge(width = dodge)
-                ),
-                point_arg, 
-                na.rm = list(TRUE)
-              )) +
-      do.call(what = ggplot2::geom_line, 
-              args = c(
-                data = list(tmp_means),
-                position = list(
-                  ggplot2::position_dodge(width = dodge)
-                ),
-                line_arg, 
-                na.rm = list(TRUE)
-              ))
-    
-    if (error_plot) {
-      plot_out <- plot_out + 
-        do.call(what = ggplot2::geom_errorbar, 
-                args = c(
-                  data = list(tmp_means),
-                  mapping = list(do.call(
-                    what = ggplot2::aes_string, 
-                    args = c(list(
-                      x = col_x, 
-                      ymin = col_lower,
-                      ymax = col_upper,
-                      group = col_trace),
-                      tmp_list_error))),
-                  position = list(ggplot2::position_dodge(width = dodge)),
-                  error_arg, 
-                  na.rm = list(TRUE), 
-                  inherit.aes = list(FALSE)
-                ))
-    }
-    
-  }
-  
-  if (length(unique(means$panel)) > 1) {
-    plot_out <- plot_out + 
-      ggplot2::facet_wrap(facets = "panel")
-  }
-  
-  ## add labels
-  if (!is.null(attr(means, "dv"))) {
-    plot_out <- plot_out + 
-      ggplot2::ylab(attr(means, "dv"))
-  }
-  if (!is.null(attr(means, "x"))) {
-    plot_out <- plot_out + 
-      ggplot2::xlab(attr(means, "x"))
-  }
-  if (!missing(legend_title)) {
-    legend_title <- paste(legend_title, collapse = "\n")
-    tmp_list <- rep(list(ggplot2::guide_legend(title = legend_title)), 
-                    length(mapping))
-    names(tmp_list) <- mapping
-    plot_out <- plot_out + 
-      do.call(what = ggplot2::guides, 
-              args = tmp_list)
-  }
-  
-  return(plot_out)
-  
-}
 
-
-#' @rdname afex_plot
-#' @export
-oneway_plot <- function(means, 
-                        data, 
-                        mapping = "",
-                        error_plot = TRUE,
-                        error_arg = list(width = 0),
-                        data_plot = TRUE,
-                        data_geom = ggbeeswarm::geom_beeswarm,
-                        data_alpha = 0.5,
-                        data_arg = list(color = "darkgrey"),
-                        point_arg = list(),
-                        legend_title,
-                        col_x = "x",
-                        col_y = "y",
-                        col_panel = "panel",
-                        col_lower = "lower",
-                        col_upper = "upper") {
-  if (!requireNamespace("ggplot2", quietly = TRUE)) {
-    stop("package ggplot2 is required.", call. = FALSE)
-  }
-  
-  if (missing(mapping)) {
-    mapping <- ""
-  }
-  
-  if (length(mapping) > 1 || mapping[1] != "") {
-    tmp_list <- as.list(rep(col_x, length(mapping)))
-    names(tmp_list) <- mapping
-
-    error_mapping <- mapping[!(mapping %in% c("linetype", "shape", "fill"))]
-    tmp_list_error <- as.list(rep(col_x, length(error_mapping)))
-    names(tmp_list_error) <- error_mapping
-  } else {
-    tmp_list <- list()
-    tmp_list_error <- list()
-  }
-  
-  plot_out <- ggplot2::ggplot(data = means, 
-                              mapping = do.call(
-                                what = ggplot2::aes_string, 
-                                args = c(list(
-                                  y = col_y, 
-                                  x = col_x, 
-                                  group = col_x),
-                                  tmp_list)))
-  
-  
- if (data_plot) {
-    if (missing(data_geom)) {
-      if (!requireNamespace("ggbeeswarm", quietly = TRUE)) {
-        stop("package ggbeeswarm is required.", call. = FALSE)
-      }
-      data_geom <- ggbeeswarm::geom_beeswarm
-    }
-    data_arg$alpha <- data_alpha
-    plot_out <- plot_out +
-      do.call(what = data_geom,
-              args = c(
-                data = list(data),
-                data_arg
-              )
-      )
-  }
-  
-  plot_out <- plot_out + 
-    do.call(what = ggplot2::geom_point, 
-            args = point_arg) 
-
-  if (error_plot) {
-    plot_out <- plot_out + 
-      do.call(what = ggplot2::geom_errorbar, 
-              args = c(
-                mapping = list(do.call(
-                    what = ggplot2::aes_string, 
-                    args = c(list(
-                      x = col_x, 
-                      ymin = col_lower,
-                      ymax = col_upper),
-                      tmp_list_error))),
-                error_arg,
-                inherit.aes = list(FALSE)
-              ))
-  }
-  
-  if (length(unique(means$panel)) > 1) {
-    plot_out <- plot_out + 
-      ggplot2::facet_wrap(facets = "panel")
-  }
-  
-  ## add labels
-  if (!is.null(attr(means, "dv"))) {
-    plot_out <- plot_out + 
-      ggplot2::ylab(attr(means, "dv"))
-  }
-  if (!is.null(attr(means, "x"))) {
-    plot_out <- plot_out + 
-      ggplot2::xlab(attr(means, "x"))
-  }
-  if (!missing(legend_title)) {
-    legend_title <- paste(legend_title, collapse = "\n")
-    tmp_list <- rep(list(ggplot2::guide_legend(title = legend_title)), 
-                    length(mapping))
-    names(tmp_list) <- mapping
-    plot_out <- plot_out + 
-      do.call(what = ggplot2::guides, 
-              args = tmp_list)
-  }
-  
-  return(plot_out)
-}

@@ -176,18 +176,18 @@
 #' SAS. Furthermore, statisticians with an applied perspective recommend type 3
 #' tests (e.g., Maxwell and Delaney, 2004). Consequently, they are the default
 #' for the ANOVA functions described here. For some more discussion on this
-#' issue see \href{http://stats.stackexchange.com/q/6208/442}{here}.
+#' issue see \href{https://stats.stackexchange.com/q/6208/442}{here}.
 #' 
 #' Note that lower order effects (e.g., main effects) in type 3 ANOVAs are only
 #' meaningful with
-#' \href{http://www.ats.ucla.edu/stat/mult_pkg/faq/general/effect.htm}{effects
+#' \href{https://stats.idre.ucla.edu/other/mult-pkg/faq/general/faqwhat-is-effect-coding/}{effects
 #' coding}. That is, contrasts should be set to \code{\link{contr.sum}} to
 #' obtain meaningful results. This is imposed automatically for the functions
 #' discussed here as long as \code{check_contrasts} is \code{TRUE} (the
 #' default). I nevertheless recommend to set the contrasts globally to
 #' \code{contr.sum} via running \code{\link{set_sum_contrasts}}. For a
 #' discussion of the other (non-recommended) coding schemes see
-#' \href{http://www.ats.ucla.edu/stat/r/library/contrast_coding.htm}{here}. }
+#' \href{https://stats.idre.ucla.edu/r/library/r-library-contrast-coding-systems-for-categorical-variables/}{here}. }
 #' 
 #' \subsection{Follow-Up Contrasts and Post-Hoc Tests}{ The S3 object returned
 #' per default can be directly passed to \code{emmeans::emmeans} for further
@@ -297,7 +297,7 @@
 #'   H., Wetzels, R., Grasman, R. P. P. P., ... Wagenmakers, E.-J. (2015).
 #'   Hidden multiplicity in exploratory multiway ANOVA: Prevalence and remedies.
 #'   \emph{Psychonomic Bulletin & Review}, 1-8.
-#'   doi:\href{http://doi.org/10.3758/s13423-015-0913-5}{10.3758/s13423-015-0913-5}
+#'   doi:\href{https://doi.org/10.3758/s13423-015-0913-5}{10.3758/s13423-015-0913-5}
 #'   
 #'   
 #'   Maxwell, S. E., & Delaney, H. D. (2004). \emph{Designing Experiments and
@@ -536,6 +536,10 @@ aov_car <- function(formula,
                   "\nRemoving those cases from the analysis."), call. = FALSE) 
     tmp.dat <- tmp.dat[!missing.values,]
     data <- data[ !(data[,id] %in% missing_ids),]
+    if ((nrow(data) == 0 ) | (nrow(tmp.dat) == 0)) {
+      stop("No observations remain after removing missing values.", 
+           "\n  Try adding to ANOVA call: na.rm = TRUE", call. = FALSE)
+    }
   } else {
     missing_ids <- NULL
   }
@@ -556,51 +560,23 @@ aov_car <- function(formula,
              dots, 
              value.var = dv))
   colnames(dat.ret)[length(colnames(dat.ret))] <- dv
+  if (!isTRUE(
+    all.equal(target = data[,c(id, between, within, dv)], 
+              current = dat.ret[,c(id, between, within, dv)], 
+              check.attributes = FALSE)
+  )) {
+    data_changed <- TRUE
+  } else {
+    data_changed <- FALSE
+  }
   
   if (length(between) > 0) {
-    if (check_contrasts) {
-      resetted <- NULL
-      for (i in between) {
-        if (is.character(tmp.dat[,i])) {
-          tmp.dat[,i] <- factor(tmp.dat[,i])
-        }
-        if (is.factor(tmp.dat[,i])) {
-          if (is.null(attr(tmp.dat[,i], "contrasts")) & 
-              (options("contrasts")[[1]][1] != "contr.sum")) {
-            contrasts(tmp.dat[,i]) <- "contr.sum"
-            resetted  <- c(resetted, i)
-          }
-          else if (!is.null(attr(tmp.dat[,i], "contrasts")) && 
-                   attr(tmp.dat[,i], "contrasts") != "contr.sum") {
-            contrasts(tmp.dat[,i]) <- "contr.sum"
-            resetted  <- c(resetted, i)
-          }
-        }
-      }
-      if (!is.null(resetted)) 
-        message(paste0("Contrasts set to contr.sum for the following variables: ", 
-                      paste0(resetted, collapse=", ")))
-    } else {
-      non_sum_contrast <- c()
-      for (i in between) {
-        if (is.factor(tmp.dat[,i])) {
-          if (is.null(attr(tmp.dat[,i], "contrasts")) & 
-              (options("contrasts")[[1]][1] != "contr.sum")) {
-            non_sum_contrast <- c(non_sum_contrast, between)
-          }
-          else if (!is.null(attr(tmp.dat[,i], "contrasts")) && 
-                   attr(tmp.dat[,i], "contrasts") != "contr.sum") {
-            non_sum_contrast <- c(non_sum_contrast, between)
-          }
-        }
-      }
-      if((type == 3 | type == "III") && (length(non_sum_contrast)>0)) 
-        warning(
-          paste0("Calculating Type 3 sums with contrasts != 'contr.sum' for: ", 
-                      paste0(non_sum_contrast, collapse=", "), 
-                      "\n  Results likely bogus or not interpretable!\n  You probably want check_contrasts = TRUE or options(contrasts=c('contr.sum','contr.poly'))"), 
-                call. = FALSE)
-    }
+    tmp.dat <- check_contrasts(
+      data = tmp.dat,
+      factors = between,
+      check_contrasts = check_contrasts,
+      type = type
+    )
   }
   if (return %in% c("aov")) include_aov <- TRUE
   if(include_aov){
@@ -686,6 +662,7 @@ aov_car <- function(formula,
     attr(afex_aov, "type") <- type
     attr(afex_aov, "transf") <- transf
     attr(afex_aov, "incomplete_cases") <- missing_ids
+    attr(afex_aov, "data_changed") <- data_changed
     afex_aov$anova_table <- 
       do.call("anova", 
               args = c(object = list(afex_aov), observed = list(observed), 

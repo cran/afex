@@ -152,7 +152,7 @@
 #' columns are returned (note: the Kenward-Roger correction does two separate
 #' things: (1) it computes an effective number for the denominator df; (2) it
 #' scales the statistic by a calculated amount, see also
-#' \url{http://stackoverflow.com/a/25612960/289572}):
+#' \url{https://stackoverflow.com/a/25612960/289572}):
 #' \enumerate{
 #'   \item \code{F} computed F statistic
 #'   \item \code{ndf} numerator degrees of freedom (number of parameters used
@@ -334,11 +334,11 @@
 #'   \url{https://github.com/singmann/afex/issues}
 #'   
 #' @author Henrik Singmann with contributions from
-#'   \href{http://stackoverflow.com/q/11335923/289572}{Ben Bolker and Joshua
+#'   \href{https://stackoverflow.com/q/11335923/289572}{Ben Bolker and Joshua
 #'   Wiley}.
 #'   
 #' @seealso \code{\link{aov_ez}} and \code{\link{aov_car}} for convenience
-#'   functions to analyze experimental deisgns with classical ANOVA or ANCOVA
+#'   functions to analyze experimental desIgns with classical ANOVA or ANCOVA
 #'   wrapping \code{\link[car]{Anova}}.
 #'
 #'   see the following for the data sets from Maxwell and Delaney (2004) used
@@ -367,7 +367,7 @@
 #'
 #'   Bates, D., Kliegl, R., Vasishth, S., & Baayen, H. (2015).
 #'   \emph{Parsimonious Mixed Models}. arXiv:1506.04967 [stat]. Retrieved from
-#'   \url{http://arxiv.org/abs/1506.04967}
+#'   \url{https://arxiv.org/abs/1506.04967}
 #'
 #'   Dalal, D. K., & Zickar, M. J. (2012). Some Common Myths About Centering
 #'   Predictor Variables in Moderated Multiple Regression and Polynomial
@@ -446,30 +446,14 @@ mixed <- function(formula,
   
   ## real function begins:
   vars.to.check <- all.vars(as.formula(formula))
-  if (check_contrasts) {
-    #browser()
-    resetted <- NULL
-    for (i in vars.to.check) {
-      if (is.character(data[,i])) {
-        data[,i] <- factor(data[,i])
-      }
-      if (is.factor(data[,i])) {
-        if (is.null(attr(data[,i], "contrasts")) & 
-            (options("contrasts")[[1]][1] != "contr.sum")) {
-          contrasts(data[,i]) <- "contr.sum"
-          resetted  <- c(resetted, i)
-        }
-        else if (!is.null(attr(data[,i], "contrasts")) && 
-                 attr(data[,i], "contrasts") != "contr.sum") {
-          contrasts(data[,i]) <- "contr.sum"
-          resetted  <- c(resetted, i)
-        }
-      }
-    }
-    if (!is.null(resetted)) 
-      message(paste0("Contrasts set to contr.sum for the following variables: ", 
-                    paste0(resetted, collapse=", ")))
-  }
+  data <- check_contrasts(
+    data = data,
+    factors = vars.to.check,
+    check_contrasts = check_contrasts,
+    type = type,
+    warn = FALSE
+  )
+  
   method <- match.arg(method, c("KR", "S", "PB", "LRT", "nested-KR", "F"), 
                       several.ok=FALSE)
   
@@ -494,7 +478,7 @@ mixed <- function(formula,
   mapping <- attr(m.matrix, "assign")
   fixed.vars <- all.vars(rh2)
   # check for missing values in variables used:
-  if (nrow(m.matrix) != nrow(data)) {
+  if (nrow(model.matrix(nobars(formula.f), data = data)) != nrow(data)) {
     data <- model.frame(
       as.formula(paste0(vars.to.check[1], 
                        "~", 
@@ -502,9 +486,10 @@ mixed <- function(formula,
       data = data)
     m.matrix <- model.matrix(rh2, data = data)
     warning(paste0("Due to missing values, reduced number of observations to ", 
-                  nrow(data)))
+                  nrow(data)), call. = FALSE)
     if(set_data_arg) {
-      warning("Due to missing values, set_data_arg set to FALSE.")
+      warning("Due to missing values, set_data_arg set to FALSE.", 
+              call. = FALSE)
       set_data_arg <- FALSE
     }
   }
@@ -550,7 +535,8 @@ mixed <- function(formula,
              method, '"', call. = FALSE)
       mf[[1]] <- quote(lme4::lmer)
     }
-    else stop("value of afex_options('lmer_function') not supported.")
+    else stop("value of afex_options('lmer_function') not supported.", 
+              call. = FALSE)
     use_reml <- TRUE
   }
   mf[["data"]] <- as.name("data")
@@ -568,7 +554,7 @@ mixed <- function(formula,
   }
   if ("family" %in% names(mf)) {
     if (!(method[1] %in% c("LRT", "PB"))) 
-      stop("GLMMs can only be estimated with 'LRT' or 'PB'.")
+      stop("GLMMs can only be estimated with 'LRT' or 'PB'.", call. = FALSE)
   }
   ## do not calculate nested models for these methods:
   if (method[1] %in% c("KR", "S")) {
@@ -1071,7 +1057,6 @@ print.mixed <- function(x, ...) {
   print(tmp)
   invisible(tmp)
 }
-
 
 #anova.mixed <- 
 

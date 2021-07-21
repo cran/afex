@@ -12,12 +12,13 @@
 #' @param ... further arguments passed through, see description of return value
 #'   for details.
 #' @param trms,xlev,grid same as for \code{\link[emmeans]{emm_basis}}.
-#' @param model argument for \code{\link[emmeans]{emmeans}()} and rlated
+#' @param model argument for \code{\link[emmeans]{emmeans}()} and related
 #'   functions that allows to choose on which model the follow-up tests for
-#'   ANOVAs with repeated-measures factors are based. \code{"univariate"} uses
-#'   the \code{aov} model and \code{"multivariate"} uses the \code{lm} model.
-#'   Default given by \code{afex_options("emmeans_mode")}. Multivariate tests
-#'   likely provide a better correction for violations of sphericity.
+#'   ANOVAs with repeated-measures factors are based. \code{"multivariate"} (the
+#'   default) uses the \code{lm} model and \code{"univariate"} uses the
+#'   \code{aov} model. Default given by \code{afex_options("emmeans_mode")}.
+#'   Multivariate tests likely work better for unbalanced data and provide a
+#'   better correction for violations of sphericity.
 #' 
 #' @return
 #' \describe{
@@ -244,7 +245,7 @@ recover_data.afex_aov = function(object, ...,
                                  model = afex_options("emmeans_model")) {
   model <- match.arg(model, c("univariate", "multivariate"))
   if (model == "univariate" & is.null(object$aov)) {
-    message("Substituting multivariate/lm model, as aov object missing.")
+    message("aov object missing, substituting multivariate/lm model.\nto get univariate tests, refit ANOVA with include_aov = TRUE")
     model <- "multivariate"
   }
   if (model == "univariate") {

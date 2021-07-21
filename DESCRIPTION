@@ -7,7 +7,8 @@ Suggests: emmeans (>= 1.4), coin, xtable, parallel, plyr, optimx,
         multcomp, testthat, mlmRev, dplyr, tidyr, dfoptim, Matrix,
         psychTools, ggplot2, MEMSS, effects, carData, ggbeeswarm, nlme,
         cowplot, jtools, ggpubr, ggpol, MASS, glmmTMB, brms, rstanarm,
-        statmod, ggResidpanel
+        statmod, performance (>= 0.7.2), see (>= 0.6.4), ez,
+        ggResidpanel
 Imports: pbkrtest (>= 0.4-1), lmerTest (>= 3.0-0), car, reshape2,
         stats, methods, utils
 Description: Convenience functions for analyzing factorial experiments using ANOVA or
@@ -41,11 +42,11 @@ Authors@R: c(person(given="Henrik", family="Singmann", role=c("aut", "cre"),
          person(given="Jonathon", family="Love", role=c("ctb")), 
          person(given="Russell", family="Lenth", role=c("ctb")), 
          person(given="Rune", family="Haubo Bojesen Christensen", role=c("ctb")))
-Version: 0.28-1
+Version: 1.0-0
 RoxygenNote: 7.1.1
 LazyData: true
 NeedsCompilation: no
-Packaged: 2021-01-12 09:20:00 UTC; henrik
+Packaged: 2021-07-09 10:01:08 UTC; singm
 Author: Henrik Singmann [aut, cre] (<https://orcid.org/0000-0002-4842-3657>),
   Ben Bolker [aut],
   Jake Westfall [aut],
@@ -60,4 +61,4 @@ Author: Henrik Singmann [aut, cre] (<https://orcid.org/0000-0002-4842-3657>),
   Rune Haubo Bojesen Christensen [ctb]
 Maintainer: Henrik Singmann <singmann@gmail.com>
 Repository: CRAN
-Date/Publication: 2021-01-12 15:50:02 UTC
+Date/Publication: 2021-07-21 06:50:05 UTC

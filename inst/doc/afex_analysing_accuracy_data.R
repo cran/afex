@@ -1,3 +1,13 @@
+## ----echo=FALSE---------------------------------------------------------------
+req_suggested_packages <- c("emmeans", "dplyr", "ggplot2", 
+                            "cowplot", "ggbeeswarm")
+pcheck <- lapply(req_suggested_packages, requireNamespace, 
+                 quietly = TRUE)
+if (any(!unlist(pcheck))) {
+   message("Required package(s) for this vignette are not available/installed and code will not be executed.")
+   knitr::opts_chunk$set(eval = FALSE)
+}
+
 ## ---- include = FALSE-------------------------------------------------------------------
 op <- options(width = 90, dplyr.summarise.inform = FALSE)
 knitr::opts_chunk$set(
@@ -40,10 +50,10 @@ e1_anova <- aov_ez(
 e1_anova
 
 ## ---------------------------------------------------------------------------------------
-emmeans(e1_anova, "congruency", model = "multivariate")
+emmeans(e1_anova, "congruency")
 
 ## ---------------------------------------------------------------------------------------
-emmeans(e1_anova, "condition", model = "multivariate")
+emmeans(e1_anova, "condition")
 
 ## ---- fig.width=6, fig.height=3---------------------------------------------------------
 plot_grid(

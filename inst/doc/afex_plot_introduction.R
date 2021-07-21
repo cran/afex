@@ -1,3 +1,13 @@
+## ----echo=FALSE---------------------------------------------------------------
+req_suggested_packages <- c("emmeans", "ggplot2", "cowplot",
+                            "ggbeeswarm", "ggpol")
+pcheck <- lapply(req_suggested_packages, requireNamespace, 
+                 quietly = TRUE)
+if (any(!unlist(pcheck))) {
+   message("Required package(s) for this vignette are not available/installed and code will not be executed.")
+   knitr::opts_chunk$set(eval = FALSE)
+}
+
 ## ----set-options, echo=FALSE, cache=FALSE-----------------------------------------------
 op <- options(width = 90)
 knitr::opts_chunk$set(dpi=72)

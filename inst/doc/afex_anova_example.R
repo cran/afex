@@ -1,3 +1,12 @@
+## ----echo=FALSE---------------------------------------------------------------
+req_suggested_packages <- c("emmeans", "multcomp", "ggplot2")
+pcheck <- lapply(req_suggested_packages, requireNamespace, 
+                 quietly = TRUE)
+if (any(!unlist(pcheck))) {
+   message("Required package(s) for this vignette are not available/installed and code will not be executed.")
+   knitr::opts_chunk$set(eval = FALSE)
+}
+
 ## ----set-options, echo=FALSE, cache=FALSE-----------------------------------------------
 op <- options(width = 90)
 knitr::opts_chunk$set(dpi=72)
@@ -7,7 +16,6 @@ library("afex")     # needed for ANOVA functions.
 library("emmeans")  # emmeans must now be loaded explicitly for follow-up tests.
 library("multcomp") # for advanced control for multiple testing/Type 1 errors.
 library("ggplot2")  # for customizing plots.
-afex_options(emmeans_model = "multivariate") # use multivariate model for all follow-up tests.
 
 ## ---------------------------------------------------------------------------------------
 data(sk2011.1)

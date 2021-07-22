@@ -154,11 +154,11 @@ In case of a singular fit or another indicator of a convergence problem, the usu
 3. No correlation among by-participant random effect terms (i.e., no correlation among random slopes themselves and between the random slopes and the random intercept).
 4. No correlation among either random grouping factor.
 
-The next decision to be made is which method to use for obtaining $p$-values. The default method is `KR` (=Kenward-Roger) which provides the best control against anti-conservative results. However, `KR` needs quite a lot of RAM, especially with complicated random effect structures and large data sets. As in this case we have both, relatively large data (i.e., many levels on each random effect, especially the item random effect) and a complicated random effect structure, it seems a reasonable decision to choose another method. The second 'best' method (in terms of controlling for Type I errors)  is the 'Satterthwaite' approximation, `method='S'`. It provides a similar control of Type I errors as the Kenward-Roger approximation and needs less RAM, however one downside is that it simply fails in some cases.
+The next decision to be made is which method to use for obtaining $p$-values. The best control against anti-conservative results is provided by `method = "KR"` (=Kenward-Roger). However, `KR` needs quite a lot of RAM, especially with complicated random effect structures and large data sets. In this case we have both, relatively large data (i.e., many levels on each random effect, especially the item random effect) and a complicated random effect structure. Consequently, it seems a reasonable decision to choose another method. The second 'best' method (in terms of controlling for Type I errors)  is the 'Satterthwaite' approximation, `method = 'S'`. It provides a similar control of Type I errors as the Kenward-Roger approximation and needs less RAM. The Satterthwaite method is currently also the default method for calculating $p$-values so does not need to be set explicitly.
 
 ## Finding the Final Model
 
-The following code fits the four models using the Satterthwaite method. To suppress random effects we use the `||` notation. Note that it is necessary to set `expand_re=TRUE` when suppressing random effects among variables that are entered as factors and not as numerical variables (all independent variables in the present case are factors). Also note that `mixed` automatically uses appropriate contrast coding if factors are included in interactions (`contr.sum`) in contrast to the `R` default (which is `contr.treatment`). To make sure the estimation does not end prematurely we set the allowed number of function evaluations to a very high value (using `lmerControl`).
+The following code fits the four models using the Satterthwaite method. To suppress random effects we use the `||` notation. Note that it is necessary to set `expand_re = TRUE` when suppressing random effects among variables that are entered as factors and not as numerical variables (all independent variables in the present case are factors). Also note that `mixed` automatically uses appropriate contrast coding if factors are included in interactions (`contr.sum`) in contrast to the `R` default (which is `contr.treatment`). To make sure the estimation does not end prematurely we set the allowed number of function evaluations to a very high value (using `lmerControl`).
 
 However, because fitting the models in R might take quite a while, you should also be able to load the fitted binary files them from [this url](https://raw.githubusercontent.com/singmann/afex/master/development/freeman_models.rda) and then load them in R with `load("freeman_models.rda")`.
 
@@ -166,7 +166,7 @@ However, because fitting the models in R might take quite a while, you should al
 ```{r, eval = FALSE}
 m1s <- mixed(log_rt ~ task*stimulus*density*frequency + 
                (stimulus*density*frequency|id)+
-               (task|item), fhch, method = "S", 
+               (task|item), fhch, 
              control = lmerControl(optCtrl = list(maxfun = 1e6)))
 ```
 ```{r, echo=FALSE}
@@ -177,7 +177,7 @@ message("boundary (singular) fit: see ?isSingular")
 ```{r, eval = FALSE}
 m2s <- mixed(log_rt ~ task*stimulus*density*frequency + 
                (stimulus*density*frequency|id)+
-               (task||item), fhch, method = "S", 
+               (task||item), fhch, 
              control = lmerControl(optCtrl = list(maxfun = 1e6)), expand_re = TRUE)
 ```
 ```{r, echo=FALSE}
@@ -188,7 +188,7 @@ message("boundary (singular) fit: see ?isSingular")
 ```{r, eval = FALSE}
 m3s <- mixed(log_rt ~ task*stimulus*density*frequency +
                (stimulus*density*frequency||id)+
-               (task|item), fhch, method = "S", 
+               (task|item), fhch, 
              control = lmerControl(optCtrl = list(maxfun = 1e6)), expand_re = TRUE)
 ```
 ```{r, echo=FALSE}
@@ -198,7 +198,7 @@ message("boundary (singular) fit: see ?isSingular")
 ```{r, eval = FALSE}
 m4s <- mixed(log_rt ~ task*stimulus*density*frequency + 
                (stimulus*density*frequency||id)+
-               (task||item), fhch, method = "S", 
+               (task||item), fhch, 
              control = lmerControl(optCtrl = list(maxfun = 1e6)), expand_re = TRUE)
 ```
 ```{r, echo=FALSE}
@@ -207,7 +207,7 @@ message("boundary (singular) fit: see ?isSingular")
 
 We can see that fitting each of these models emits the "singular fit" message (it is technically a `message` and not a `warning`) indicating that the model is over-parameterized and did not converge successfully. In particular, this message indicates that the model is specified with more random effect parameters than can be estimated given the current data. 
 
-It is instructive to see that even with a comparatively large number of observations, `r nrow(fhch)`, a set of seven random slopes for the by-participant term and one random slope for the by-item term cannot be estimated successfully. And this holds even after removing all correlations. Thus, it should not be surprising that similar sized models regularly do not converge with smaller numbers of observations. Furthermore, we are here in the fortunate situation that each factor has only two levels. A factor with more levels corresponds to more parameters of the random effect terms.
+It is instructive to see that even with a comparatively large number of observations, 12960, a set of seven random slopes for the by-participant term and one random slope for the by-item term cannot be estimated successfully. And this holds even after removing all correlations. Thus, it should not be surprising that similar sized models regularly do not converge with smaller numbers of observations. Furthermore, we are here in the fortunate situation that each factor has only two levels. A factor with more levels corresponds to more parameters of the random effect terms.
 
 Before deciding what to do next, we take a look at the estimated random effect estimates. We do so for the model without any correlations. Note that for `afex` models we usually do not want to use the `summary` method as it prints the results on the level of the model coefficients and not model terms. But for the random effects we have to do so. However, we are only interested in the random effect terms so we only print those using `summary(model)$varcor`.
 
@@ -223,7 +223,7 @@ The output shows that the estimated SDs of the random slopes of the two-way inte
 ```{r, eval=FALSE}
 m5s <- mixed(log_rt ~ task*stimulus*density*frequency + 
                ((stimulus+density+frequency)^2||id)+
-               (task||item), fhch, method = "S", 
+               (task||item), fhch, 
              control = lmerControl(optCtrl = list(maxfun = 1e6)), expand_re = TRUE)
 ```
 ```{r, echo=FALSE}
@@ -241,7 +241,7 @@ Not too surprisingly, this model also produces a singular fit. Inspection of the
 ```{r, eval=FALSE}
 m6s <- mixed(log_rt ~ task*stimulus*density*frequency + 
                (stimulus+density+frequency||id)+
-               (task||item), fhch, method = "S", 
+               (task||item), fhch, 
              control = lmerControl(optCtrl = list(maxfun = 1e6)), 
              expand_re = TRUE)
 ```
@@ -263,7 +263,7 @@ As in `m4s` above, the random effect SD for the density term is estimated to be 
 ```{r, eval=FALSE}
 m7s <- mixed(log_rt ~ task*stimulus*density*frequency + 
                (stimulus+frequency||id)+
-               (task||item), fhch, method = "S", 
+               (task||item), fhch, 
              control = lmerControl(optCtrl = list(maxfun = 1e6)), expand_re = TRUE)
 ```
 
@@ -272,7 +272,7 @@ This model finally does not emit a singular fit warning. Is this our final model
 ```{r, eval=FALSE}
 m8s <- mixed(log_rt ~ task*stimulus*density*frequency + 
                (stimulus+frequency|id)+
-               (task||item), fhch, method = "S", 
+               (task||item), fhch, 
              control = lmerControl(optCtrl = list(maxfun = 1e6)), expand_re = TRUE)
 ```
 ```{r, echo=FALSE}
@@ -284,7 +284,7 @@ This model does not show a singular fit message but emits another warning. Speci
 ```{r, eval=FALSE}
 m9s <- mixed(log_rt ~ task*stimulus*density*frequency + 
                (stimulus+frequency||id)+
-               (task|item), fhch, method = "S", 
+               (task|item), fhch, 
              control = lmerControl(optCtrl = list(maxfun = 1e6)), expand_re = TRUE)
 ```
 
@@ -313,7 +313,7 @@ We can also see that one of the most noticeable differences between the maximal 
 
 ## LRT Results
 
-It is instructive to compare those results with results obtained using the comparatively 'worst' method for obtaining $p$-values implemented in `afex::mixed`, likelihood ratio tests. Likelihood ratio-tests should in principle deliver reasonable results for large data sets. A common rule of thumb is that the number of levels for each random effect grouping factor needs to be large, say above 50. Here, we have a very large number of items (`r length(levels(fhch$item))`), but not that many participants (`r length(levels(fhch$id))`). Thus, qualitative results should be the very similar, but it still is interesting to see exactly what happens. We therefore fit the final model using `method='LRT'`. 
+It is instructive to compare those results with results obtained using the comparatively 'worst' method for obtaining $p$-values implemented in `afex::mixed`, likelihood ratio tests. Likelihood ratio-tests should in principle deliver reasonable results for large data sets. A common rule of thumb is that the number of levels for each random effect grouping factor needs to be large, say above 50. Here, we have a very large number of items (600), but not that many participants (45). Thus, qualitative results should be the very similar, but it still is interesting to see exactly what happens. We therefore fit the final model using `method='LRT'`. 
 
 ```{r, eval = FALSE}
 m9lrt <- mixed(log_rt ~ task*stimulus*density*frequency + 

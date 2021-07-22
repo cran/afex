@@ -89,7 +89,7 @@ ggplot(agg_i, aes(x = interaction(density,frequency), y = mean)) +
 ## ---- eval = FALSE----------------------------------------------------------------------
 #  m1s <- mixed(log_rt ~ task*stimulus*density*frequency +
 #                 (stimulus*density*frequency|id)+
-#                 (task|item), fhch, method = "S",
+#                 (task|item), fhch,
 #               control = lmerControl(optCtrl = list(maxfun = 1e6)))
 
 ## ---- echo=FALSE------------------------------------------------------------------------
@@ -98,7 +98,7 @@ message("boundary (singular) fit: see ?isSingular")
 ## ---- eval = FALSE----------------------------------------------------------------------
 #  m2s <- mixed(log_rt ~ task*stimulus*density*frequency +
 #                 (stimulus*density*frequency|id)+
-#                 (task||item), fhch, method = "S",
+#                 (task||item), fhch,
 #               control = lmerControl(optCtrl = list(maxfun = 1e6)), expand_re = TRUE)
 
 ## ---- echo=FALSE------------------------------------------------------------------------
@@ -107,7 +107,7 @@ message("boundary (singular) fit: see ?isSingular")
 ## ---- eval = FALSE----------------------------------------------------------------------
 #  m3s <- mixed(log_rt ~ task*stimulus*density*frequency +
 #                 (stimulus*density*frequency||id)+
-#                 (task|item), fhch, method = "S",
+#                 (task|item), fhch,
 #               control = lmerControl(optCtrl = list(maxfun = 1e6)), expand_re = TRUE)
 
 ## ---- echo=FALSE------------------------------------------------------------------------
@@ -116,7 +116,7 @@ message("boundary (singular) fit: see ?isSingular")
 ## ---- eval = FALSE----------------------------------------------------------------------
 #  m4s <- mixed(log_rt ~ task*stimulus*density*frequency +
 #                 (stimulus*density*frequency||id)+
-#                 (task||item), fhch, method = "S",
+#                 (task||item), fhch,
 #               control = lmerControl(optCtrl = list(maxfun = 1e6)), expand_re = TRUE)
 
 ## ---- echo=FALSE------------------------------------------------------------------------
@@ -131,7 +131,7 @@ cat(outp_m4s_vc$output, sep = "\n")
 ## ---- eval=FALSE------------------------------------------------------------------------
 #  m5s <- mixed(log_rt ~ task*stimulus*density*frequency +
 #                 ((stimulus+density+frequency)^2||id)+
-#                 (task||item), fhch, method = "S",
+#                 (task||item), fhch,
 #               control = lmerControl(optCtrl = list(maxfun = 1e6)), expand_re = TRUE)
 
 ## ---- echo=FALSE------------------------------------------------------------------------
@@ -146,7 +146,7 @@ cat(outp_m5s_vc$output, sep = "\n")
 ## ---- eval=FALSE------------------------------------------------------------------------
 #  m6s <- mixed(log_rt ~ task*stimulus*density*frequency +
 #                 (stimulus+density+frequency||id)+
-#                 (task||item), fhch, method = "S",
+#                 (task||item), fhch,
 #               control = lmerControl(optCtrl = list(maxfun = 1e6)),
 #               expand_re = TRUE)
 
@@ -162,13 +162,13 @@ cat(outp_m6s_vc$output, sep = "\n")
 ## ---- eval=FALSE------------------------------------------------------------------------
 #  m7s <- mixed(log_rt ~ task*stimulus*density*frequency +
 #                 (stimulus+frequency||id)+
-#                 (task||item), fhch, method = "S",
+#                 (task||item), fhch,
 #               control = lmerControl(optCtrl = list(maxfun = 1e6)), expand_re = TRUE)
 
 ## ---- eval=FALSE------------------------------------------------------------------------
 #  m8s <- mixed(log_rt ~ task*stimulus*density*frequency +
 #                 (stimulus+frequency|id)+
-#                 (task||item), fhch, method = "S",
+#                 (task||item), fhch,
 #               control = lmerControl(optCtrl = list(maxfun = 1e6)), expand_re = TRUE)
 
 ## ---- echo=FALSE------------------------------------------------------------------------
@@ -177,7 +177,7 @@ warning(fit_m8s$warnings, call. = FALSE)
 ## ---- eval=FALSE------------------------------------------------------------------------
 #  m9s <- mixed(log_rt ~ task*stimulus*density*frequency +
 #                 (stimulus+frequency||id)+
-#                 (task|item), fhch, method = "S",
+#                 (task|item), fhch,
 #               control = lmerControl(optCtrl = list(maxfun = 1e6)), expand_re = TRUE)
 
 ## ---- eval=FALSE------------------------------------------------------------------------

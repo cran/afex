@@ -1,4 +1,4 @@
-## ----echo=FALSE---------------------------------------------------------------
+## ---- echo=FALSE--------------------------------------------------------------
 req_suggested_packages <- c("emmeans", "ggplot2", "cowplot",
                             "ggbeeswarm", "ggpol", 
                             "nlme", "glmmTMB", "rstanarm", "brms", 

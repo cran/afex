@@ -162,3 +162,25 @@ test_that("lmer_alt works with custom contrasts", {
                      "re1.IV15.4"))
 })
 
+test_that("subset() in mix works with method == 'LRT'", {
+  data(obk.long)
+  set_default_contrasts()
+  msub <- mixed(value ~ treatment*phase*hour +(1|id), 
+                data = subset(obk.long, treatment != "control"), 
+                method = "LRT")
+  #dput(as.data.frame(anova(msub))[,"Chi Df"])
+  expect_equal(
+    object = as.data.frame(anova(msub))[,"Chi Df"], 
+    expected = c(1, 2, 4, 2, 4, 8, 8)
+  )
+  set_sum_contrasts()
+  msub1 <- mixed(value ~ treatment*phase*hour +(1|id), 
+                data = subset(obk.long, treatment != "control"), 
+                method = "LRT")
+  #dput(as.data.frame(anova(msub))[,"Chi Df"])
+  expect_equal(
+    object = as.data.frame(anova(msub1))[,"Chi Df"], 
+    expected = c(1, 2, 4, 2, 4, 8, 8)
+  )
+  set_default_contrasts()
+})

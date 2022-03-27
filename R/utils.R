@@ -3,6 +3,7 @@ check_contrasts <- function(data, factors,
                             check_contrasts, type, 
                             warn = TRUE) {
   if (check_contrasts) {
+    data <- droplevels(data)
     resetted <- NULL
     for (i in factors) {
       if (is.character(data[,i])) {

@@ -1,4 +1,34 @@
                     *************************
+                    ** afex VERSION 1.1-x **
+                    *************************
+                    
+                    Changes in afex Version 1.1-x
+                    Released March 2022
+                    
+    Significant User Visible Changes and New Features
+    
+    o   Fitting messages for mixed() are now only shown per default in 
+        interactive mode, thanks to Marius Barth (#111).
+    
+    o   Nicer error message about missing variables for ANOVAs.
+    
+    o   Removed check_contrasts() argument for ANOVAs, which did not work as 
+        described for designs with repeated-measures factors: 
+        https://github.com/singmann/afex/issues/109
+        
+    
+    Bugfixes
+    
+    o   Fixed overzealous data completeness check introduced in version 1.0 in 
+        aov_car() which prevented ANOVAs with additive factors and no cross over
+        data from working.
+        
+    o   mixed(..., method = "LRT") and similar nested methdos should work with
+        empty factor levels: https://github.com/singmann/afex/issues/96
+
+
+
+                    *************************
                     ** afex VERSION 1.0-x **
                     *************************
                     

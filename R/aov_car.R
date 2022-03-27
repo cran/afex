@@ -5,7 +5,7 @@
 #' between-within or split-plot ANOVAs) for data in the \strong{long} format
 #' (i.e., one observation per row). If the data has more than one observation
 #' per individual and cell of the design (e.g., multiple responses per
-#' condition), the data will by automatically aggregated. The default settings
+#' condition), the data will be automatically aggregated. The default settings
 #' reproduce results from commercial statistical packages such as SPSS or SAS.
 #' \code{aov_ez} is called specifying the factors as character vectors,
 #' \code{aov_car} is called using a formula similar to \code{\link{aov}}
@@ -64,10 +64,6 @@
 #'   \code{afex_options("factorize")}, which is initially \code{TRUE}. If one
 #'   wants to run an ANCOVA, this needs to be set to \code{FALSE} (in which case
 #'   centering on 0 is checked on numeric variables).
-#' @param check_contrasts \code{logical}. Should contrasts for between-subject
-#'   factors be checked and (if necessary) changed to be \code{"contr.sum"}. See
-#'   details. The default is given by \code{afex_options("check_contrasts")},
-#'   which is initially \code{TRUE}.
 #' @param print.formula \code{aov_ez} and \code{aov_4} are wrapper for
 #'   \code{aov_car}. This boolean argument indicates whether the formula in the
 #'   call to \code{car.aov} should be printed.
@@ -165,10 +161,10 @@
 #' (partial eta-squared) or \code{"none"} via \code{anova_table} this becomes
 #' unnecessary.
 #' 
-#' If \code{check_contrasts = TRUE}, contrasts will be set to \code{"contr.sum"}
-#' for all between-subject factors if default contrasts are not equal to
-#' \code{"contr.sum"} or \code{attrib(factor, "contrasts") != "contr.sum"}.
-#' (within-subject factors are hard-coded \code{"contr.sum"}.) }
+#' Factor contrasts will be set to \code{"contr.sum"} for all between-subject
+#' factors if default contrasts are not equal to \code{"contr.sum"} or
+#' \code{attrib(factor, "contrasts") != "contr.sum"}. (within-subject factors
+#' are hard-coded \code{"contr.sum"}.) }
 #' 
 #' \subsection{Statistical Issues}{ \strong{Type 3 sums of squares are default
 #' in \pkg{afex}.} While some authors argue that so-called type 3 sums of
@@ -181,14 +177,12 @@
 #' 
 #' Note that lower order effects (e.g., main effects) in type 3 ANOVAs are only
 #' meaningful with
-#' \href{https://stats.idre.ucla.edu/other/mult-pkg/faq/general/faqwhat-is-effect-coding/}{effects
-#' coding}. That is, contrasts should be set to \code{\link{contr.sum}} to
-#' obtain meaningful results. This is imposed automatically for the functions
-#' discussed here as long as \code{check_contrasts} is \code{TRUE} (the
-#' default). I nevertheless recommend to set the contrasts globally to
-#' \code{contr.sum} via running \code{\link{set_sum_contrasts}}. For a
-#' discussion of the other (non-recommended) coding schemes see
-#' \href{https://stats.idre.ucla.edu/r/library/r-library-contrast-coding-systems-for-categorical-variables/}{here}. }
+#' \href{https://stats.oarc.ucla.edu/other/mult-pkg/faq/general/faqwhat-is-effect-coding/}{effects
+#' coding}. Therefore, contrasts are set to \code{\link{contr.sum}} which
+#' ensures meaningful results. For a discussion of the other (non-recommended)
+#' coding schemes see
+#' \href{https://stats.oarc.ucla.edu/r/library/r-library-contrast-coding-systems-for-categorical-variables/}{here}.
+#' }
 #' 
 #' \subsection{Follow-Up Contrasts and Post-Hoc Tests}{ The S3 object returned
 #' per default can be directly passed to \code{emmeans::emmeans} for further
@@ -207,7 +201,7 @@
 #'  }
 #'  
 #'  Note that \pkg{emmeans} allows for a variety of advanced settings and
-#'  simplifiations, for example: all pairwise comparison of a single factor
+#'  simplifications, for example: all pairwise comparison of a single factor
 #'  using one command (e.g., \code{emmeans(x, "a", contr = "pairwise")}) or
 #'  advanced control for multiple testing by passing objects to \pkg{multcomp}.
 #'  A comprehensive overview of the functionality is provided in the
@@ -318,7 +312,6 @@ aov_car <- function(formula,
                     fun_aggregate = NULL, 
                     type = afex_options("type"), 
                     factorize = afex_options("factorize"), 
-                    check_contrasts = afex_options("check_contrasts"), 
                     observed = NULL, 
                     anova_table = list(), 
                     include_aov = afex_options("include_aov"),
@@ -330,11 +323,6 @@ aov_car <- function(formula,
   dots <- list(...)
   
   ### deprercate old argument names:
-  if("check.contrasts" %in% names(dots)) {  
-    warn_deprecated_arg("check.contrasts", "check_contrasts")
-    check_contrasts <- dots$check.contrasts
-    dots <- dots[names(dots) != "check.contrasts"]
-  }
   if("fun.aggregate" %in% names(dots)) { 
     warn_deprecated_arg("fun.aggregate", "fun_aggregate")
     fun_aggregate <- dots$fun.aggregate
@@ -360,6 +348,16 @@ aov_car <- function(formula,
   }
   
   vars <- all.vars(formula)
+  ### check for missing variables
+  if (any(!(vars %in% colnames(data)))) {
+    mc <- match.call()
+    missing_vars <- vars[!(vars %in% colnames(data))]
+    stop(
+      "variable(s) `", paste(missing_vars, collapse = "`, `"), "` not in `", 
+      deparse(mc[["data"]]), "`", call. = FALSE
+    )
+  }
+  
   #--- Russ Lenth added/modified code to detect transformed responses:
   lhs <- all.names(formula[[2]])
   transf <- setdiff(lhs, all.vars(formula[[2]]))
@@ -484,19 +482,10 @@ aov_car <- function(formula,
   ## check for structurally missing data
   # within-subjects
   if ((length(within) > 0) && any(table(data[within]) == 0)) {
-    stop("Empty cells in within-subjects design ", 
+    stop("Empty cells in within-subjects design", 
          " (i.e., bad data structure).\n", 
          "", paste0("table(data[", deparse(within), "])"), "\n# ",
          paste(utils::capture.output(table(data[within])), collapse = "\n# "),
-         call. = FALSE)
-  }
-  # between-subjects
-  between_nn <- between[!vapply(data[between], is.numeric, NA)]
-  if (length(between_nn) > 0 && any(table(data[between_nn]) == 0)) {
-    stop("Empty cells in between-subjects design ", 
-         " (i.e., bad data structure).\n",  
-         "", paste0("table(data[", deparse(between_nn), "])"), "\n# ",
-         paste(utils::capture.output(table(data[between_nn])), collapse = "\n# "),
          call. = FALSE)
   }
   
@@ -505,7 +494,7 @@ aov_car <- function(formula,
     if (any(xtabs(
       as.formula(paste0("~", id.escaped, if (length(within) > 0) "+", rh1)), 
       data = data) > 1)) {
-      warning("More than one observation per cell, aggregating the data using mean (i.e, fun_aggregate = mean)!", 
+      warning("More than one observation per design cell, aggregating data using `fun_aggregate = mean`.\nTo turn off this warning, pass `fun_aggregate = mean` explicitly.", 
               call. = FALSE)
       fun_aggregate <- mean
     }
@@ -537,6 +526,13 @@ aov_car <- function(formula,
   } else {
     missing_ids <- NULL
   }
+  # if (length(between_nn) > 0 && any(table(data[between_nn]) == 0)) {
+  #   stop("Empty cells in between-subjects design ", 
+  #        " (i.e., bad data structure).\n",  
+  #        "", paste0("table(data[", deparse(between_nn), "])"), "\n# ",
+  #        paste(utils::capture.output(table(data[between_nn])), collapse = "\n# "),
+  #        call. = FALSE)
+  # }
 
   #   if (length(between) > 0) {
   #     n_data_points <- xtabs(as.formula(paste("~", paste(between, collapse = "+"))), data = tmp.dat)
@@ -568,13 +564,14 @@ aov_car <- function(formula,
     tmp.dat <- check_contrasts(
       data = tmp.dat,
       factors = between,
-      check_contrasts = check_contrasts,
+      check_contrasts = TRUE,
       type = type
     )
   }
+  
   if (return %in% c("aov")) include_aov <- TRUE
   if(include_aov){
-    if (check_contrasts) {
+    if (TRUE) { ## was: check_contrasts
       factor_vars <- 
         vapply(dat.ret[,c(within, between), drop = FALSE], is.factor, NA)
       contrasts <- as.list(rep("contr.sum", sum(factor_vars)))
@@ -618,21 +615,32 @@ aov_car <- function(formula,
                               ") ~ ", 
                               rh2)), 
            data = tmp.dat))
-    if (any(is.na(coef(tmp.lm)))) 
-      stop("Some parameters are not estimable, most likely due to empty cells of the design (i.e., structural missings). Check your data.")
+    if (any(is.na(coef(tmp.lm)))) {
+      between_design_error(
+        data = tmp.dat, 
+        between = between, 
+        bad_vars = names(which(apply(is.na(coef(tmp.lm)), 1, any)))
+      ) 
+    }
     if (return == "lm") return(tmp.lm)
-    
     Anova.out <- Anova(tmp.lm, 
                        idata = idata, 
                        idesign = as.formula(paste0("~", rh3)), 
                        type = type)
     data.l <- c(data.l, idata = list(idata))
     
-  } else { # if NO within-subjetc factors are present (i.e., purley between ANOVA):
+  } else { # if NO within-subject factors are present (i.e., purely between ANOVA):
     colnames(tmp.dat)[ncol(tmp.dat)] <- "dv"
     tmp.lm <- do.call("lm", 
                       list(formula = as.formula(paste0("dv ~ ", rh2)), 
                            data = tmp.dat))
+if (any(is.na(coef(tmp.lm)))) {
+      between_design_error(
+        data = tmp.dat, 
+        between = between, 
+        bad_vars = names(which(is.na(coef(tmp.lm))))
+      ) 
+    }
     if (return == "lm") return(tmp.lm)
     Anova.out <- Anova(tmp.lm, type = type)
   }
@@ -706,7 +714,6 @@ aov_4 <- function(formula,
                   fun_aggregate = NULL, 
                   type = afex_options("type"), 
                   factorize = afex_options("factorize"), 
-                  check_contrasts = afex_options("check_contrasts"), 
                   return = afex_options("return_aov"), 
                   anova_table = list(), 
                   include_aov = afex_options("include_aov"),
@@ -743,7 +750,6 @@ aov_4 <- function(formula,
           type = type, 
           return = return, 
           factorize = factorize, 
-          check_contrasts = check_contrasts, 
           observed = observed, 
           anova_table = anova_table, 
           include_aov = include_aov,
@@ -764,7 +770,6 @@ aov_ez <- function(id,
                    transformation,
                    type = afex_options("type"), 
                    factorize = afex_options("factorize"), 
-                   check_contrasts = afex_options("check_contrasts"), 
                    return = afex_options("return_aov"), 
                    anova_table = list(), 
                    include_aov = afex_options("include_aov"),
@@ -799,11 +804,24 @@ aov_ez <- function(id,
           type = type, 
           return = return, 
           factorize = factorize, 
-          check_contrasts = check_contrasts, 
           observed = observed, 
           anova_table = anova_table, 
           include_aov = include_aov,
           ...)
 }
 
+between_design_error <- function(data, between, bad_vars) {
+  ## check between-subjects design for completeness
+  ## select all factor variables
+  between_nn <- between[!vapply(data[between], is.numeric, NA)]
+  stop(
+    "Rank deficient model matrix; insufficient data to estimate full model.\n", 
+    "Model coefficient(s) estimated as NA: ", 
+    paste(bad_vars, collapse = ", "),
+    "\nLikely empty cells in between-subjects design ",
+    "(i.e., bad data structure).\n",
+    "", paste0("table(data[", deparse(between_nn), "])"), "\n# ",
+    paste(utils::capture.output(table(data[between_nn])), collapse = "\n# "),
+    call. = FALSE)
+}
 

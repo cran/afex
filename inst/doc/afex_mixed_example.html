@@ -12,11 +12,23 @@
 
 <meta name="author" content="Henrik Singmann" />
 
-<meta name="date" content="2021-07-21" />
+<meta name="date" content="2022-03-27" />
 
 <title>Mixed Model Reanalysis of RT data</title>
 
-<script src="data:application/javascript;base64,Ly8gUGFuZG9jIDIuOSBhZGRzIGF0dHJpYnV0ZXMgb24gYm90aCBoZWFkZXIgYW5kIGRpdi4gV2UgcmVtb3ZlIHRoZSBmb3JtZXIgKHRvCi8vIGJlIGNvbXBhdGlibGUgd2l0aCB0aGUgYmVoYXZpb3Igb2YgUGFuZG9jIDwgMi44KS4KZG9jdW1lbnQuYWRkRXZlbnRMaXN0ZW5lcignRE9NQ29udGVudExvYWRlZCcsIGZ1bmN0aW9uKGUpIHsKICB2YXIgaHMgPSBkb2N1bWVudC5xdWVyeVNlbGVjdG9yQWxsKCJkaXYuc2VjdGlvbltjbGFzcyo9J2xldmVsJ10gPiA6Zmlyc3QtY2hpbGQiKTsKICB2YXIgaSwgaCwgYTsKICBmb3IgKGkgPSAwOyBpIDwgaHMubGVuZ3RoOyBpKyspIHsKICAgIGggPSBoc1tpXTsKICAgIGlmICghL15oWzEtNl0kL2kudGVzdChoLnRhZ05hbWUpKSBjb250aW51ZTsgIC8vIGl0IHNob3VsZCBiZSBhIGhlYWRlciBoMS1oNgogICAgYSA9IGguYXR0cmlidXRlczsKICAgIHdoaWxlIChhLmxlbmd0aCA+IDApIGgucmVtb3ZlQXR0cmlidXRlKGFbMF0ubmFtZSk7CiAgfQp9KTsK"></script>
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
 
 <style type="text/css">
   code{white-space: pre-wrap;}
@@ -26,6 +38,7 @@
   div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
   ul.task-list{list-style: none;}
     </style>
+
 
 
 <style type="text/css">
@@ -127,7 +140,225 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 
 
-<link rel="stylesheet" href="data:text/css,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20800px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%2020px%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%200%3B%0Apadding%3A%204px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%3Anot%28%5Bclass%5D%29%20%7B%0Amargin%3A%20auto%3B%0Amin%2Dwidth%3A%2040%25%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%5Bsummary%3D%22R%20argblock%22%5D%20%7B%0Awidth%3A%20100%25%3B%0Aborder%3A%20none%3B%0A%7D%0Atable%3Anot%28%5Bclass%5D%29%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%3Anot%28%5Bclass%5D%29%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%3Anot%28%5Bclass%5D%29%2C%20table%3Anot%28%5Bclass%5D%29%20th%2C%20table%3Anot%28%5Bclass%5D%29%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%3Anot%28%5Bclass%5D%29%20tr%2Eodd%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%2013px%3B%0Apadding%2Dbottom%3A%201px%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f5f5f5%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0A%7D%0Apre%20%7B%0Aoverflow%2Dx%3A%20auto%3B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200%2010px%200%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20white%3B%0Aborder%3A%20%23f5f5f5%201px%20solid%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20code%20%7B%0Acolor%3A%20%23444%3B%0Abackground%2Dcolor%3A%20white%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20monospace%3B%0Afont%2Dsize%3A%2090%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%204px%3B%0Acolor%3A%20%23d14%3B%0Aborder%3A%201px%20solid%20%23e1e1e8%3B%0Awhite%2Dspace%3A%20inherit%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Atable%20%3E%20caption%2C%20div%2Efigure%20p%2Ecaption%20%7B%0Afont%2Dstyle%3A%20italic%3B%0A%7D%0Atable%20%3E%20caption%20span%2C%20div%2Efigure%20p%2Ecaption%20span%20%7B%0Afont%2Dstyle%3A%20normal%3B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%200%2010px%3B%0A%7D%0Atable%3Anot%28%5Bclass%5D%29%20%7B%0Amargin%3A%20auto%20auto%2010px%20auto%3B%0A%7D%0Aimg%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0Amax%2Dwidth%3A%20100%25%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f5f5f5%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f5f5f5%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f5f5f5%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Adiv%2Er%2Dhelp%2Dpage%20%7B%0Abackground%2Dcolor%3A%20%23f9f9f9%3B%0Aborder%2Dbottom%3A%20%23ddd%201px%20solid%3B%0Amargin%2Dbottom%3A%2010px%3B%0Apadding%3A%2010px%3B%0A%7D%0Adiv%2Er%2Dhelp%2Dpage%3Ahover%20%7B%0Abackground%2Dcolor%3A%20%23f4f4f4%3B%0A%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" type="text/css" />
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 800px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 20px;
+}
+#header {
+text-align: center;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 0;
+padding: 4px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table:not([class]) {
+margin: auto;
+min-width: 40%;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table[summary="R argblock"] {
+width: 100%;
+border: none;
+}
+table:not([class]) th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table:not([class]) td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table:not([class]), table:not([class]) th, table:not([class]) td {
+border-left-style: none;
+border-right-style: none;
+}
+table:not([class]) tr.odd {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 13px;
+padding-bottom: 1px;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f5f5f5;
+border-radius: 3px;
+color: #333;
+}
+pre {
+overflow-x: auto;
+border-radius: 3px;
+margin: 5px 0 10px 0;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: white;
+border: #f5f5f5 1px solid;
+}
+pre:not([class]) code {
+color: #444;
+background-color: white;
+}
+code {
+font-family: monospace;
+font-size: 90%;
+}
+p > code, li > code {
+padding: 2px 4px;
+color: #d14;
+border: 1px solid #e1e1e8;
+white-space: inherit;
+}
+div.figure {
+text-align: center;
+}
+table > caption, div.figure p.caption {
+font-style: italic;
+}
+table > caption span, div.figure p.caption span {
+font-style: normal;
+font-weight: bold;
+}
+p {
+margin: 0 0 10px;
+}
+table:not([class]) {
+margin: auto auto 10px auto;
+}
+img:not([class]) {
+background-color: #FFFFFF;
+padding: 2px;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+max-width: 100%;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f5f5f5;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f5f5f5;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f5f5f5;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+div.r-help-page {
+background-color: #f9f9f9;
+border-bottom: #ddd 1px solid;
+margin-bottom: 10px;
+padding: 10px;
+}
+div.r-help-page:hover {
+background-color: #f4f4f4;
+}
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
 
 
 
@@ -141,24 +372,28 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <h1 class="title toc-ignore">Mixed Model Reanalysis of RT data</h1>
 <h4 class="author">Henrik Singmann</h4>
-<h4 class="date">2021-07-21</h4>
+<h4 class="date">2022-03-27</h4>
 
 
 <div id="TOC">
 <ul>
 <li><a href="#overview">Overview</a></li>
-<li><a href="#description-of-experiment-and-data">Description of Experiment and Data</a></li>
+<li><a href="#description-of-experiment-and-data">Description of
+Experiment and Data</a></li>
 <li><a href="#data-and-r-preparation">Data and R Preparation</a></li>
 <li><a href="#descriptive-analysis">Descriptive Analysis</a></li>
 <li><a href="#model-setup">Model Setup</a></li>
 <li><a href="#finding-the-final-model">Finding the Final Model</a></li>
-<li><a href="#results-of-maximal-and-final-model">Results of Maximal and Final Model</a></li>
+<li><a href="#results-of-maximal-and-final-model">Results of Maximal and
+Final Model</a></li>
 <li><a href="#lrt-results">LRT Results</a></li>
 <li><a href="#summary-of-results">Summary of Results</a></li>
 <li><a href="#follow-up-analyses">Follow-Up Analyses</a>
 <ul>
-<li><a href="#taskstimulusfrequency-interaction">task:stimulus:frequency Interaction</a></li>
-<li><a href="#taskstimulusdensityfrequency-interaction">task:stimulus:density:frequency Interaction</a></li>
+<li><a href="#taskstimulusfrequency-interaction">task:stimulus:frequency
+Interaction</a></li>
+<li><a href="#taskstimulusdensityfrequency-interaction">task:stimulus:density:frequency
+Interaction</a></li>
 </ul></li>
 <li><a href="#references">References</a></li>
 </ul>
@@ -166,16 +401,39 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <div id="overview" class="section level2">
 <h2>Overview</h2>
-<p>This documents reanalysis response time data from an Experiment performed by Freeman, Heathcote, Chalmers, and Hockley (2010) using the mixed model functionality of <strong>afex</strong> implemented in function <code>mixed</code> followed by post-hoc tests using package <strong>emmeans</strong> (Lenth, 2017). After a brief description of the data set and research question, the code and results are presented.</p>
+<p>This documents reanalysis response time data from an Experiment
+performed by Freeman, Heathcote, Chalmers, and Hockley (2010) using the
+mixed model functionality of <strong>afex</strong> implemented in
+function <code>mixed</code> followed by post-hoc tests using package
+<strong>emmeans</strong> (Lenth, 2017). After a brief description of the
+data set and research question, the code and results are presented.</p>
 </div>
 <div id="description-of-experiment-and-data" class="section level2">
 <h2>Description of Experiment and Data</h2>
-<p>The data are lexical decision and word naming latencies for 300 words and 300 nonwords from 45 participants presented in Freeman et al. (2010). The 300 items in each <code>stimulus</code> condition were selected to form a balanced <span class="math inline">\(2 \times 2\)</span> design with factors neighborhood <code>density</code> (low versus high) and <code>frequency</code> (low versus high). The <code>task</code> was a between subjects factor: 25 participants worked on the lexical decision task and 20 participants on the naming task. After excluding erroneous responses each participants responded to between 135 and 150 words and between 124 and 150 nonwords. We analyzed log RTs which showed an approximately normal picture.</p>
+<p>The data are lexical decision and word naming latencies for 300 words
+and 300 nonwords from 45 participants presented in Freeman et
+al. (2010). The 300 items in each <code>stimulus</code> condition were
+selected to form a balanced <span class="math inline">\(2 \times
+2\)</span> design with factors neighborhood <code>density</code> (low
+versus high) and <code>frequency</code> (low versus high). The
+<code>task</code> was a between subjects factor: 25 participants worked
+on the lexical decision task and 20 participants on the naming task.
+After excluding erroneous responses each participants responded to
+between 135 and 150 words and between 124 and 150 nonwords. We analyzed
+log RTs which showed an approximately normal picture.</p>
 </div>
 <div id="data-and-r-preparation" class="section level2">
 <h2>Data and R Preparation</h2>
-<p>We start with loading some packages we will need throughout this example. For data manipulation we will be using the <code>dplyr</code> and <code>tidyr</code> packages from the <a href="https://www.tidyverse.org/"><code>tidyverse</code></a>. A thorough introduction to these packages is beyond this example, but well worth it, and can be found in <a href="https://r4ds.had.co.nz/">‘R for Data Science’</a> by Wickham and Grolemund. For plotting we will be using <code>ggplot2</code>, also part of the <code>tidyverse</code>.</p>
-<p>After loading the packages, we will load the data (which comes with <code>afex</code>), remove the errors, and take a look at the variables in the data.</p>
+<p>We start with loading some packages we will need throughout this
+example. For data manipulation we will be using the <code>dplyr</code>
+and <code>tidyr</code> packages from the <a href="https://www.tidyverse.org/"><code>tidyverse</code></a>. A thorough
+introduction to these packages is beyond this example, but well worth
+it, and can be found in <a href="https://r4ds.had.co.nz/">‘R for Data
+Science’</a> by Wickham and Grolemund. For plotting we will be using
+<code>ggplot2</code>, also part of the <code>tidyverse</code>.</p>
+<p>After loading the packages, we will load the data (which comes with
+<code>afex</code>), remove the errors, and take a look at the variables
+in the data.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&quot;afex&quot;</span>) <span class="co"># needed for mixed() and attaches lme4 automatically.</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&quot;emmeans&quot;</span>) <span class="co"># emmeans is needed for follow-up tests </span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&quot;multcomp&quot;</span>) <span class="co"># for advanced control for multiple testing/Type 1 errors.</span></span>
@@ -200,7 +458,9 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ##  $ rt       : num  1.091 0.876 0.71 1.21 0.843 ...
 ##  $ log_rt   : num  0.0871 -0.1324 -0.3425 0.1906 -0.1708 ...
 ##  $ correct  : logi  TRUE TRUE TRUE TRUE TRUE TRUE ...</code></pre>
-<p>To make sure our expectations about the data match the data we use some <code>dplyr</code> magic to confirm the number of participants per condition and items per participant.</p>
+<p>To make sure our expectations about the data match the data we use
+some <code>dplyr</code> magic to confirm the number of participants per
+condition and items per participant.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## are all participants in only one task?</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>fhch <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(id) <span class="sc">%&gt;%</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">task =</span> <span class="fu">n_distinct</span>(task)) <span class="sc">%&gt;%</span></span>
@@ -232,7 +492,19 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ##   &lt;fct&gt;    &lt;int&gt; &lt;int&gt; &lt;dbl&gt;
 ## 1 word       135   150  145.
 ## 2 nonword    124   150  143.</code></pre>
-<p>Before running the analysis we should make sure that our dependent variable looks roughly normal. To compare <code>rt</code> with <code>log_rt</code> within the same figure we first need to transform the data from the wide format (where both rt types occupy one column each) into the long format (in which the two rt types are combined into a single column with an additional indicator column). To do so we use <code>tidyr::pivot_longer</code>. Then we simply call <code>ggplot</code> with <code>geom_histogram</code> and <code>facet_wrap(vars(rt_type))</code> on the new <code>tibble</code>. The plot shows that <code>log_rt</code> looks clearly more normal than <code>rt</code>, although not perfectly so. An interesting exercise could be to rerun the analysis below using a transformation that provides an even better ‘normalization’.</p>
+<p>Before running the analysis we should make sure that our dependent
+variable looks roughly normal. To compare <code>rt</code> with
+<code>log_rt</code> within the same figure we first need to transform
+the data from the wide format (where both rt types occupy one column
+each) into the long format (in which the two rt types are combined into
+a single column with an additional indicator column). To do so we use
+<code>tidyr::pivot_longer</code>. Then we simply call
+<code>ggplot</code> with <code>geom_histogram</code> and
+<code>facet_wrap(vars(rt_type))</code> on the new <code>tibble</code>.
+The plot shows that <code>log_rt</code> looks clearly more normal than
+<code>rt</code>, although not perfectly so. An interesting exercise
+could be to rerun the analysis below using a transformation that
+provides an even better ‘normalization’.</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>fhch_long <span class="ot">&lt;-</span> fhch <span class="sc">%&gt;%</span> </span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">c</span>(rt, log_rt), <span class="at">names_to =</span> <span class="st">&quot;rt_type&quot;</span>, <span class="at">values_to =</span> <span class="st">&quot;rt&quot;</span>)</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(fhch_long, <span class="fu">aes</span>(rt)) <span class="sc">+</span></span>
@@ -242,8 +514,23 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <div id="descriptive-analysis" class="section level2">
 <h2>Descriptive Analysis</h2>
-<p>The main factors in the experiment were the between-subjects factor <code>task</code> (<code>naming</code> vs. <code>lexdec</code>), and the within-subjects factors <code>stimulus</code> (<code>word</code> vs. <code>nonword</code>), <code>density</code> (<code>low</code> vs. <code>high</code>), and <code>frequency</code> (<code>low</code> vs. <code>high</code>). Before running an analysis it is a good idea to visually inspect the data to gather some expectations regarding the results. Should the statistical results dramatically disagree with the expectations this suggests some type of error along the way (e.g., model misspecification) or at least encourages a thorough check to make sure everything is correct. We first begin by plotting the data aggregated by-participant.</p>
-<p>In each plot we plot the raw data in the background. To make the individual data points visible we use <code>ggbeeswarm::geom_quasirandom</code> and <code>alpha = 0.5</code> for semi-transparency. On top of this we add a (transparent) box plot as well as the mean and standard error.</p>
+<p>The main factors in the experiment were the between-subjects factor
+<code>task</code> (<code>naming</code> vs. <code>lexdec</code>), and the
+within-subjects factors <code>stimulus</code> (<code>word</code>
+vs. <code>nonword</code>), <code>density</code> (<code>low</code>
+vs. <code>high</code>), and <code>frequency</code> (<code>low</code>
+vs. <code>high</code>). Before running an analysis it is a good idea to
+visually inspect the data to gather some expectations regarding the
+results. Should the statistical results dramatically disagree with the
+expectations this suggests some type of error along the way (e.g., model
+misspecification) or at least encourages a thorough check to make sure
+everything is correct. We first begin by plotting the data aggregated
+by-participant.</p>
+<p>In each plot we plot the raw data in the background. To make the
+individual data points visible we use
+<code>ggbeeswarm::geom_quasirandom</code> and <code>alpha = 0.5</code>
+for semi-transparency. On top of this we add a (transparent) box plot as
+well as the mean and standard error.</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>agg_p <span class="ot">&lt;-</span> fhch <span class="sc">%&gt;%</span> </span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(id, task, stimulus, density, frequency) <span class="sc">%&gt;%</span></span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">mean =</span> <span class="fu">mean</span>(log_rt)) <span class="sc">%&gt;%</span></span>
@@ -266,32 +553,98 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_summary</span>(<span class="at">colour =</span> <span class="st">&quot;red&quot;</span>) <span class="sc">+</span></span>
 <span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(<span class="at">cols =</span> <span class="fu">vars</span>(task), <span class="at">rows =</span> <span class="fu">vars</span>(stimulus))</span></code></pre></div>
 <p><img src="data:image/png;base64,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" width="90%" /></p>
-<p>These two plots show a very similar pattern and suggest several things:</p>
+<p>These two plots show a very similar pattern and suggest several
+things:</p>
 <ul>
-<li>Responses to <code>nonwords</code> appear slower than responses to <code>words</code>, at least for the <code>naming</code> task.</li>
-<li><code>lexdec</code> responses appear to be slower than <code>naming</code> responses, particularly in the <code>word</code> condition.</li>
-<li>In the <code>nonword</code> and <code>naming</code> condition we see a clear effect of <code>frequency</code> with slower responses to <code>high</code> than <code>low</code> <code>frequency</code> words.</li>
-<li>In the <code>word</code> conditions the <code>frequency</code> pattern appears to be in the opposite direction to the pattern described in the previous point: faster responses to <code>low</code> <code>frequency</code> than to <code>high</code> <code>frequency</code> words.</li>
-<li><code>density</code> appears to have no effect, perhaps with the exception of the <code>nonword</code> <code>lexdec</code> condition.</li>
+<li>Responses to <code>nonwords</code> appear slower than responses to
+<code>words</code>, at least for the <code>naming</code> task.</li>
+<li><code>lexdec</code> responses appear to be slower than
+<code>naming</code> responses, particularly in the <code>word</code>
+condition.</li>
+<li>In the <code>nonword</code> and <code>naming</code> condition we see
+a clear effect of <code>frequency</code> with slower responses to
+<code>high</code> than <code>low</code> <code>frequency</code>
+words.</li>
+<li>In the <code>word</code> conditions the <code>frequency</code>
+pattern appears to be in the opposite direction to the pattern described
+in the previous point: faster responses to <code>low</code>
+<code>frequency</code> than to <code>high</code> <code>frequency</code>
+words.</li>
+<li><code>density</code> appears to have no effect, perhaps with the
+exception of the <code>nonword</code> <code>lexdec</code>
+condition.</li>
 </ul>
 </div>
 <div id="model-setup" class="section level2">
 <h2>Model Setup</h2>
-<p>To set up a mixed model it is important to identify which factors vary within which grouping factor generating random variability (i.e., grouping factors are sources of stochastic variability). The two grouping factors are participants (<code>id</code>) and items (<code>item</code>). The within-participant factors are <code>stimulus</code>, <code>density</code>, and <code>frequency</code>. The within-item factor is <code>task</code>. The ‘maximal model’ (Barr, Levy, Scheepers, and Tily, 2013) therefore is the model with by-participant random slopes for <code>stimulus</code>, <code>density</code>, and <code>frequency</code> and their interactions and by-item random slopes for <code>task</code>.</p>
-<p>It is rather common that a maximal model with a complicated random effect structure, such as the present one, does not converge successfully. The best indicator of this is a “singular fit” warning. A model with a singular fit warning should not be reported or used. Instead, one should make sure that qualitatively the same results are also observed with a model without singular fit warnings. If the maximal model that does not converge and a reduced model without a singular fit warning (i.e., the final model) diverge in their results, results should only be interpreted cautiously.</p>
-<p>In case of a singular fit or another indicator of a convergence problem, the usual first step is removing the correlations among the random terms. In our example, there are two sets of correlations, one for each random effect grouping variable. Consequently, we can build four model that have the maximal structure in terms of random-slopes and only differ in which correlations among random terms are calculated:</p>
+<p>To set up a mixed model it is important to identify which factors
+vary within which grouping factor generating random variability (i.e.,
+grouping factors are sources of stochastic variability). The two
+grouping factors are participants (<code>id</code>) and items
+(<code>item</code>). The within-participant factors are
+<code>stimulus</code>, <code>density</code>, and <code>frequency</code>.
+The within-item factor is <code>task</code>. The ‘maximal model’ (Barr,
+Levy, Scheepers, and Tily, 2013) therefore is the model with
+by-participant random slopes for <code>stimulus</code>,
+<code>density</code>, and <code>frequency</code> and their interactions
+and by-item random slopes for <code>task</code>.</p>
+<p>It is rather common that a maximal model with a complicated random
+effect structure, such as the present one, does not converge
+successfully. The best indicator of this is a “singular fit” warning. A
+model with a singular fit warning should not be reported or used.
+Instead, one should make sure that qualitatively the same results are
+also observed with a model without singular fit warnings. If the maximal
+model that does not converge and a reduced model without a singular fit
+warning (i.e., the final model) diverge in their results, results should
+only be interpreted cautiously.</p>
+<p>In case of a singular fit or another indicator of a convergence
+problem, the usual first step is removing the correlations among the
+random terms. In our example, there are two sets of correlations, one
+for each random effect grouping variable. Consequently, we can build
+four model that have the maximal structure in terms of random-slopes and
+only differ in which correlations among random terms are calculated:</p>
 <ol style="list-style-type: decimal">
 <li>With all correlations.</li>
-<li>No correlation among by-item random effects (i.e., no correlation between random intercept and <code>task</code> random slope).</li>
-<li>No correlation among by-participant random effect terms (i.e., no correlation among random slopes themselves and between the random slopes and the random intercept).</li>
+<li>No correlation among by-item random effects (i.e., no correlation
+between random intercept and <code>task</code> random slope).</li>
+<li>No correlation among by-participant random effect terms (i.e., no
+correlation among random slopes themselves and between the random slopes
+and the random intercept).</li>
 <li>No correlation among either random grouping factor.</li>
 </ol>
-<p>The next decision to be made is which method to use for obtaining <span class="math inline">\(p\)</span>-values. The best control against anti-conservative results is provided by <code>method = &quot;KR&quot;</code> (=Kenward-Roger). However, <code>KR</code> needs quite a lot of RAM, especially with complicated random effect structures and large data sets. In this case we have both, relatively large data (i.e., many levels on each random effect, especially the item random effect) and a complicated random effect structure. Consequently, it seems a reasonable decision to choose another method. The second ‘best’ method (in terms of controlling for Type I errors) is the ‘Satterthwaite’ approximation, <code>method = &#39;S&#39;</code>. It provides a similar control of Type I errors as the Kenward-Roger approximation and needs less RAM. The Satterthwaite method is currently also the default method for calculating <span class="math inline">\(p\)</span>-values so does not need to be set explicitly.</p>
+<p>The next decision to be made is which method to use for obtaining
+<span class="math inline">\(p\)</span>-values. The best control against
+anti-conservative results is provided by <code>method = &quot;KR&quot;</code>
+(=Kenward-Roger). However, <code>KR</code> needs quite a lot of RAM,
+especially with complicated random effect structures and large data
+sets. In this case we have both, relatively large data (i.e., many
+levels on each random effect, especially the item random effect) and a
+complicated random effect structure. Consequently, it seems a reasonable
+decision to choose another method. The second ‘best’ method (in terms of
+controlling for Type I errors) is the ‘Satterthwaite’ approximation,
+<code>method = &#39;S&#39;</code>. It provides a similar control of Type I
+errors as the Kenward-Roger approximation and needs less RAM. The
+Satterthwaite method is currently also the default method for
+calculating <span class="math inline">\(p\)</span>-values so does not
+need to be set explicitly.</p>
 </div>
 <div id="finding-the-final-model" class="section level2">
 <h2>Finding the Final Model</h2>
-<p>The following code fits the four models using the Satterthwaite method. To suppress random effects we use the <code>||</code> notation. Note that it is necessary to set <code>expand_re = TRUE</code> when suppressing random effects among variables that are entered as factors and not as numerical variables (all independent variables in the present case are factors). Also note that <code>mixed</code> automatically uses appropriate contrast coding if factors are included in interactions (<code>contr.sum</code>) in contrast to the <code>R</code> default (which is <code>contr.treatment</code>). To make sure the estimation does not end prematurely we set the allowed number of function evaluations to a very high value (using <code>lmerControl</code>).</p>
-<p>However, because fitting the models in R might take quite a while, you should also be able to load the fitted binary files them from <a href="https://raw.githubusercontent.com/singmann/afex/master/development/freeman_models.rda">this url</a> and then load them in R with <code>load(&quot;freeman_models.rda&quot;)</code>.</p>
+<p>The following code fits the four models using the Satterthwaite
+method. To suppress random effects we use the <code>||</code> notation.
+Note that it is necessary to set <code>expand_re = TRUE</code> when
+suppressing random effects among variables that are entered as factors
+and not as numerical variables (all independent variables in the present
+case are factors). Also note that <code>mixed</code> automatically uses
+appropriate contrast coding if factors are included in interactions
+(<code>contr.sum</code>) in contrast to the <code>R</code> default
+(which is <code>contr.treatment</code>). To make sure the estimation
+does not end prematurely we set the allowed number of function
+evaluations to a very high value (using <code>lmerControl</code>).</p>
+<p>However, because fitting the models in R might take quite a while,
+you should also be able to load the fitted binary files them from <a href="https://raw.githubusercontent.com/singmann/afex/master/development/freeman_models.rda">this
+url</a> and then load them in R with
+<code>load(&quot;freeman_models.rda&quot;)</code>.</p>
 <div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>m1s <span class="ot">&lt;-</span> <span class="fu">mixed</span>(log_rt <span class="sc">~</span> task<span class="sc">*</span>stimulus<span class="sc">*</span>density<span class="sc">*</span>frequency <span class="sc">+</span> </span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>               (stimulus<span class="sc">*</span>density<span class="sc">*</span>frequency<span class="sc">|</span>id)<span class="sc">+</span></span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>               (task<span class="sc">|</span>item), fhch, </span>
@@ -312,9 +665,29 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>               (task<span class="sc">||</span>item), fhch, </span>
 <span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">control =</span> <span class="fu">lmerControl</span>(<span class="at">optCtrl =</span> <span class="fu">list</span>(<span class="at">maxfun =</span> <span class="fl">1e6</span>)), <span class="at">expand_re =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
 <pre><code>## boundary (singular) fit: see ?isSingular</code></pre>
-<p>We can see that fitting each of these models emits the “singular fit” message (it is technically a <code>message</code> and not a <code>warning</code>) indicating that the model is over-parameterized and did not converge successfully. In particular, this message indicates that the model is specified with more random effect parameters than can be estimated given the current data.</p>
-<p>It is instructive to see that even with a comparatively large number of observations, 12960, a set of seven random slopes for the by-participant term and one random slope for the by-item term cannot be estimated successfully. And this holds even after removing all correlations. Thus, it should not be surprising that similar sized models regularly do not converge with smaller numbers of observations. Furthermore, we are here in the fortunate situation that each factor has only two levels. A factor with more levels corresponds to more parameters of the random effect terms.</p>
-<p>Before deciding what to do next, we take a look at the estimated random effect estimates. We do so for the model without any correlations. Note that for <code>afex</code> models we usually do not want to use the <code>summary</code> method as it prints the results on the level of the model coefficients and not model terms. But for the random effects we have to do so. However, we are only interested in the random effect terms so we only print those using <code>summary(model)$varcor</code>.</p>
+<p>We can see that fitting each of these models emits the “singular fit”
+message (it is technically a <code>message</code> and not a
+<code>warning</code>) indicating that the model is over-parameterized
+and did not converge successfully. In particular, this message indicates
+that the model is specified with more random effect parameters than can
+be estimated given the current data.</p>
+<p>It is instructive to see that even with a comparatively large number
+of observations, 12960, a set of seven random slopes for the
+by-participant term and one random slope for the by-item term cannot be
+estimated successfully. And this holds even after removing all
+correlations. Thus, it should not be surprising that similar sized
+models regularly do not converge with smaller numbers of observations.
+Furthermore, we are here in the fortunate situation that each factor has
+only two levels. A factor with more levels corresponds to more
+parameters of the random effect terms.</p>
+<p>Before deciding what to do next, we take a look at the estimated
+random effect estimates. We do so for the model without any
+correlations. Note that for <code>afex</code> models we usually do not
+want to use the <code>summary</code> method as it prints the results on
+the level of the model coefficients and not model terms. But for the
+random effects we have to do so. However, we are only interested in the
+random effect terms so we only print those using
+<code>summary(model)$varcor</code>.</p>
 <div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m4s)<span class="sc">$</span>varcor </span></code></pre></div>
 <pre><code>##  Groups   Name                                    Std.Dev. 
 ##  item     re2.task1                               0.0568715
@@ -328,7 +701,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ##  id.6     re1.stimulus1                           0.0445333
 ##  id.7     (Intercept)                             0.1936292
 ##  Residual                                         0.3001905</code></pre>
-<p>The output shows that the estimated SDs of the random slopes of the two-way interactions are all zero. However, because we cannot remove the random slopes for the two way interaction while retaining the three-way interaction, we start by removing the three-way interaction first.</p>
+<p>The output shows that the estimated SDs of the random slopes of the
+two-way interactions are all zero. However, because we cannot remove the
+random slopes for the two way interaction while retaining the three-way
+interaction, we start by removing the three-way interaction first.</p>
 <div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>m5s <span class="ot">&lt;-</span> <span class="fu">mixed</span>(log_rt <span class="sc">~</span> task<span class="sc">*</span>stimulus<span class="sc">*</span>density<span class="sc">*</span>frequency <span class="sc">+</span> </span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>               ((stimulus<span class="sc">+</span>density<span class="sc">+</span>frequency)<span class="sc">^</span><span class="dv">2</span><span class="sc">||</span>id)<span class="sc">+</span></span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>               (task<span class="sc">||</span>item), fhch, </span>
@@ -346,14 +722,18 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ##  id.5     re1.stimulus1               4.4539e-02
 ##  id.6     (Intercept)                 1.9374e-01
 ##  Residual                             3.0030e-01</code></pre>
-<p>Not too surprisingly, this model also produces a singular fit. Inspection of the estimates shows that the two-way interaction of the slopes are still estimated to be zero. So we remove those in the next step.</p>
+<p>Not too surprisingly, this model also produces a singular fit.
+Inspection of the estimates shows that the two-way interaction of the
+slopes are still estimated to be zero. So we remove those in the next
+step.</p>
 <div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>m6s <span class="ot">&lt;-</span> <span class="fu">mixed</span>(log_rt <span class="sc">~</span> task<span class="sc">*</span>stimulus<span class="sc">*</span>density<span class="sc">*</span>frequency <span class="sc">+</span> </span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>               (stimulus<span class="sc">+</span>density<span class="sc">+</span>frequency<span class="sc">||</span>id)<span class="sc">+</span></span>
 <span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>               (task<span class="sc">||</span>item), fhch, </span>
 <span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">control =</span> <span class="fu">lmerControl</span>(<span class="at">optCtrl =</span> <span class="fu">list</span>(<span class="at">maxfun =</span> <span class="fl">1e6</span>)), </span>
 <span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>             <span class="at">expand_re =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
 <pre><code>## boundary (singular) fit: see ?isSingular</code></pre>
-<p>This model still shows a singular fit warning. The random effect estimates below show a potential culprit.</p>
+<p>This model still shows a singular fit warning. The random effect
+estimates below show a potential culprit.</p>
 <div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m6s)<span class="sc">$</span>varcor </span></code></pre></div>
 <pre><code>##  Groups   Name           Std.Dev.
 ##  item     re2.task1      0.056831
@@ -363,32 +743,46 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ##  id.2     re1.stimulus1  0.044524
 ##  id.3     (Intercept)    0.193659
 ##  Residual                0.300297</code></pre>
-<p>As in <code>m4s</code> above, the random effect SD for the density term is estimated to be zero. Thus, we remove this as well in the next step.</p>
+<p>As in <code>m4s</code> above, the random effect SD for the density
+term is estimated to be zero. Thus, we remove this as well in the next
+step.</p>
 <div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>m7s <span class="ot">&lt;-</span> <span class="fu">mixed</span>(log_rt <span class="sc">~</span> task<span class="sc">*</span>stimulus<span class="sc">*</span>density<span class="sc">*</span>frequency <span class="sc">+</span> </span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>               (stimulus<span class="sc">+</span>frequency<span class="sc">||</span>id)<span class="sc">+</span></span>
 <span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>               (task<span class="sc">||</span>item), fhch, </span>
 <span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">control =</span> <span class="fu">lmerControl</span>(<span class="at">optCtrl =</span> <span class="fu">list</span>(<span class="at">maxfun =</span> <span class="fl">1e6</span>)), <span class="at">expand_re =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
-<p>This model finally does not emit a singular fit warning. Is this our final model? Before deciding on this, we see whether we can add the correlation terms again without running into any problems. We begin by adding the correlation to the by-participant term.</p>
+<p>This model finally does not emit a singular fit warning. Is this our
+final model? Before deciding on this, we see whether we can add the
+correlation terms again without running into any problems. We begin by
+adding the correlation to the by-participant term.</p>
 <div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>m8s <span class="ot">&lt;-</span> <span class="fu">mixed</span>(log_rt <span class="sc">~</span> task<span class="sc">*</span>stimulus<span class="sc">*</span>density<span class="sc">*</span>frequency <span class="sc">+</span> </span>
 <span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>               (stimulus<span class="sc">+</span>frequency<span class="sc">|</span>id)<span class="sc">+</span></span>
 <span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>               (task<span class="sc">||</span>item), fhch, </span>
 <span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">control =</span> <span class="fu">lmerControl</span>(<span class="at">optCtrl =</span> <span class="fu">list</span>(<span class="at">maxfun =</span> <span class="fl">1e6</span>)), <span class="at">expand_re =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
 <pre><code>## Warning: Model failed to converge with max|grad| = 0.00347544 (tol = 0.002, component 1)</code></pre>
-<p>This model does not show a singular fit message but emits another warning. Specifically, a warning that the absolute maximal gradient at the final solution is too high. This warning is not necessarily critical (i.e., it can be a false positive), but can also indicate serious problems. Consequently, we try adding the correlation between the by-item random terms instead:</p>
+<p>This model does not show a singular fit message but emits another
+warning. Specifically, a warning that the absolute maximal gradient at
+the final solution is too high. This warning is not necessarily critical
+(i.e., it can be a false positive), but can also indicate serious
+problems. Consequently, we try adding the correlation between the
+by-item random terms instead:</p>
 <div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>m9s <span class="ot">&lt;-</span> <span class="fu">mixed</span>(log_rt <span class="sc">~</span> task<span class="sc">*</span>stimulus<span class="sc">*</span>density<span class="sc">*</span>frequency <span class="sc">+</span> </span>
 <span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>               (stimulus<span class="sc">+</span>frequency<span class="sc">||</span>id)<span class="sc">+</span></span>
 <span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>               (task<span class="sc">|</span>item), fhch, </span>
 <span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">control =</span> <span class="fu">lmerControl</span>(<span class="at">optCtrl =</span> <span class="fu">list</span>(<span class="at">maxfun =</span> <span class="fl">1e6</span>)), <span class="at">expand_re =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
-<p>This model also does not show any warnings. Thus, we have arrived at the end of the model selection process.</p>
+<p>This model also does not show any warnings. Thus, we have arrived at
+the end of the model selection process.</p>
 </div>
 <div id="results-of-maximal-and-final-model" class="section level2">
 <h2>Results of Maximal and Final Model</h2>
 <p>We now have the following two relevant models.</p>
 <ul>
-<li><code>m1s</code>: The maximal random effect structure justified by the design (i.e., the maximal model)</li>
+<li><code>m1s</code>: The maximal random effect structure justified by
+the design (i.e., the maximal model)</li>
 <li><code>m9s</code>: The final model</li>
 </ul>
-<p>Robust results are those that hold regardless across maximal and final (i.e., reduced) model. Therefore, let us compare the pattern of significant and non-significant effects.</p>
+<p>Robust results are those that hold regardless across maximal and
+final (i.e., reduced) model. Therefore, let us compare the pattern of
+significant and non-significant effects.</p>
 <div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">left_join</span>(<span class="fu">nice</span>(m1s), <span class="fu">nice</span>(m9s), <span class="at">by =</span> <span class="st">&quot;Effect&quot;</span>, </span>
 <span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>          <span class="at">suffix =</span> <span class="fu">c</span>(<span class="st">&quot;_full&quot;</span>, <span class="st">&quot;_final&quot;</span>)) </span></code></pre></div>
 <pre><code>## Mixed Model Anova Table (Type 3 tests, S-method)
@@ -414,12 +808,30 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ## 15 task:stimulus:density:frequency 1, 108.10   10.19 **         .002 1, 578.77  11.72 ***         &lt;.001
 ## ---
 ## Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘+’ 0.1 ‘ ’ 1</code></pre>
-<p>What this shows is that the pattern of significant and non-significant effect is the same for both models. The only significant effect for which the evidence is not that strong is the 3-way interaction between <code>stimulus:density:frequency</code>. It is only just below .05 for the full model and has a somewhat lower value for the final model.</p>
-<p>We can also see that one of the most noticeable differences between the maximal and the final model is the number of denominator degrees of freedom. This is highly influenced by the random effect structure and thus considerable larger in the final (i.e., reduced) model. The difference in the other statistics is lower.</p>
+<p>What this shows is that the pattern of significant and
+non-significant effect is the same for both models. The only significant
+effect for which the evidence is not that strong is the 3-way
+interaction between <code>stimulus:density:frequency</code>. It is only
+just below .05 for the full model and has a somewhat lower value for the
+final model.</p>
+<p>We can also see that one of the most noticeable differences between
+the maximal and the final model is the number of denominator degrees of
+freedom. This is highly influenced by the random effect structure and
+thus considerable larger in the final (i.e., reduced) model. The
+difference in the other statistics is lower.</p>
 </div>
 <div id="lrt-results" class="section level2">
 <h2>LRT Results</h2>
-<p>It is instructive to compare those results with results obtained using the comparatively ‘worst’ method for obtaining <span class="math inline">\(p\)</span>-values implemented in <code>afex::mixed</code>, likelihood ratio tests. Likelihood ratio-tests should in principle deliver reasonable results for large data sets. A common rule of thumb is that the number of levels for each random effect grouping factor needs to be large, say above 50. Here, we have a very large number of items (600), but not that many participants (45). Thus, qualitative results should be the very similar, but it still is interesting to see exactly what happens. We therefore fit the final model using <code>method=&#39;LRT&#39;</code>.</p>
+<p>It is instructive to compare those results with results obtained
+using the comparatively ‘worst’ method for obtaining <span class="math inline">\(p\)</span>-values implemented in
+<code>afex::mixed</code>, likelihood ratio tests. Likelihood ratio-tests
+should in principle deliver reasonable results for large data sets. A
+common rule of thumb is that the number of levels for each random effect
+grouping factor needs to be large, say above 50. Here, we have a very
+large number of items (600), but not that many participants (45). Thus,
+qualitative results should be the very similar, but it still is
+interesting to see exactly what happens. We therefore fit the final
+model using <code>method=&#39;LRT&#39;</code>.</p>
 <div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>m9lrt <span class="ot">&lt;-</span> <span class="fu">mixed</span>(log_rt <span class="sc">~</span> task<span class="sc">*</span>stimulus<span class="sc">*</span>density<span class="sc">*</span>frequency <span class="sc">+</span> </span>
 <span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>               (stimulus<span class="sc">+</span>frequency<span class="sc">||</span>id)<span class="sc">+</span></span>
 <span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>               (task<span class="sc">|</span>item), fhch, <span class="at">method =</span> <span class="st">&quot;LRT&quot;</span>, </span>
@@ -450,20 +862,73 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ## 15 task:stimulus:density:frequency  1  11.71 ***   &lt;.001
 ## ---
 ## Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘+’ 0.1 ‘ ’ 1</code></pre>
-<p>The results in this case match the results of the Satterthwaite method. With lower numbers of levels of the grouping factor (e.g., less participants) this would not necessarily be expected.</p>
+<p>The results in this case match the results of the Satterthwaite
+method. With lower numbers of levels of the grouping factor (e.g., less
+participants) this would not necessarily be expected.</p>
 </div>
 <div id="summary-of-results" class="section level2">
 <h2>Summary of Results</h2>
-<p>Fortunately, the results from all models converged on the same pattern of significant and non-significant effects providing a high degree of confidence in the results. This might not be too surprising given the comparatively large number of total data points and the fact that each random effect grouping factor has a considerable number of levels (above 30 for both participants and items). In the following we focus on the final model using the Satterthwaite method, <code>m9s</code>.</p>
-<p>In terms of the significant findings, there are many that seem to be in line with the descriptive results described above. For example, the highly significant effect of <code>task:stimulus:frequency</code> with <span class="math inline">\(F(1, 578.91) = 124.16\)</span>, <span class="math inline">\(p &lt; .001\)</span>, appears to be in line with the observation that the frequency effect appears to change its sign depending on the <code>task:stimulus</code> cell (with <code>nonword</code> and <code>naming</code> showing the opposite patterns than the other three conditions). Consequently, we start by investigating this interaction further below.</p>
+<p>Fortunately, the results from all models converged on the same
+pattern of significant and non-significant effects providing a high
+degree of confidence in the results. This might not be too surprising
+given the comparatively large number of total data points and the fact
+that each random effect grouping factor has a considerable number of
+levels (above 30 for both participants and items). In the following we
+focus on the final model using the Satterthwaite method,
+<code>m9s</code>.</p>
+<p>In terms of the significant findings, there are many that seem to be
+in line with the descriptive results described above. For example, the
+highly significant effect of <code>task:stimulus:frequency</code> with
+<span class="math inline">\(F(1, 578.91) = 124.16\)</span>, <span class="math inline">\(p &lt; .001\)</span>, appears to be in line with
+the observation that the frequency effect appears to change its sign
+depending on the <code>task:stimulus</code> cell (with
+<code>nonword</code> and <code>naming</code> showing the opposite
+patterns than the other three conditions). Consequently, we start by
+investigating this interaction further below.</p>
 </div>
 <div id="follow-up-analyses" class="section level2">
 <h2>Follow-Up Analyses</h2>
-<p>Before investigating the significant interaction in detail it is a good idea to remind oneself what a significant interaction represents on a conceptual level; that one or multiple of the variables in the interaction moderate (i.e., affect) the effect of the other variable or variables. Consequently, there are several ways to investigate a significant interaction. Each of the involved variables can be seen as the moderating variables and each of the variables can be seen as the effect of interest. Which one of those possible interpretations is of interest in a given situation highly depends on the actual data and research question and multiple views can be ‘correct’ in a given situation.</p>
-<p>In addition to this conceptual issue, there are also multiple technical ways to investigate a significant interaction. One approach not followed here is to split the data into subsets according to the moderating variables and compute the statistical model again for the subsets with the effect variable(s) as remaining fixed effect. This approach, also called <em>simple effects</em> analysis, is, for example, recommended by Maxwell and Delaney (2004) as it does not assume variance homogeneity and is faithful to the data at each level. The approach taken here is to simply perform the test on the estimated final model. This approach assumes variance homogeneity (i.e., that the variances in all groups are homogeneous) and has the added benefit that it is computationally relatively simple. In addition, it can all be achieved using the framework provided by <a href="https://cran.r-project.org/package=emmeans"><code>emmeans</code></a> (Lenth, 2017).</p>
+<p>Before investigating the significant interaction in detail it is a
+good idea to remind oneself what a significant interaction represents on
+a conceptual level; that one or multiple of the variables in the
+interaction moderate (i.e., affect) the effect of the other variable or
+variables. Consequently, there are several ways to investigate a
+significant interaction. Each of the involved variables can be seen as
+the moderating variables and each of the variables can be seen as the
+effect of interest. Which one of those possible interpretations is of
+interest in a given situation highly depends on the actual data and
+research question and multiple views can be ‘correct’ in a given
+situation.</p>
+<p>In addition to this conceptual issue, there are also multiple
+technical ways to investigate a significant interaction. One approach
+not followed here is to split the data into subsets according to the
+moderating variables and compute the statistical model again for the
+subsets with the effect variable(s) as remaining fixed effect. This
+approach, also called <em>simple effects</em> analysis, is, for example,
+recommended by Maxwell and Delaney (2004) as it does not assume variance
+homogeneity and is faithful to the data at each level. The approach
+taken here is to simply perform the test on the estimated final model.
+This approach assumes variance homogeneity (i.e., that the variances in
+all groups are homogeneous) and has the added benefit that it is
+computationally relatively simple. In addition, it can all be achieved
+using the framework provided by <a href="https://cran.r-project.org/package=emmeans"><code>emmeans</code></a>
+(Lenth, 2017).</p>
 <div id="taskstimulusfrequency-interaction" class="section level3">
 <h3>task:stimulus:frequency Interaction</h3>
-<p>Our interest in the beginning is on the effect of <code>frequency</code> by <code>task:stimulus</code> combination. So let us first look at the estimated marginal means of this effect. In <code>emmeans</code> parlance these estimated means are called ‘least-square means’ because of historical reasons, but because of the lack of least-square estimation in mixed models we prefer the term estimated marginal means, or EMMs for short. Those can be obtained in the following way. To prevent <code>emmeans</code> from calculating the <em>df</em> for the EMMs (which can be quite costly), we use asymptotic <em>df</em>s (i.e., <span class="math inline">\(z\)</span> values and tests). <code>emmeans</code> requires to first specify the variable(s) one wants to treat as the effect variable(s) (here <code>frequency</code>) and then allows to specify condition variables.</p>
+<p>Our interest in the beginning is on the effect of
+<code>frequency</code> by <code>task:stimulus</code> combination. So let
+us first look at the estimated marginal means of this effect. In
+<code>emmeans</code> parlance these estimated means are called
+‘least-square means’ because of historical reasons, but because of the
+lack of least-square estimation in mixed models we prefer the term
+estimated marginal means, or EMMs for short. Those can be obtained in
+the following way. To prevent <code>emmeans</code> from calculating the
+<em>df</em> for the EMMs (which can be quite costly), we use asymptotic
+<em>df</em>s (i.e., <span class="math inline">\(z\)</span> values and
+tests). <code>emmeans</code> requires to first specify the variable(s)
+one wants to treat as the effect variable(s) (here
+<code>frequency</code>) and then allows to specify condition
+variables.</p>
 <div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">emm_options</span>(<span class="at">lmer.df =</span> <span class="st">&quot;asymptotic&quot;</span>) <span class="co"># also possible: &#39;satterthwaite&#39;, &#39;kenward-roger&#39;</span></span>
 <span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>emm_i1 <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(m9s, <span class="st">&quot;frequency&quot;</span>, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;stimulus&quot;</span>, <span class="st">&quot;task&quot;</span>))</span>
 <span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>emm_i1</span></code></pre></div>
@@ -491,7 +956,19 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ## Results are averaged over the levels of: density 
 ## Degrees-of-freedom method: asymptotic 
 ## Confidence level used: 0.95</code></pre>
-<p>The returned values are in line with our observation that the <code>nonword</code> and <code>naming</code> condition diverges from the other three. But is there actual evidence that the effect flips? We can test this using additional <code>emmeans</code> functionality. Specifically, we first use the <code>pairs</code> function which provides us with a pairwise test of the effect of <code>frequency</code> in each <code>task:stimulus</code> combination. Then we need to combine the four tests within one object to obtain a family-wise error rate correction which we do via <code>update(..., by = NULL)</code> (i.e., we revert the effect of the <code>by</code> statement from the earlier <code>emmeans</code> call) and finally we select the <code>holm</code> method for controlling for family wise error rate (the Holm method is uniformly more powerful than the Bonferroni).</p>
+<p>The returned values are in line with our observation that the
+<code>nonword</code> and <code>naming</code> condition diverges from the
+other three. But is there actual evidence that the effect flips? We can
+test this using additional <code>emmeans</code> functionality.
+Specifically, we first use the <code>pairs</code> function which
+provides us with a pairwise test of the effect of <code>frequency</code>
+in each <code>task:stimulus</code> combination. Then we need to combine
+the four tests within one object to obtain a family-wise error rate
+correction which we do via <code>update(..., by = NULL)</code> (i.e., we
+revert the effect of the <code>by</code> statement from the earlier
+<code>emmeans</code> call) and finally we select the <code>holm</code>
+method for controlling for family wise error rate (the Holm method is
+uniformly more powerful than the Bonferroni).</p>
 <div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">update</span>(<span class="fu">pairs</span>(emm_i1), <span class="at">by =</span> <span class="cn">NULL</span>, <span class="at">adjust =</span> <span class="st">&quot;holm&quot;</span>)</span></code></pre></div>
 <pre><code>## NOTE: Results may be misleading due to involvement in interactions</code></pre>
 <pre><code>##  contrast   stimulus task   estimate     SE  df z.ratio p.value
@@ -503,7 +980,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ## Results are averaged over the levels of: density 
 ## Degrees-of-freedom method: asymptotic 
 ## P value adjustment: holm method for 4 tests</code></pre>
-<p>We could also use a slightly more powerful method than the Holm method, method <code>free</code> from package <code>multcomp</code>. This method takes the correlation of the model parameters into account. However, results do not differ much here:</p>
+<p>We could also use a slightly more powerful method than the Holm
+method, method <code>free</code> from package <code>multcomp</code>.
+This method takes the correlation of the model parameters into account.
+However, results do not differ much here:</p>
 <div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">as.glht</span>(<span class="fu">update</span>(<span class="fu">pairs</span>(emm_i1), <span class="at">by =</span> <span class="cn">NULL</span>)), <span class="at">test =</span> <span class="fu">adjusted</span>(<span class="st">&quot;free&quot;</span>))</span></code></pre></div>
 <pre><code>## 
 ##   Simultaneous Tests for General Linear Hypotheses
@@ -517,8 +997,17 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ## ---
 ## Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 ## (Adjusted p values reported -- free method)</code></pre>
-<p>We see that the results are exactly as expected. In the <code>nonword</code> and <code>naming</code> condition we have a clear negative effect of frequency while in the other three conditions it is clearly positive.</p>
-<p>We could now also use <code>emmeans</code> and re-transform the estimates back onto the original RT response scale. For this, we can again <code>update</code> the <code>emmeans</code> object by using <code>tran = &quot;log&quot;</code> to specify the transformation and then indicating we want the means on the response scale with <code>type = &quot;response&quot;</code>. These values might be used for plotting.</p>
+<p>We see that the results are exactly as expected. In the
+<code>nonword</code> and <code>naming</code> condition we have a clear
+negative effect of frequency while in the other three conditions it is
+clearly positive.</p>
+<p>We could now also use <code>emmeans</code> and re-transform the
+estimates back onto the original RT response scale. For this, we can
+again <code>update</code> the <code>emmeans</code> object by using
+<code>tran = &quot;log&quot;</code> to specify the transformation and then
+indicating we want the means on the response scale with
+<code>type = &quot;response&quot;</code>. These values might be used for
+plotting.</p>
 <div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>emm_i1b <span class="ot">&lt;-</span> <span class="fu">update</span>(emm_i1, <span class="at">tran =</span> <span class="st">&quot;log&quot;</span>, <span class="at">type =</span> <span class="st">&quot;response&quot;</span>, <span class="at">by =</span> <span class="cn">NULL</span>)</span>
 <span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>emm_i1b</span></code></pre></div>
 <pre><code>##  frequency stimulus task   response     SE  df asymp.LCL asymp.UCL
@@ -535,7 +1024,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ## Degrees-of-freedom method: asymptotic 
 ## Confidence level used: 0.95 
 ## Intervals are back-transformed from the log scale</code></pre>
-<p>A more direct approach for plotting the interaction is via <code>afex_plot</code>. For a plot that is not too busy it makes sense to specify across which grouping factor the individual level data should be aggregated. We use the participant variable <code>&quot;id&quot;</code> here. We also use <code>ggbeeswarm::geom_quasirandom</code> as the geom for the data in the background following the example in <a href="afex_plot_introduction.html">the <code>afex_plot</code> vignette</a>.</p>
+<p>A more direct approach for plotting the interaction is via
+<code>afex_plot</code>. For a plot that is not too busy it makes sense
+to specify across which grouping factor the individual level data should
+be aggregated. We use the participant variable <code>&quot;id&quot;</code> here.
+We also use <code>ggbeeswarm::geom_quasirandom</code> as the geom for
+the data in the background following the example in <a href="afex_plot_introduction.html">the <code>afex_plot</code>
+vignette</a>.</p>
 <div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">afex_plot</span>(m9s, <span class="st">&quot;frequency&quot;</span>, <span class="st">&quot;stimulus&quot;</span>, <span class="st">&quot;task&quot;</span>, <span class="at">id =</span> <span class="st">&quot;id&quot;</span>,</span>
 <span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>          <span class="at">data_geom =</span> ggbeeswarm<span class="sc">::</span>geom_quasirandom, </span>
 <span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">data_arg =</span> <span class="fu">list</span>(</span>
@@ -546,8 +1041,20 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <div id="taskstimulusdensityfrequency-interaction" class="section level3">
 <h3>task:stimulus:density:frequency Interaction</h3>
-<p>As the last example, let us take a look at the significant four-way interaction of <code>task:stimulus:density:frequency</code>, <span class="math inline">\(F(1, 578.77) = 11.72\)</span>, <span class="math inline">\(p &lt; .001\)</span>. Here we might be interested in a slightly more difficult question namely whether the <code>density:frequency</code> interaction varies across <code>task:stimulus</code> conditions. If we again look at the figures above, it appears that there is a difference between <code>low:low</code> and <code>high:low</code> in the <code>nonword</code> and <code>lexdec</code> condition, but not in the other conditions.</p>
-<p>Looking at the 2-way interaction of <code>density:frequency</code> by the <code>task:stimulus</code> interaction can be done using <code>emmeans</code> using the <code>joint_test</code> function. We simply need to specify the appropriate <code>by</code> variables and get conditional tests this way.</p>
+<p>As the last example, let us take a look at the significant four-way
+interaction of <code>task:stimulus:density:frequency</code>, <span class="math inline">\(F(1, 578.77) = 11.72\)</span>, <span class="math inline">\(p &lt; .001\)</span>. Here we might be interested
+in a slightly more difficult question namely whether the
+<code>density:frequency</code> interaction varies across
+<code>task:stimulus</code> conditions. If we again look at the figures
+above, it appears that there is a difference between
+<code>low:low</code> and <code>high:low</code> in the
+<code>nonword</code> and <code>lexdec</code> condition, but not in the
+other conditions.</p>
+<p>Looking at the 2-way interaction of <code>density:frequency</code> by
+the <code>task:stimulus</code> interaction can be done using
+<code>emmeans</code> using the <code>joint_test</code> function. We
+simply need to specify the appropriate <code>by</code> variables and get
+conditional tests this way.</p>
 <div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">joint_tests</span>(m9s, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;stimulus&quot;</span>, <span class="st">&quot;task&quot;</span>))</span></code></pre></div>
 <pre><code>## stimulus = word, task = naming:
 ##  model term        df1 df2 F.ratio p.value
@@ -572,8 +1079,18 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ##  density             1 Inf  15.837 0.0001 
 ##  frequency           1 Inf  43.811 &lt;.0001 
 ##  density:frequency   1 Inf  14.806 0.0001</code></pre>
-<p>This test indeed shows that the <code>density:frequency</code> interaction is only significant in the <code>nonword</code> and <code>lexdec</code> condition. Next, let’s see if we can unpack this interaction in a meaningful manner. For this we compare <code>low:low</code> and <code>high:low</code> in each of the four groups. And just for the sake of making the example more complex, we also compare <code>low:high</code> and <code>high:high</code>.</p>
-<p>To do so, we first need to setup a new set of EMMs. Specifically, we get the EMMs of the two variables of interest, density and frequency, using the same <code>by</code> specification as the <code>joint_test</code> call. We can then setup custom contrasts that tests our hypotheses.</p>
+<p>This test indeed shows that the <code>density:frequency</code>
+interaction is only significant in the <code>nonword</code> and
+<code>lexdec</code> condition. Next, let’s see if we can unpack this
+interaction in a meaningful manner. For this we compare
+<code>low:low</code> and <code>high:low</code> in each of the four
+groups. And just for the sake of making the example more complex, we
+also compare <code>low:high</code> and <code>high:high</code>.</p>
+<p>To do so, we first need to setup a new set of EMMs. Specifically, we
+get the EMMs of the two variables of interest, density and frequency,
+using the same <code>by</code> specification as the
+<code>joint_test</code> call. We can then setup custom contrasts that
+tests our hypotheses.</p>
 <div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>emm_i2 <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(m2s, <span class="fu">c</span>(<span class="st">&quot;density&quot;</span>, <span class="st">&quot;frequency&quot;</span>), <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;stimulus&quot;</span>, <span class="st">&quot;task&quot;</span>))</span>
 <span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>emm_i2</span></code></pre></div>
 <pre><code>## stimulus = word, task = naming:
@@ -606,8 +1123,16 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ## 
 ## Degrees-of-freedom method: asymptotic 
 ## Confidence level used: 0.95</code></pre>
-<p>These contrasts can be specified via a list of custom contrasts on the EMMs (or reference grid in <code>emmeans</code> parlance) which can be passed to the <code>contrast</code> function. The contrasts are a <code>list</code> where each element should sum to one (i.e., be a proper contrast) and be of length equal to the number of EMMs (although we have 16 EMMs in total, we only need to specify it for a length of four due to conditioning by <code>c(&quot;stimulus&quot;, &quot;task&quot;)</code>).</p>
-<p>To control for the family wise error rate across all tests, we again use <code>update(..., by = NULL)</code> on the result to revert the effect of the conditioning.</p>
+<p>These contrasts can be specified via a list of custom contrasts on
+the EMMs (or reference grid in <code>emmeans</code> parlance) which can
+be passed to the <code>contrast</code> function. The contrasts are a
+<code>list</code> where each element should sum to one (i.e., be a
+proper contrast) and be of length equal to the number of EMMs (although
+we have 16 EMMs in total, we only need to specify it for a length of
+four due to conditioning by <code>c(&quot;stimulus&quot;, &quot;task&quot;)</code>).</p>
+<p>To control for the family wise error rate across all tests, we again
+use <code>update(..., by = NULL)</code> on the result to revert the
+effect of the conditioning.</p>
 <div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="co"># desired contrats:</span></span>
 <span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>des_c <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
 <span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">ll_hl =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>),</span>
@@ -626,17 +1151,36 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ## 
 ## Degrees-of-freedom method: asymptotic 
 ## P value adjustment: holm method for 8 tests</code></pre>
-<p>In contrast to our expectation, the results show two significant effects and not only one. In line with our expectations, in the <code>nonword</code> and <code>lexdec</code> condition the EMM of <code>low:low</code> is smaller than the EMM for <code>high:low</code>, <span class="math inline">\(z = -5.63\)</span>, <span class="math inline">\(p &lt; .0001\)</span>. However, in the <code>nonword</code> and <code>naming</code> condition we found the opposite pattern; the EMM of <code>low:low</code> is larger than the EMM for <code>high:low</code>, <span class="math inline">\(z = 3.53\)</span>, <span class="math inline">\(p = .003\)</span>. For all other effects <span class="math inline">\(|z| &lt; 1.4\)</span>, <span class="math inline">\(p &gt; .98\)</span>. In addition, there is no difference between <code>low:high</code> and <code>high:high</code> in any condition.</p>
+<p>In contrast to our expectation, the results show two significant
+effects and not only one. In line with our expectations, in the
+<code>nonword</code> and <code>lexdec</code> condition the EMM of
+<code>low:low</code> is smaller than the EMM for <code>high:low</code>,
+<span class="math inline">\(z = -5.63\)</span>, <span class="math inline">\(p &lt; .0001\)</span>. However, in the
+<code>nonword</code> and <code>naming</code> condition we found the
+opposite pattern; the EMM of <code>low:low</code> is larger than the EMM
+for <code>high:low</code>, <span class="math inline">\(z =
+3.53\)</span>, <span class="math inline">\(p = .003\)</span>. For all
+other effects <span class="math inline">\(|z| &lt; 1.4\)</span>, <span class="math inline">\(p &gt; .98\)</span>. In addition, there is no
+difference between <code>low:high</code> and <code>high:high</code> in
+any condition.</p>
 </div>
 </div>
 <div id="references" class="section level2">
 <h2>References</h2>
 <ul>
-<li>Barr, D. J., Levy, R., Scheepers, C., &amp; Tily, H. J. (2013). Random effects structure for confirmatory hypothesis testing: Keep it maximal. <em>Journal of Memory and Language</em>, 68(3), 255-278. <a href="https://doi.org/10.1016/j.jml.2012.11.001" class="uri">https://doi.org/10.1016/j.jml.2012.11.001</a></li>
-<li>Bretz, F., Hothorn, T., &amp; Westfall, P. H. (2011). <em>Multiple comparisons using R</em>. Boca Raton, FL: CRC Press. <a href="https://CRAN.R-project.org/package=multcomp" class="uri">https://CRAN.R-project.org/package=multcomp</a></li>
-<li>Freeman, E., Heathcote, A., Chalmers, K., &amp; Hockley, W. (2010). Item effects in recognition memory for words. <em>Journal of Memory and Language</em>, 62(1), 1-18. <a href="https://doi.org/10.1016/j.jml.2009.09.004" class="uri">https://doi.org/10.1016/j.jml.2009.09.004</a></li>
-<li>Lenth, R. (2017). <em>emmeans: Estimated Marginal Means, aka Least-Squares Means</em>. R package version 0.9.1. <a href="https://CRAN.R-project.org/package=emmeans" class="uri">https://CRAN.R-project.org/package=emmeans</a></li>
-<li>Maxwell, S. E., &amp; Delaney, H. D. (2004). <em>Designing experiments and analyzing data: a model-comparisons perspective</em>. Mahwah, N.J.: Lawrence Erlbaum Associates.</li>
+<li>Barr, D. J., Levy, R., Scheepers, C., &amp; Tily, H. J. (2013).
+Random effects structure for confirmatory hypothesis testing: Keep it
+maximal. <em>Journal of Memory and Language</em>, 68(3), 255-278. <a href="https://doi.org/10.1016/j.jml.2012.11.001" class="uri">https://doi.org/10.1016/j.jml.2012.11.001</a></li>
+<li>Bretz, F., Hothorn, T., &amp; Westfall, P. H. (2011). <em>Multiple
+comparisons using R</em>. Boca Raton, FL: CRC Press. <a href="https://CRAN.R-project.org/package=multcomp" class="uri">https://CRAN.R-project.org/package=multcomp</a></li>
+<li>Freeman, E., Heathcote, A., Chalmers, K., &amp; Hockley, W. (2010).
+Item effects in recognition memory for words. <em>Journal of Memory and
+Language</em>, 62(1), 1-18. <a href="https://doi.org/10.1016/j.jml.2009.09.004" class="uri">https://doi.org/10.1016/j.jml.2009.09.004</a></li>
+<li>Lenth, R. (2017). <em>emmeans: Estimated Marginal Means, aka
+Least-Squares Means</em>. R package version 0.9.1. <a href="https://CRAN.R-project.org/package=emmeans" class="uri">https://CRAN.R-project.org/package=emmeans</a></li>
+<li>Maxwell, S. E., &amp; Delaney, H. D. (2004). <em>Designing
+experiments and analyzing data: a model-comparisons perspective</em>.
+Mahwah, N.J.: Lawrence Erlbaum Associates.</li>
 </ul>
 </div>
 

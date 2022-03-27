@@ -23,7 +23,7 @@ Description: Convenience functions for analyzing factorial experiments using ANO
          afex_plot() provides a high-level interface for interaction or one-way 
          plots using ggplot2, combining raw data and model estimates. afex uses 
          type 3 sums of squares as default (imitating commercial statistical software).
-URL: http://afex.singmann.science/, https://github.com/singmann/afex
+URL: https://afex.singmann.science/, https://github.com/singmann/afex
 BugReports: https://github.com/singmann/afex/issues
 License: GPL (>= 2)
 Encoding: UTF-8
@@ -42,11 +42,11 @@ Authors@R: c(person(given="Henrik", family="Singmann", role=c("aut", "cre"),
          person(given="Jonathon", family="Love", role=c("ctb")), 
          person(given="Russell", family="Lenth", role=c("ctb")), 
          person(given="Rune", family="Haubo Bojesen Christensen", role=c("ctb")))
-Version: 1.0-1
-RoxygenNote: 7.1.1
+Version: 1.1-0
+RoxygenNote: 7.1.2
 LazyData: true
 NeedsCompilation: no
-Packaged: 2021-07-21 19:00:22 UTC; singm
+Packaged: 2022-03-27 11:20:25 UTC; singm
 Author: Henrik Singmann [aut, cre] (<https://orcid.org/0000-0002-4842-3657>),
   Ben Bolker [aut],
   Jake Westfall [aut],
@@ -61,4 +61,4 @@ Author: Henrik Singmann [aut, cre] (<https://orcid.org/0000-0002-4842-3657>),
   Rune Haubo Bojesen Christensen [ctb]
 Maintainer: Henrik Singmann <singmann@gmail.com>
 Repository: CRAN
-Date/Publication: 2021-07-22 04:40:18 UTC
+Date/Publication: 2022-03-27 15:00:02 UTC

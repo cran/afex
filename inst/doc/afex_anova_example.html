@@ -12,7 +12,7 @@
 
 <meta name="author" content="Henrik Singmann" />
 
-<meta name="date" content="2022-03-27" />
+<meta name="date" content="2022-04-28" />
 
 <title>ANOVA and Post-Hoc Contrasts: Reanalysis of Singmann and Klauer (2011)</title>
 
@@ -373,7 +373,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <h1 class="title toc-ignore">ANOVA and Post-Hoc Contrasts: Reanalysis of
 Singmann and Klauer (2011)</h1>
 <h4 class="author">Henrik Singmann</h4>
-<h4 class="date">2022-03-27</h4>
+<h4 class="date">2022-04-28</h4>
 
 
 <div id="TOC">
@@ -640,7 +640,7 @@ three-way interaction is significant.</p>
 <code>xtable</code> for nice formatting:</p>
 <div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(xtable<span class="sc">::</span><span class="fu">xtable</span>(<span class="fu">anova</span>(a1), <span class="at">digits =</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="dv">2</span>, <span class="dv">5</span>), <span class="dv">3</span>, <span class="dv">4</span>)), <span class="at">type =</span> <span class="st">&quot;html&quot;</span>)</span></code></pre></div>
 <!-- html table generated in R 4.1.3 by xtable 1.8-4 package -->
-<!-- Sun Mar 27 12:19:01 2022 -->
+<!-- Thu Apr 28 20:03:35 2022 -->
 <table border="1">
 <tr>
 <th>
@@ -884,12 +884,12 @@ it to <code>multcomp</code> (Bretz, Hothorn, &amp; Westfall, 2011):</p>
 ## 
 ## Linear Hypotheses:
 ##              Estimate Std. Error t value Pr(&gt;|t|)   
-## MP - MT == 0   10.831      4.331   2.501   0.0587 . 
-## MP - AC == 0   18.100      5.018   3.607   0.0048 **
-## MP - DA == 0    4.556      4.196   1.086   0.3135   
-## MT - AC == 0    7.269      3.984   1.825   0.1940   
-## MT - DA == 0   -6.275      4.703  -1.334   0.3135   
-## AC - DA == 0  -13.544      5.299  -2.556   0.0587 . 
+## MP - MT == 0   10.831      4.331   2.501  0.05897 . 
+## MP - AC == 0   18.100      5.018   3.607  0.00463 **
+## MP - DA == 0    4.556      4.196   1.086  0.31350   
+## MT - AC == 0    7.269      3.984   1.825  0.19410   
+## MT - DA == 0   -6.275      4.703  -1.334  0.31350   
+## AC - DA == 0  -13.544      5.299  -2.556  0.05897 . 
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## (Adjusted p values reported -- free method)</code></pre>
@@ -1238,6 +1238,8 @@ more powerful Type 1 error corrections.</p>
 
 ## Warning in tmp$pfunction(&quot;adjusted&quot;, ...): Completion with error &gt; abseps
 
+## Warning in tmp$pfunction(&quot;adjusted&quot;, ...): Completion with error &gt; abseps
+
 ## Warning in tmp$pfunction(&quot;adjusted&quot;, ...): Completion with error &gt; abseps</code></pre>
 <pre><code>## $`what = affirmation`
 ## 
@@ -1245,14 +1247,14 @@ more powerful Type 1 error corrections.</p>
 ## 
 ## Linear Hypotheses:
 ##                Estimate Std. Error t value Pr(&gt;|t|)    
-## diff_1 == 0       4.175      1.641   2.543 0.065378 .  
-## diff_2 == 0      34.925      7.082   4.931 0.000106 ***
-## diff_3 == 0     -23.600      9.830  -2.401 0.071264 .  
-## diff_4 == 0      -8.100     11.275  -0.718 0.688158    
-## val_ded == 0     35.800      7.096   5.045 0.000106 ***
-## val_prob == 0     0.400      7.096   0.056 0.955346    
-## plau_ded == 0    -3.275      3.065  -1.068 0.603577    
-## plau_prob == 0   30.775      4.992   6.164 1.72e-06 ***
+## diff_1 == 0       4.175      1.641   2.543   0.0649 .  
+## diff_2 == 0      34.925      7.082   4.931 8.65e-05 ***
+## diff_3 == 0     -23.600      9.830  -2.401   0.0708 .  
+## diff_4 == 0      -8.100     11.275  -0.718   0.6882    
+## val_ded == 0     35.800      7.096   5.045 5.94e-05 ***
+## val_prob == 0     0.400      7.096   0.056   0.9553    
+## plau_ded == 0    -3.275      3.065  -1.068   0.6037    
+## plau_prob == 0   30.775      4.992   6.164 6.08e-06 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## (Adjusted p values reported -- free method)
@@ -1264,14 +1266,14 @@ more powerful Type 1 error corrections.</p>
 ## 
 ## Linear Hypotheses:
 ##                Estimate Std. Error t value Pr(&gt;|t|)    
-## diff_1 == 0     -22.425      8.742  -2.565 0.080764 .  
-## diff_2 == 0      -2.700      8.987  -0.300 0.984914    
-## diff_3 == 0      -0.925      7.522  -0.123 0.984914    
-## diff_4 == 0      -3.650      9.358  -0.390 0.984914    
-## val_ded == 0    -11.412      6.651  -1.716 0.379090    
-## val_prob == 0    -1.137      6.651  -0.171 0.984914    
-## plau_ded == 0    -4.562      4.115  -1.109 0.725872    
-## plau_prob == 0   13.363      2.957   4.519 0.000423 ***
+## diff_1 == 0     -22.425      8.742  -2.565 0.081289 .  
+## diff_2 == 0      -2.700      8.987  -0.300 0.984917    
+## diff_3 == 0      -0.925      7.522  -0.123 0.984917    
+## diff_4 == 0      -3.650      9.358  -0.390 0.984917    
+## val_ded == 0    -11.412      6.651  -1.716 0.378872    
+## val_prob == 0    -1.137      6.651  -0.171 0.984917    
+## plau_ded == 0    -4.562      4.115  -1.109 0.725899    
+## plau_prob == 0   13.363      2.957   4.519 0.000387 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## (Adjusted p values reported -- free method)</code></pre>

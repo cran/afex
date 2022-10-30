@@ -67,15 +67,15 @@ theme_set(theme_bw(base_size = 15) +
 #         width = 9, height = 8, units = "cm")
 
 ## ----fig.width=8.5, fig.height=16, dpi = 125--------------------------------------------
+p0 <- afex_plot(aw, x = "noise", trace = "angle", error = "within")
 p1 <- afex_plot(aw, x = "noise", trace = "angle", error = "within", dodge = 0.3,
                 data_arg = list(
                   position = 
                     ggplot2::position_jitterdodge(
                       jitter.width = 0, 
-                      jitter.height = 10, 
+                      jitter.height = 25, 
                       dodge.width = 0.3  ## needs to be same as dodge
-                    ),
-                  color = "darkgrey"))
+                    )))
 p2 <- afex_plot(aw, x = "noise", trace = "angle", error = "within", dodge = 0.5,
                 data_geom = geom_count)
 p3 <- afex_plot(aw, x = "noise", trace = "angle", error = "within", 
@@ -88,13 +88,11 @@ p5 <- afex_plot(aw, x = "noise", trace = "angle", error = "within", dodge = 0.5,
                 data_geom = ggbeeswarm::geom_beeswarm,
                 data_arg = list(
                   dodge.width = 0.5,  ## needs to be same as dodge
-                  cex = 0.8,
-                  color = "darkgrey"))
+                  cex = 0.8))
 p6 <- afex_plot(aw, x = "noise", trace = "angle", error = "within", dodge = 0.5,
                 data_geom = ggbeeswarm::geom_quasirandom,
                 data_arg = list(
-                  dodge.width = 0.5,  ## needs to be same as dodge
-                  color = "darkgrey"))
+                  dodge.width = 0.5))
 p7 <- afex_plot(aw, x = "noise", trace = "angle", error = "within", dodge = 0.7, 
                 data_geom = ggpol::geom_boxjitter, 
                 data_arg = list(
@@ -103,7 +101,18 @@ p7 <- afex_plot(aw, x = "noise", trace = "angle", error = "within", dodge = 0.7,
                   outlier.intersect = TRUE),
                 point_arg = list(size = 2.5), 
                 error_arg = list(size = 1.5, width = 0))
-plot_grid(p1, p2, p3, p4, p5, p6, p7, ncol = 2, labels = 1:7)  
+plot_grid(p0, p1, p2, p3, p4, p5, p6, p7, ncol = 2, labels = 1:8)  
+
+## ----fig.width=3.5, fig.height=3, dpi = 100, out.width='50%'----------------------------
+afex_plot(aw, x = "noise", trace = "angle", error = "within", dodge = 0.5,
+          data_geom = list(
+            geom_violin, 
+            ggbeeswarm::geom_quasirandom
+          ),
+          data_arg = list(
+            list(draw_quantiles = c(0.25, 0.5, 0.75)),
+            list(dodge.width = 0.5)
+          ))
 
 ## ----fig.width=8.5, fig.height=8, dpi = 125---------------------------------------------
 p2 <- afex_plot(aw, x = "noise", trace = "angle", error = "within", dodge = 0.5,
@@ -130,10 +139,10 @@ p5 <- afex_plot(aw, x = "noise", trace = "angle", error = "within", dodge = 0.7,
                 point_arg = list(size = 2.5), 
                 line_arg = list(linetype = 0),
                 error_arg = list(size = 1.5, width = 0))
-plot_grid(p2, p3, p4, p5, ncol = 2, labels = 2:5) 
+plot_grid(p2, p3, p4, p5, ncol = 2) 
 
 ## ----fig.width=8.5, fig.height=4, dpi = 150---------------------------------------------
-p1 <- afex_plot(aw, x = "noise", trace = "angle", mapping = "color", 
+p1 <- afex_plot(aw, x = "noise", trace = "angle", mapping = c("color"), 
                 error = "within", 
                 point_arg = list(size = 5), line_arg = list(size = 2),
                 error_arg = list(size = 2))
@@ -146,7 +155,6 @@ plot_grid(p1, p2, ncol = 2)
 
 ## ----fig.width=7, fig.height=3.5, message=FALSE-----------------------------------------
 po1 <- afex_plot(aw, x = "angle", mapping = "color", error = "within", 
-                 data_arg = list(),
                  point_arg = list(size = 2.5), 
                  error_arg = list(size = 1.5, width = 0.05)) 
 po2 <- afex_plot(aw, x = "angle", error = "within", 
@@ -182,7 +190,7 @@ plot_grid(
 ) 
 
 ## ---- echo=FALSE------------------------------------------------------------------------
-load(system.file("extdata/", "output_afex_plot_mixed_vignette.rda", package = "afex"))
+load(system.file("extdata/", "output_afex_plot_mixed_vignette_model.rda", package = "afex"))
 
 ## ---- eval=FALSE------------------------------------------------------------------------
 #  data("fhch2010") # load
@@ -196,56 +204,33 @@ load(system.file("extdata/", "output_afex_plot_mixed_vignette.rda", package = "a
 ## ---------------------------------------------------------------------------------------
 emmeans::emm_options(lmer.df = "asymptotic")
 
-## ---- eval=FALSE------------------------------------------------------------------------
-#  m9s
+## ---- eval=TRUE-------------------------------------------------------------------------
+m9s
 
-## ---- echo=FALSE------------------------------------------------------------------------
-cat(aout_1$output, sep = "\n")
+## ----fig.width=7, fig.height=3.5, eval=TRUE---------------------------------------------
+afex_plot(m9s, x = "stimulus", trace = "frequency", panel = "task") 
 
-## ----fig.width=7, fig.height=3.5, eval=FALSE--------------------------------------------
-#  afex_plot(m9s, x = "stimulus", trace = "frequency", panel = "task")
-
-## ----fig.width=7, fig.height=3.5, echo=FALSE--------------------------------------------
-message("Aggregating data over: item, id")
-message("NOTE: Results may be misleading due to involvement in interactions")
-ap1
-
-## ----fig.width=7, fig.height=3.5, eval=FALSE--------------------------------------------
-#  plot_grid(
-#    afex_plot(m9s, x = "stimulus", trace = "frequency", panel = "task",
-#              id = "id"),
-#    afex_plot(m9s, x = "stimulus", trace = "frequency", panel = "task",
-#              id = "item"),
-#    labels = c("ID", "Item")
-#  )
-
-## ----fig.width=7, fig.height=3.5, echo=FALSE--------------------------------------------
-message("NOTE: Results may be misleading due to involvement in interactions")
-message("NOTE: Results may be misleading due to involvement in interactions")
+## ----fig.width=7, fig.height=3.5, eval=TRUE---------------------------------------------
 plot_grid( 
-  ap2a, 
-  ap2b, 
+  afex_plot(m9s, x = "stimulus", trace = "frequency", panel = "task", 
+            id = "id"), 
+  afex_plot(m9s, x = "stimulus", trace = "frequency", panel = "task", 
+            id = "item"), 
   labels = c("ID", "Item") 
 )
 
-
-## ----fig.width=7, fig.height=3.5, eval=FALSE--------------------------------------------
-#  plot_grid(
-#    afex_plot(m9s, x = "stimulus", trace = "frequency", panel = "task",
-#              id = "item", dodge = 0.8,
-#              data_geom = geom_violin,
-#              data_arg = list(width = 0.5)),
-#    afex_plot(m9s, x = "stimulus", trace = "frequency", panel = "task",
-#              id = "item", dodge = 0.8,
-#              data_geom = geom_boxplot,
-#              data_arg = list(width = 0.5),
-#              error_arg = list(size = 1.5, width = 0, linetype = 1))
-#  )
-
-## ----fig.width=7, fig.height=3.5, echo=FALSE--------------------------------------------
-message("NOTE: Results may be misleading due to involvement in interactions")
-message("NOTE: Results may be misleading due to involvement in interactions")
-plot_grid(ap3a, ap3b)
+## ----fig.width=7, fig.height=3.5, eval=TRUE---------------------------------------------
+plot_grid( 
+  afex_plot(m9s, x = "stimulus", trace = "frequency", panel = "task", 
+            id = "item", dodge = 0.8,
+            data_geom = geom_violin, 
+            data_arg = list(width = 0.5)), 
+  afex_plot(m9s, x = "stimulus", trace = "frequency", panel = "task", 
+            id = "item", dodge = 0.8,
+            data_geom = geom_boxplot, 
+            data_arg = list(width = 0.5),
+            error_arg = list(size = 1.5, width = 0, linetype = 1))
+)
 
 ## ---- eval=FALSE------------------------------------------------------------------------
 #  pairs(emmeans::emmeans(mrt, c("stimulus", "frequency"), by = "task"))
@@ -262,11 +247,6 @@ cat(aout_2$output, sep = "\n")
 #              data_geom = geom_violin,
 #              data_arg = list(width = 0.5))
 #  )
-
-## ----fig.width=7, fig.height=3.5, echo=FALSE--------------------------------------------
-message("NOTE: Results may be misleading due to involvement in interactions")
-message("NOTE: Results may be misleading due to involvement in interactions")
-plot_grid(ap4a, ap4b)
 
 ## ---- include=FALSE-----------------------------------------------------------
 options(op)

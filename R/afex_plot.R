@@ -64,18 +64,24 @@
 #'   the error bar.
 #' @param data_plot \code{logical}. Should raw data be plotted in the 
 #'   background? Default is \code{TRUE}.
-#' @param data_geom Geom \code{function} used for plotting data in background.
-#'   The default (missing) uses \code{\link[ggplot2]{geom_point}} if
-#'   \code{trace} is specified, otherwise
+#' @param data_geom Geom \code{function} or \code{list} of geom functions used
+#'   for plotting data in background. The default (missing) uses
+#'   \code{\link[ggplot2]{geom_point}} if \code{trace} is specified, otherwise
 #'   \code{\link[ggbeeswarm]{geom_beeswarm}} (a good alternative is
 #'   \code{ggbeeswarm::geom_quasirandom}) . See examples fo further options.
-#' @param data_alpha numeric \code{alpha} value between 0 and 1 passed to 
+#' @param data_alpha numeric \code{alpha} value between 0 and 1 passed to
 #'   \code{data_geom}. Default is \code{0.5} which correspond to semitransparent
 #'   data points in the background such that overlapping data points are plotted
-#'   darker.
-#' @param data_arg A \code{list} of further arguments passed to 
-#'   \code{data_geom}. Default is \code{list(color = "darkgrey")}, which plots
-#'   points in the background in grey.
+#'   darker. If \code{NULL} it is not passed to \code{data_geom}, and can be set
+#'   via \code{data_arg}.
+#' @param data_color color that should be used for the data in the background.
+#'   Default is \code{"darkgrey"}. If \code{NULL} it is not passed to
+#'   \code{data_geom}, and can be set via \code{data_arg}. Ignored if
+#'   \code{"color"} or \code{"colour"} in \code{mapping}.
+#' @param data_arg A \code{list} of further arguments passed to
+#'   \code{data_geom}. Can also be a \code{list} of \code{list}s, in case
+#'   \code{data_geom} is a \code{list} of multiple geoms, which allows having
+#'   separate argument lists per \code{data_geom}.
 #' @param point_arg,line_arg A \code{list} of further arguments passed to 
 #'   \code{\link[ggplot2]{geom_point}} or \code{\link[ggplot2]{geom_line}} which
 #'   draw the points and lines in the foreground. Default is \code{list()}.
@@ -292,7 +298,8 @@ afex_plot.afex_aov <- function(object,
                                data_plot = TRUE,
                                data_geom,
                                data_alpha = 0.5,
-                               data_arg = list(color = "darkgrey"),
+                               data_color = "darkgrey",
+                               data_arg = list(),
                                point_arg = list(),
                                line_arg = list(),
                                emmeans_arg = list(),
@@ -390,6 +397,7 @@ afex_plot.afex_aov <- function(object,
                             data_plot = data_plot,
                             data_geom = data_geom,
                             data_alpha = data_alpha,
+                            data_color = data_color,
                             data_arg = data_arg,
                             point_arg = point_arg,
                             line_arg = line_arg,
@@ -417,7 +425,8 @@ afex_plot.mixed <- function(object,
                             data_plot = TRUE,
                             data_geom,
                             data_alpha = 0.5,
-                            data_arg = list(color = "darkgrey"),
+                            data_color = "darkgrey",
+                            data_arg = list(),
                             point_arg = list(),
                             line_arg = list(),
                             emmeans_arg = list(),
@@ -521,6 +530,7 @@ afex_plot.mixed <- function(object,
                             data_plot = data_plot,
                             data_geom = data_geom,
                             data_alpha = data_alpha,
+                            data_color = data_color,
                             data_arg = data_arg,
                             point_arg = point_arg,
                             line_arg = line_arg,
@@ -547,7 +557,8 @@ afex_plot.merMod <- function(object,
                             data_plot = TRUE,
                             data_geom,
                             data_alpha = 0.5,
-                            data_arg = list(color = "darkgrey"),
+                            data_color = "darkgrey",
+                            data_arg = list(),
                             point_arg = list(),
                             line_arg = list(),
                             emmeans_arg = list(),
@@ -650,6 +661,7 @@ afex_plot.merMod <- function(object,
                             data_plot = data_plot,
                             data_geom = data_geom,
                             data_alpha = data_alpha,
+                            data_color = data_color,
                             data_arg = data_arg,
                             point_arg = point_arg,
                             line_arg = line_arg,
@@ -678,7 +690,8 @@ afex_plot.default <- function(object,
                               data_plot = TRUE,
                               data_geom,
                               data_alpha = 0.5,
-                              data_arg = list(color = "darkgrey"),
+                              data_color = "darkgrey",
+                              data_arg = list(),
                               point_arg = list(),
                               line_arg = list(),
                               emmeans_arg = list(),
@@ -809,6 +822,7 @@ afex_plot.default <- function(object,
                             data_plot = data_plot,
                             data_geom = data_geom,
                             data_alpha = data_alpha,
+                            data_color = data_color,
                             data_arg = data_arg,
                             point_arg = point_arg,
                             line_arg = line_arg,

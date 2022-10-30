@@ -10,6 +10,7 @@ afex_plot_internal <- function(x,
                                data_plot,
                                data_geom,
                                data_alpha,
+                               data_color,
                                data_arg,
                                point_arg,
                                line_arg,
@@ -33,6 +34,7 @@ afex_plot_internal <- function(x,
                               data_geom = data_geom,
                               data_alpha = data_alpha,
                               data_arg = data_arg,
+                              data_color = data_color,
                               point_arg = point_arg,
                               line_arg = line_arg,
                               mapping = mapping,
@@ -52,6 +54,7 @@ afex_plot_internal <- function(x,
                          data_plot = data_plot,
                          data_geom = data_geom,
                          data_alpha = data_alpha,
+                         data_color = data_color,
                          data_arg = data_arg,
                          point_arg = point_arg,
                          mapping = mapping,
@@ -96,6 +99,9 @@ rename_factor_levels <- function(data, factor_levels,
                call. = FALSE)
         }
         names(factor_levels[[i]]) <- levels(data[[names(factor_levels)[i]]])
+      }
+      if (!is.factor(data[[names(factor_levels)[i]]])) {
+        data[[names(factor_levels)[i]]] <- factor(data[[names(factor_levels)[i]]])
       }
       factor_levels[[i]] <- factor_levels[[i]][ 
         names(factor_levels[[i]]) %in% levels(data[[names(factor_levels)[i]]]) ]

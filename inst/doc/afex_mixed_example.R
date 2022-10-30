@@ -227,16 +227,17 @@ cat(emm_o3$output, sep = "\n")
 ## ---- echo=FALSE------------------------------------------------------------------------
 cat(emm_o4$output, sep = "\n")
 
-## ---- eval=FALSE------------------------------------------------------------------------
-#  afex_plot(m9s, "frequency", "stimulus", "task", id = "id",
-#            data_geom = ggbeeswarm::geom_quasirandom,
-#            data_arg = list(
-#              dodge.width = 0.5,  ## needs to be same as dodge
-#              cex = 0.8,
-#              color = "darkgrey"))
+## ---- echo=FALSE------------------------------------------------------------------------
+load(system.file("extdata/", "output_afex_plot_mixed_vignette_model.rda", package = "afex"))
+emm_options(lmer.df = "asymptotic") 
 
-## ---- echo=FALSE, fig.width=5, fig.height=4, out.width="90%"----------------------------
-p1
+## ---- eval=TRUE, fig.width=5, fig.height=4, out.width="90%"-----------------------------
+afex_plot(m9s, "frequency", "stimulus", "task", id = "id",
+          data_geom = ggbeeswarm::geom_quasirandom, 
+          data_arg = list(
+            dodge.width = 0.5,  ## needs to be same as dodge
+            cex = 0.8,
+            color = "darkgrey"))
 
 ## ---- eval=FALSE------------------------------------------------------------------------
 #  joint_tests(m9s, by = c("stimulus", "task"))

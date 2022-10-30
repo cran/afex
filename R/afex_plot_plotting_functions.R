@@ -9,7 +9,8 @@ interaction_plot <- function(means,
                              data_plot = TRUE,
                              data_geom = ggplot2::geom_point,
                              data_alpha = 0.5,
-                             data_arg = list(color = "darkgrey"),
+                             data_color = "darkgrey",
+                             data_arg = list(),
                              point_arg = list(),
                              line_arg = list(),
                              dodge = 0.5, 
@@ -50,27 +51,97 @@ interaction_plot <- function(means,
     if (missing(data_geom)) {
       data_geom <- ggplot2::geom_point
     }
-    data_arg$alpha <- data_alpha
-    if (!("position" %in% names(data_arg)) & 
-        ("position" %in% names(formals(data_geom)))) {
-      data_arg$position = ggplot2::position_dodge(width = dodge)
+    if (is.function(data_geom)) {
+      if (!is.null(data_alpha)) data_arg$alpha <- data_alpha
+      if (!is.null(data_color) & !any(c("color", "colour") %in% mapping)) {
+        data_arg$color <- data_color
+      }
+      if (!("position" %in% names(data_arg)) & 
+          ("position" %in% names(formals(data_geom)))) {
+        data_arg$position = ggplot2::position_dodge(width = dodge)
+      }
+      plot_out <- plot_out +
+        do.call(what = data_geom,
+                args = c(
+                  #mapping = list(ggplot2::aes(group = interaction(x, trace))),
+                  mapping = 
+                    list(
+                      ggplot2::aes_string(
+                        group = 
+                          paste0("interaction(", 
+                                 paste0(c(col_x, col_trace), collapse =  ", "), 
+                                 ")")
+                      )),
+                  data = list(data),
+                  data_arg
+                )
+        )
+    } else if (is.list(data_geom)) {
+      ## https://stackoverflow.com/a/13433689/289572
+      depth <- function(this) {
+        ifelse(is.list(this), 1L + 
+                 as.numeric(all(as.logical(sapply(this, depth)))), 0L)
+      }
+      if (depth(data_arg) == 1) {
+        if (!is.null(data_alpha)) data_arg$alpha <- data_alpha
+        if (!is.null(data_color) & !any(c("color", "colour") %in% mapping)) {
+          data_arg$color <- data_color
+        }
+        if (!("position" %in% names(data_arg)) & 
+            ("position" %in% 
+             unlist(sapply(data_geom, function(x) names(formals(x)))))) {
+          data_arg$position = ggplot2::position_dodge(width = dodge)
+        } 
+        for (i in seq_along(data_geom)) {
+          plot_out <- plot_out +
+            do.call(what = data_geom[[i]],
+                    args = c(
+                      mapping = 
+                        list(
+                          ggplot2::aes_string(
+                            group = 
+                              paste0("interaction(", 
+                                     paste0(c(col_x, col_trace), 
+                                            collapse =  ", "), 
+                                     ")")
+                          )),
+                      data = list(data),
+                      data_arg
+                    )
+            )
+        }
+      } else {
+        for (i in seq_along(data_arg)) {
+          if (!is.null(data_alpha)) data_arg[[i]]$alpha <- data_alpha
+          if (!is.null(data_color) & !any(c("color", "colour") %in% mapping)) {
+            data_arg[[i]]$color <- data_color
+          } 
+          if (!("position" %in% names(data_arg[[i]])) & 
+              ("position" %in% names(formals(data_geom[[i]])))) {
+            data_arg[[i]]$position = ggplot2::position_dodge(width = dodge)
+          } 
+        }
+        for (i in seq_along(data_geom)) {
+          plot_out <- plot_out +
+            do.call(what = data_geom[[i]],
+                    args = c(
+                      mapping = 
+                        list(
+                          ggplot2::aes_string(
+                            group = 
+                              paste0("interaction(", 
+                                     paste0(c(col_x, col_trace), 
+                                            collapse =  ", "), 
+                                     ")")
+                          )),
+                      data = list(data),
+                      data_arg[[i]]
+                    )
+            )
+        }
+      }
+      
     }
-    plot_out <- plot_out +
-      do.call(what = data_geom,
-              args = c(
-                #mapping = list(ggplot2::aes(group = interaction(x, trace))),
-                mapping = 
-                  list(
-                    ggplot2::aes_string(
-                      group = 
-                        paste0("interaction(", 
-                               paste0(c(col_x, col_trace), collapse =  ", "), 
-                               ")")
-                    )),
-                data = list(data),
-                data_arg
-              )
-      )
   }
   for (i in levels(data$trace)) {
     tmp_means <- means
@@ -157,7 +228,8 @@ oneway_plot <- function(means,
                         data_plot = TRUE,
                         data_geom = ggbeeswarm::geom_beeswarm,
                         data_alpha = 0.5,
-                        data_arg = list(color = "darkgrey"),
+                        data_color = "darkgrey",
+                        data_arg = list(),
                         point_arg = list(),
                         legend_title,
                         col_x = "x",
@@ -195,22 +267,66 @@ oneway_plot <- function(means,
                                   tmp_list)))
   
   
- if (data_plot) {
+  if (data_plot) {
     if (missing(data_geom)) {
       if (!requireNamespace("ggbeeswarm", quietly = TRUE)) {
         stop("package ggbeeswarm is required.", call. = FALSE)
       }
       data_geom <- ggbeeswarm::geom_beeswarm
     }
-    data_arg$alpha <- data_alpha
-    plot_out <- plot_out +
-      do.call(what = data_geom,
-              args = c(
-                data = list(data),
-                data_arg
-              )
-      )
+    if (is.function(data_geom)) {
+      if (!is.null(data_alpha)) data_arg$alpha <- data_alpha
+      if (!is.null(data_color) & !any(c("color", "colour") %in% mapping)) {
+        data_arg$color <- data_color
+      }
+      plot_out <- plot_out +
+        do.call(what = data_geom,
+                args = c(
+                  data = list(data),
+                  data_arg
+                )
+        )
+    } else if (is.list(data_geom)) {
+      ## https://stackoverflow.com/a/13433689/289572
+      depth <- function(this) {
+        ifelse(is.list(this), 1L + 
+                 as.numeric(all(as.logical(sapply(this, depth)))), 0L)
+      }
+      if (depth(data_arg) == 1) {
+        if (!is.null(data_alpha)) data_arg$alpha <- data_alpha
+        if (!is.null(data_color) & !any(c("color", "colour") %in% mapping)) {
+          data_arg$color <- data_color
+        }
+        for (i in seq_along(data_geom)) {
+          plot_out <- plot_out +
+            do.call(what = data_geom[[i]],
+                    args = c(
+                      data = list(data),
+                      data_arg
+                    )
+            )
+        }
+      } else {
+        for (i in seq_along(data_arg)) {
+          if (!is.null(data_alpha)) data_arg[[i]]$alpha <- data_alpha
+          if (!is.null(data_color) & !any(c("color", "colour") %in% mapping)) {
+            data_arg[[i]]$color <- data_color
+          } 
+        }
+        data_arg$alpha <- data_alpha
+        for (i in seq_along(data_geom)) {
+          plot_out <- plot_out +
+            do.call(what = data_geom[[i]],
+                    args = c(
+                      data = list(data),
+                      data_arg[[i]]
+                    )
+            )
+        }
+      }
+    }
   }
+  
   
   plot_out <- plot_out + 
     do.call(what = ggplot2::geom_point, 

@@ -12,7 +12,7 @@
 
 <meta name="author" content="Henrik Singmann" />
 
-<meta name="date" content="2022-10-30" />
+<meta name="date" content="2023-01-08" />
 
 <title>ANOVA and Post-Hoc Contrasts: Reanalysis of Singmann and Klauer (2011)</title>
 
@@ -31,23 +31,23 @@ document.addEventListener('DOMContentLoaded', function(e) {
 </script>
 
 <style type="text/css">
-  code{white-space: pre-wrap;}
-  span.smallcaps{font-variant: small-caps;}
-  span.underline{text-decoration: underline;}
-  div.column{display: inline-block; vertical-align: top; width: 50%;}
-  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-  ul.task-list{list-style: none;}
-    </style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
 
 
 
 <style type="text/css">
-  code {
-    white-space: pre;
-  }
-  .sourceCode {
-    overflow: visible;
-  }
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
 </style>
 <style type="text/css" data-origin="pandoc">
 pre > code.sourceCode { white-space: pre; position: relative; }
@@ -65,55 +65,54 @@ pre > code.sourceCode { white-space: pre-wrap; }
 pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
-  { counter-reset: source-line 0; }
+{ counter-reset: source-line 0; }
 pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
+{ position: relative; left: -4em; counter-increment: source-line; }
 pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-    color: #aaaaaa;
-  }
-pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
 div.sourceCode
-  {   }
+{ }
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-code span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code span.at { color: #7d9029; } /* Attribute */
-code span.bn { color: #40a070; } /* BaseN */
-code span.bu { } /* BuiltIn */
-code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code span.ch { color: #4070a0; } /* Char */
-code span.cn { color: #880000; } /* Constant */
-code span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code span.dt { color: #902000; } /* DataType */
-code span.dv { color: #40a070; } /* DecVal */
-code span.er { color: #ff0000; font-weight: bold; } /* Error */
-code span.ex { } /* Extension */
-code span.fl { color: #40a070; } /* Float */
-code span.fu { color: #06287e; } /* Function */
-code span.im { } /* Import */
-code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
-code span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code span.op { color: #666666; } /* Operator */
-code span.ot { color: #007020; } /* Other */
-code span.pp { color: #bc7a00; } /* Preprocessor */
-code span.sc { color: #4070a0; } /* SpecialChar */
-code span.ss { color: #bb6688; } /* SpecialString */
-code span.st { color: #4070a0; } /* String */
-code span.va { color: #19177c; } /* Variable */
-code span.vs { color: #4070a0; } /* VerbatimString */
-code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
 </style>
 <script>
 // apply pandoc div.sourceCode style to pre.sourceCode instead
@@ -380,7 +379,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <h1 class="title toc-ignore">ANOVA and Post-Hoc Contrasts: Reanalysis of
 Singmann and Klauer (2011)</h1>
 <h4 class="author">Henrik Singmann</h4>
-<h4 class="date">2022-10-30</h4>
+<h4 class="date">2023-01-08</h4>
 
 
 <div id="TOC">
@@ -650,7 +649,7 @@ three-way interaction is significant.</p>
 <code>xtable</code> for nice formatting:</p>
 <div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(xtable<span class="sc">::</span><span class="fu">xtable</span>(<span class="fu">anova</span>(a1), <span class="at">digits =</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="dv">2</span>, <span class="dv">5</span>), <span class="dv">3</span>, <span class="dv">4</span>)), <span class="at">type =</span> <span class="st">&quot;html&quot;</span>)</span></code></pre></div>
 <!-- html table generated in R 4.1.3 by xtable 1.8-4 package -->
-<!-- Sun Oct 30 21:34:27 2022 -->
+<!-- Sun Jan 08 19:20:27 2023 -->
 <table border="1">
 <tr>
 <th>
@@ -894,12 +893,12 @@ it to <code>multcomp</code> (Bretz, Hothorn, &amp; Westfall, 2011):</p>
 ## 
 ## Linear Hypotheses:
 ##              Estimate Std. Error t value Pr(&gt;|t|)   
-## MP - MT == 0   10.831      4.331   2.501  0.05922 . 
-## MP - AC == 0   18.100      5.018   3.607  0.00442 **
-## MP - DA == 0    4.556      4.196   1.086  0.31350   
-## MT - AC == 0    7.269      3.984   1.825  0.19402   
-## MT - DA == 0   -6.275      4.703  -1.334  0.31350   
-## AC - DA == 0  -13.544      5.299  -2.556  0.05922 . 
+## MP - MT == 0   10.831      4.331   2.501   0.0591 . 
+## MP - AC == 0   18.100      5.018   3.607   0.0046 **
+## MP - DA == 0    4.556      4.196   1.086   0.3135   
+## MT - AC == 0    7.269      3.984   1.825   0.1940   
+## MT - DA == 0   -6.275      4.703  -1.334   0.3135   
+## AC - DA == 0  -13.544      5.299  -2.556   0.0591 . 
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## (Adjusted p values reported -- free method)</code></pre>
@@ -1255,14 +1254,14 @@ more powerful Type 1 error corrections.</p>
 ## 
 ## Linear Hypotheses:
 ##                Estimate Std. Error t value Pr(&gt;|t|)    
-## diff_1 == 0       4.175      1.641   2.543   0.0649 .  
-## diff_2 == 0      34.925      7.082   4.931 9.97e-05 ***
-## diff_3 == 0     -23.600      9.830  -2.401   0.0709 .  
-## diff_4 == 0      -8.100     11.275  -0.718   0.6882    
-## val_ded == 0     35.800      7.096   5.045 5.73e-05 ***
-## val_prob == 0     0.400      7.096   0.056   0.9553    
-## plau_ded == 0    -3.275      3.065  -1.068   0.6036    
-## plau_prob == 0   30.775      4.992   6.164 1.80e-06 ***
+## diff_1 == 0       4.175      1.641   2.543 0.065648 .  
+## diff_2 == 0      34.925      7.082   4.931 0.000127 ***
+## diff_3 == 0     -23.600      9.830  -2.401 0.070866 .  
+## diff_4 == 0      -8.100     11.275  -0.718 0.688158    
+## val_ded == 0     35.800      7.096   5.045 0.000127 ***
+## val_prob == 0     0.400      7.096   0.056 0.955346    
+## plau_ded == 0    -3.275      3.065  -1.068 0.603616    
+## plau_prob == 0   30.775      4.992   6.164 1.71e-06 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## (Adjusted p values reported -- free method)
@@ -1274,14 +1273,14 @@ more powerful Type 1 error corrections.</p>
 ## 
 ## Linear Hypotheses:
 ##                Estimate Std. Error t value Pr(&gt;|t|)    
-## diff_1 == 0     -22.425      8.742  -2.565   0.0811 .  
-## diff_2 == 0      -2.700      8.987  -0.300   0.9849    
-## diff_3 == 0      -0.925      7.522  -0.123   0.9849    
-## diff_4 == 0      -3.650      9.358  -0.390   0.9849    
-## val_ded == 0    -11.412      6.651  -1.716   0.3794    
-## val_prob == 0    -1.137      6.651  -0.171   0.9849    
-## plau_ded == 0    -4.562      4.115  -1.109   0.7259    
-## plau_prob == 0   13.363      2.957   4.519   0.0005 ***
+## diff_1 == 0     -22.425      8.742  -2.565  0.08125 .  
+## diff_2 == 0      -2.700      8.987  -0.300  0.98491    
+## diff_3 == 0      -0.925      7.522  -0.123  0.98491    
+## diff_4 == 0      -3.650      9.358  -0.390  0.98491    
+## val_ded == 0    -11.412      6.651  -1.716  0.37946    
+## val_prob == 0    -1.137      6.651  -0.171  0.98491    
+## plau_ded == 0    -4.562      4.115  -1.109  0.72584    
+## plau_prob == 0   13.363      2.957   4.519  0.00043 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## (Adjusted p values reported -- free method)</code></pre>

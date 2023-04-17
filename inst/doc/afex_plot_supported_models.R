@@ -153,7 +153,7 @@ afex_plot(tmb, "spp", "mined", id = "site", data = Salamanders,
 
 ## ----fig.width=7, fig.height=3, echo=FALSE----------------------------------------------
 load(system.file("extdata/", "plots_rstanarm.rda", package = "afex"))
-plot_grid(b1, b2, labels = "AUTO")
+grid::grid.newpage(); grid::grid.draw(b12)
 
 ## ---- eval=FALSE------------------------------------------------------------------------
 #  cbpp_l <- vector("list", nrow(cbpp))
@@ -181,7 +181,7 @@ plot_grid(b1, b2, labels = "AUTO")
 #  plot_grid(b3, b4, labels = "AUTO")
 
 ## ----fig.width=7, fig.height=3, echo=FALSE----------------------------------------------
-plot_grid(b3, b4, labels = "AUTO")
+grid::grid.newpage(); grid::grid.draw(b34)
 
 ## ---- eval=FALSE------------------------------------------------------------------------
 #  data("Machines", package = "MEMSS")
@@ -197,7 +197,7 @@ plot_grid(b3, b4, labels = "AUTO")
 #  plot_grid(b5, b6, labels = "AUTO")
 
 ## ----fig.width=7, fig.height=3, echo=FALSE----------------------------------------------
-plot_grid(b5, b6, labels = "AUTO")
+grid::grid.newpage(); grid::grid.draw(b56)
 
 ## ---- eval=FALSE, include=FALSE---------------------------------------------------------
 #  library("rstanarm") ## requires resetting the ggplot2 theme
@@ -214,6 +214,7 @@ plot_grid(b5, b6, labels = "AUTO")
 #                              chains = 2, cores = 1, seed = 12345, iter = 500)
 #  b1 <- afex_plot(example_model, "period")
 #  b2 <- afex_plot(example_model, "period", data_geom = geom_violin)
+#  b12 <- ggplotGrob(plot_grid(b1, b2))
 #  
 #  cbpp_l <- vector("list", nrow(cbpp))
 #  for (i in seq_along(cbpp_l)) {
@@ -232,13 +233,15 @@ plot_grid(b5, b6, labels = "AUTO")
 #                               chains = 2, cores = 1, seed = 12345, iter = 500)
 #  b3 <- afex_plot(example_model2, "period")
 #  b4 <- afex_plot(example_model2, "period", id = "herd")
+#  b34 <- plot_grid(b3, b4)
 #  
 #  data("Machines", package = "MEMSS")
 #  mm <- stan_lmer(score ~ Machine + (Machine|Worker), data=Machines,
 #                  chains = 2, cores = 1, seed = 12345, iter = 500)
 #  b5 <- afex_plot(mm, "Machine")
 #  b6 <- afex_plot(mm, "Machine", id = "Worker", data = Machines)
-#  save(b1, b2, b3, b4, b5, b6, file = "../inst/extdata/plots_rstanarm.rda",
+#  b56 <- ggplotGrob(plot_grid(b5, b6))
+#  save(b12, b34, b56, file = "../inst/extdata/plots_rstanarm.rda",
 #       compress = "xz", version = 2)
 
 ## ---- eval=FALSE------------------------------------------------------------------------
@@ -256,7 +259,7 @@ plot_grid(b5, b6, labels = "AUTO")
 
 ## ----fig.width=7, fig.height=3, echo=FALSE----------------------------------------------
 load(system.file("extdata/", "plots_brms.rda", package = "afex"))
-plot_grid(bb1, bb2)
+grid::grid.newpage(); grid::grid.draw(bbout)
 
 ## ---- eval=FALSE, include=FALSE---------------------------------------------------------
 #  library("brms")
@@ -266,7 +269,8 @@ plot_grid(bb1, bb2)
 #  bb1 <- afex_plot(mm2, "Machine", data = Machines, dv = "score")
 #  bb2 <- afex_plot(mm2, "Machine", id = "Worker",
 #            data = Machines, dv = "score")
-#  save(bb1, bb2, file = "../inst/extdata/plots_brms.rda", version = 2)
+#  bbout <- ggplotGrob(plot_grid(bb1, bb2))
+#  save(bbout, file = "../inst/extdata/plots_brms.rda", version = 2)
 
 ## ----fig.width=4, fig.height=3, eval = FALSE--------------------------------------------
 #  library("GLMMadaptive")

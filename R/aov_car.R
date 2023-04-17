@@ -11,11 +11,10 @@
 #' \code{aov_car} is called using a formula similar to \code{\link{aov}}
 #' specifying an error strata for the within-subject factor(s), and \code{aov_4}
 #' is called with a \pkg{lme4}-like formula (all ANOVA functions return
-#' identical results). The returned object contains the ANOVA also fitted via
-#' base R's \code{\link{aov}} which can be passed to e.g., \pkg{emmeans} for
-#' further analysis (e.g., follow-up tests, contrasts, plotting, etc.). These
-#' functions employ \code{\link[car]{Anova}} (from the \pkg{car} package) to
-#' provide test of effects avoiding the somewhat unhandy format of
+#' identical results). The returned object can be passed to e.g., \pkg{emmeans}
+#' for further analysis (e.g., follow-up tests, contrasts, plotting, etc.).
+#' These functions employ \code{\link[car]{Anova}} (from the \pkg{car} package)
+#' to provide test of effects avoiding the somewhat unhandy format of
 #' \code{car::Anova}.
 #' 
 #'
@@ -37,7 +36,7 @@
 #' @param observed \code{character} vector indicating which of the variables are
 #'   observed (i.e, measured) as compared to experimentally manipulated. The
 #'   default effect size reported (generalized eta-squared) requires correct
-#'   specification of the obsered (in contrast to manipulated) variables.
+#'   specification of the observed (in contrast to manipulated) variables.
 #' @param formula A formula specifying the ANOVA model similar to
 #'   \code{\link{aov}} (for \code{aov_car} or similar to \code{lme4:lmer} for
 #'   \code{aov_4}). Must include an error term (i.e., \code{Error(id/...)} for
@@ -300,6 +299,7 @@
 #' @importFrom reshape2 dcast
 #' @importFrom lme4 findbars nobars 
 #' @importFrom stats terms as.formula xtabs contrasts<- coef
+#' @importFrom utils head
 #' 
 #' @example examples/examples.aov_car.R
 #' 
@@ -422,7 +422,7 @@ aov_car <- function(formula,
                .Machine$double.eps ^ 0.5]
       if (length(non.null) > 0) 
         warning(paste0(
-          "Numerical variables NOT centered on 0 (i.e., likely bogus results): ", 
+"Numerical variables NOT centered on 0 (matters if variable in interaction):\n   ", 
                       paste0(non.null, collapse = ", ")), call. = FALSE)
     }
   }
@@ -514,9 +514,16 @@ aov_car <- function(formula,
   if (any(is.na(tmp.dat))) {
     missing.values <- apply(tmp.dat, 1, function(x) any(is.na(x)))
     missing_ids <- unique(tmp.dat[missing.values,1])
-    warning(paste0("Missing values for following ID(s):\n", 
-                  paste0(missing_ids, collapse = ", "), 
-                  "\nRemoving those cases from the analysis."), call. = FALSE) 
+    warning(paste0("Missing values for ", length(missing_ids), " ID(s), which were removed before analysis:\n", 
+                  if (length(missing_ids) < 10) 
+                    paste0(missing_ids, collapse = ", ")
+                  else 
+                    paste0(paste0(missing_ids[1:10], collapse = ", "), 
+                           ", ... [showing first 10 only]"), 
+                  "\nBelow the first few rows (in wide format) of the removed cases with missing data.\n  ",
+                  paste(utils::capture.output(head(tmp.dat[missing.values,])),
+                  collapse = "\n# ")), 
+                  call. = FALSE) 
     tmp.dat <- tmp.dat[!missing.values,]
     data <- data[ !(data[,id] %in% missing_ids),]
     if ((nrow(data) == 0 ) | (nrow(tmp.dat) == 0)) {
@@ -634,7 +641,7 @@ aov_car <- function(formula,
     tmp.lm <- do.call("lm", 
                       list(formula = as.formula(paste0("dv ~ ", rh2)), 
                            data = tmp.dat))
-if (any(is.na(coef(tmp.lm)))) {
+    if (any(is.na(coef(tmp.lm)))) {
       between_design_error(
         data = tmp.dat, 
         between = between, 

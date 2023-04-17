@@ -161,7 +161,8 @@ message("Aggregating data over: pno")
 message("NOTE: Results may be misleading due to involvement in interactions")
 message("Aggregating data over: pno")
 message("NOTE: Results may be misleading due to involvement in interactions")
-plot_grid(pp2a_main_a, pp2a_main_b)
+grid::grid.newpage()
+grid::grid.draw(pp2a_main)
 
 ## ---- eval=FALSE------------------------------------------------------------------------
 #  emmeans(e1_mixed1_v2_allfit, c("congruency", "condition"), type = "response")
@@ -189,7 +190,8 @@ cat(emm_2a_pairs$output, sep = "\n")
 
 ## ---- echo=FALSE, fig.width=4.5, fig.height=3.5-----------------------------------------
 message("Aggregating data over: pno")
-pp2a_inter
+grid::grid.newpage()
+grid::grid.draw(pp2a_inter)
 
 ## ---- eval=FALSE------------------------------------------------------------------------
 #  afex_plot(e1_mixed1_v1, "condition", "congruency",
@@ -197,132 +199,8 @@ pp2a_inter
 
 ## ---- echo=FALSE, fig.width=4.5, fig.height=3.5-----------------------------------------
 message("Aggregating data over: pno")
-pp2a_inter_v1
-
-## ---- eval=FALSE, include=FALSE---------------------------------------------------------
-#  save(e1_mixed1_v1, e1_mixed1_v2, e1_mixed1_v2_allfit,
-#       e12_mixed1_t2, e12_mixed1, e12_mixed1_t2_red,
-#       file = "development/stroop_mixed.rda", compress = "xz")
-#  ## load("development/stroop_mixed.rda")
-
-## ---- eval=FALSE, include=FALSE---------------------------------------------------------
-#  stroop_e1_agg <- stroop_e1 %>%
-#    group_by(condition, congruency, pno) %>%
-#    summarise(acc = mean(acc),
-#              n = n())
-#  capture_call <- function(call) {
-#    warnings <- testthat::capture_warnings(eval(substitute(call)))
-#    output <- suppressWarnings(capture.output(eval(substitute(call))))
-#    messages <- testthat::capture_messages(substitute(call))
-#    list(
-#      output = output,
-#      warnings = warnings,
-#      messages = messages
-#    )
-#  }
-#  outp_e1_mixed1_v1 <- capture_call(print(e1_mixed1_v1))
-#  outp_e1_mixed1_v2 <- capture_call(print(e1_mixed1_v2))
-#  outp_e1_mixed1_v2_allfit <- capture_call(print(e1_mixed1_v2_allfit))
-#  
-#  emm_2a_cong <- emmeans(e1_mixed1_v2_allfit, "congruency", type = "response")
-#  emm_2a_cond <- emmeans(e1_mixed1_v2_allfit, "condition", type = "response")
-#  
-#  emm_2a_inter1 <- emmeans(e1_mixed1_v2_allfit, c("congruency", "condition"),
-#                           type = "response")
-#  emm_2a_inter2 <- emmeans(e1_mixed1_v2_allfit, "congruency",
-#                           by = "condition", type = "response")
-#  
-#  emm_2a_inter1_out <- capture_call(print(emm_2a_inter1))
-#  emm_2a_inter2_out <- capture_call(print(emm_2a_inter2))
-#  
-#  
-#  emm_2a_cong_out <- capture_call(print(emm_2a_cong))
-#  emm_2a_cond_out <- capture_call(print(emm_2a_cond))
-#  
-#  emm_inter_1 <- emmeans(e1_mixed1_v2_allfit, "congruency",
-#                         by = "condition", type = "response")
-#  emm_2a_pairs <- capture_call(print(pairs(emm_inter_1)))
-#  
-#  # pp2a_main <- plot_grid(
-#  #   afex_plot(e1_mixed1_v2_allfit, "congruency", error = "within",
-#  #             data_geom = geom_quasirandom, data_alpha = 0.3) +
-#  #     coord_cartesian(ylim = c(0.25, 1)),
-#  #   afex_plot(e1_mixed1_v2_allfit, "condition", error = "within",
-#  #             data_geom = geom_quasirandom, data_alpha = 0.3) +
-#  #     coord_cartesian(ylim = c(0.25, 1))
-#  # )
-#  pp2a_main_a <- afex_plot(e1_mixed1_v2_allfit, "congruency", error = "within",
-#              data_geom = geom_quasirandom, data_alpha = 0.3) +
-#      coord_cartesian(ylim = c(0.25, 1))
-#  pp2a_main_b <- afex_plot(e1_mixed1_v2_allfit, "condition", error = "within",
-#              data_geom = geom_quasirandom, data_alpha = 0.3) +
-#      coord_cartesian(ylim = c(0.25, 1))
-#  
-#  pp2a_inter <- afex_plot(e1_mixed1_v2_allfit, "condition", "congruency",
-#            data_geom = geom_violin)
-#  
-#  pp2a_inter_v1 <- afex_plot(e1_mixed1_v1, "condition", "congruency",
-#            data_geom = geom_violin)
-#  
-#  ### experiments 1 and 2
-#  
-#  outp_e12_mixed1 <- capture_call(print(e12_mixed1))
-#  outp_e12_mixed1_t2 <- capture_call(print(e12_mixed1_t2))
-#  
-#  outp_e12_mixed1_t2_red <- capture_call(print(e12_mixed1_t2_red))
-#  
-#  emm_e12_inter_out <- capture_call(print(emmeans(e12_mixed1,
-#                                      c("congruency", "condition"),
-#                                      type = "response")))
-#  
-#  emm_e12_t2_inter_out <- capture_call(print(emmeans(e12_mixed1_t2,
-#                                      c("congruency", "condition"),
-#                                      type = "response")))
-#  
-#  emm_e12_t2_red_inter_out <- capture_call(print(emmeans(e12_mixed1_t2_red,
-#                             c("congruency", "condition"),
-#                             type = "response")))
-#  
-#  emm_e12_t2_red_pairs_out <- capture_call(print(pairs(
-#    emmeans(e12_mixed1_t2_red, "congruency",
-#                                      by = "condition",
-#                                      type = "response"))))
-#  
-#  emm_e12_t2_pairs_out <- capture_call(print(pairs(
-#    emmeans(e12_mixed1_t2, "congruency",
-#                                  by = "condition", type = "response"))))
-#  
-#  emm_e12_t2_pairs_p_out <- capture_call(print(pairs(emmeans(e12_mixed1_t2, "congruency", by = "condition", type = "response",
-#          submodel = "minimal"))))
-#  
-#  pp_e12_inter_t3 <- afex_plot(e12_mixed1, "condition", "congruency",
-#                               data_geom = geom_violin)
-#  pp_e12_inter_t2 <- afex_plot(e12_mixed1_t2, "condition", "congruency",
-#                               data_geom = geom_violin)
-#  pp_e12_inter_t2_red <- afex_plot(e12_mixed1_t2_red, "condition", "congruency",
-#                                   data_geom = geom_violin)
-#  
-#  save(outp_e1_mixed1_v1, outp_e1_mixed1_v2,
-#       outp_e1_mixed1_v2_allfit,
-#       emm_2a_cong_out, emm_2a_cond_out,
-#       pp2a_main_a, pp2a_main_b,
-#       emm_2a_inter1_out, emm_2a_inter2_out,
-#       emm_2a_pairs,
-#       pp2a_inter, pp2a_inter_v1,
-#  
-#       outp_e12_mixed1, outp_e12_mixed1_t2,
-#       outp_e12_mixed1_t2_red,
-#       emm_e12_inter_out, emm_e12_t2_inter_out,
-#       emm_e12_t2_red_inter_out,
-#       emm_e12_t2_red_pairs_out,
-#       emm_e12_t2_pairs_out,
-#       emm_e12_t2_pairs_p_out,
-#       pp_e12_inter_t3, pp_e12_inter_t2,
-#       pp_e12_inter_t2_red,
-#  
-#       file = "inst/extdata/outputs_glmm_vignette.rda",
-#       compress = "xz")
-#  
+grid::grid.newpage()
+grid::grid.draw(pp2a_inter_v1)
 
 ## ---------------------------------------------------------------------------------------
 ## extract data from experiment 1 and remove NAs
@@ -371,6 +249,9 @@ stroop_e12_agg <- stroop_e12 %>%
 #  )
 
 ## ---- eval=FALSE------------------------------------------------------------------------
+#  stopCluster(cl)
+
+## ---- eval=FALSE------------------------------------------------------------------------
 #  e12_mixed1
 
 ## ---- echo=FALSE------------------------------------------------------------------------
@@ -389,7 +270,8 @@ cat(outp_e12_mixed1_t2$output, sep = "\n")
 ## ---- echo=FALSE, fig.width=4.5, fig.height=3.5-----------------------------------------
 message("Aggregating data over: pno")
 message("NOTE: Results may be misleading due to involvement in interactions")
-pp_e12_inter_t3
+grid::grid.newpage()
+grid::grid.draw(pp_e12_inter_t3)
 
 ## ---- eval=FALSE------------------------------------------------------------------------
 #  afex_plot(e12_mixed1_t2, "condition", "congruency",
@@ -399,7 +281,8 @@ pp_e12_inter_t3
 message("Aggregating data over: pno")
 message("emmeans are based on full model which includes all effects.")
 message("NOTE: Results may be misleading due to involvement in interactions")
-pp_e12_inter_t2
+grid::grid.newpage()
+grid::grid.draw(pp_e12_inter_t2)
 
 ## ---- eval=FALSE------------------------------------------------------------------------
 #  emmeans(e12_mixed1, c("congruency", "condition"), type = "response")
@@ -475,8 +358,143 @@ cat(emm_e12_t2_pairs_p_out$output, sep = "\n")
 ## ---- echo=FALSE, fig.width=4.5, fig.height=3.5-----------------------------------------
 message("Aggregating data over: pno")
 message("emmeans are based on full model which includes all effects.")
-pp_e12_inter_t2_red
+grid::grid.newpage()
+grid::grid.draw(pp_e12_inter_t2_red)
 
 ## ---- include=FALSE-----------------------------------------------------------
 options(op)
+
+## ---- eval=FALSE, include=FALSE-----------------------------------------------
+#  save(e1_mixed1_v1, e1_mixed1_v2, e1_mixed1_v2_allfit,
+#       e12_mixed1_t2, e12_mixed1, e12_mixed1_t2_red,
+#       file = "development/stroop_mixed.rda", compress = "xz")
+#  load("development/stroop_mixed.rda")
+
+## ---- eval=FALSE, include=FALSE-----------------------------------------------
+#  stroop_e1_agg <- stroop_e1 %>%
+#    group_by(condition, congruency, pno) %>%
+#    summarise(acc = mean(acc),
+#              n = n())
+#  stroop_e12 <- stroop %>%
+#    filter(!is.na(acc)) %>%
+#    filter(study %in% c("1", "2")) %>%
+#    droplevels()
+#  
+#  stroop_e12_agg <- stroop_e12 %>%
+#    group_by(study, condition, congruency, pno) %>%
+#    summarise(acc = mean(acc),
+#              n = n())
+#  capture_call <- function(call) {
+#    warnings <- testthat::capture_warnings(eval(substitute(call)))
+#    output <- suppressWarnings(capture.output(eval(substitute(call))))
+#    messages <- testthat::capture_messages(substitute(call))
+#    list(
+#      output = output,
+#      warnings = warnings,
+#      messages = messages
+#    )
+#  }
+#  outp_e1_mixed1_v1 <- capture_call(print(e1_mixed1_v1))
+#  outp_e1_mixed1_v2 <- capture_call(print(e1_mixed1_v2))
+#  outp_e1_mixed1_v2_allfit <- capture_call(print(e1_mixed1_v2_allfit))
+#  
+#  emm_2a_cong <- emmeans(e1_mixed1_v2_allfit, "congruency", type = "response")
+#  emm_2a_cond <- emmeans(e1_mixed1_v2_allfit, "condition", type = "response")
+#  
+#  emm_2a_inter1 <- emmeans(e1_mixed1_v2_allfit, c("congruency", "condition"),
+#                           type = "response")
+#  emm_2a_inter2 <- emmeans(e1_mixed1_v2_allfit, "congruency",
+#                           by = "condition", type = "response")
+#  
+#  emm_2a_inter1_out <- capture_call(print(emm_2a_inter1))
+#  emm_2a_inter2_out <- capture_call(print(emm_2a_inter2))
+#  
+#  
+#  emm_2a_cong_out <- capture_call(print(emm_2a_cong))
+#  emm_2a_cond_out <- capture_call(print(emm_2a_cond))
+#  
+#  emm_inter_1 <- emmeans(e1_mixed1_v2_allfit, "congruency",
+#                         by = "condition", type = "response")
+#  emm_2a_pairs <- capture_call(print(pairs(emm_inter_1)))
+#  
+#  pp2a_main <- ggplotGrob(plot_grid(
+#    afex_plot(e1_mixed1_v2_allfit, "congruency", error = "within",
+#              data_geom = geom_quasirandom, data_alpha = 0.3) +
+#      coord_cartesian(ylim = c(0.25, 1)),
+#    afex_plot(e1_mixed1_v2_allfit, "condition", error = "within",
+#              data_geom = geom_quasirandom, data_alpha = 0.3) +
+#      coord_cartesian(ylim = c(0.25, 1))
+#  ))
+#  # pp2a_main_a <- afex_plot(e1_mixed1_v2_allfit, "congruency", error = "within",
+#  #             data_geom = geom_quasirandom, data_alpha = 0.3) +
+#  #     coord_cartesian(ylim = c(0.25, 1))
+#  # pp2a_main_b <- afex_plot(e1_mixed1_v2_allfit, "condition", error = "within",
+#  #             data_geom = geom_quasirandom, data_alpha = 0.3) +
+#  #     coord_cartesian(ylim = c(0.25, 1))
+#  
+#  pp2a_inter <- ggplotGrob(afex_plot(e1_mixed1_v2_allfit, "condition", "congruency",
+#            data_geom = geom_violin))
+#  
+#  pp2a_inter_v1 <- ggplotGrob(afex_plot(e1_mixed1_v1, "condition", "congruency",
+#            data_geom = geom_violin))
+#  
+#  ### experiments 1 and 2
+#  
+#  outp_e12_mixed1 <- capture_call(print(e12_mixed1))
+#  outp_e12_mixed1_t2 <- capture_call(print(e12_mixed1_t2))
+#  
+#  outp_e12_mixed1_t2_red <- capture_call(print(e12_mixed1_t2_red))
+#  
+#  emm_e12_inter_out <- capture_call(print(emmeans(e12_mixed1,
+#                                      c("congruency", "condition"),
+#                                      type = "response")))
+#  
+#  emm_e12_t2_inter_out <- capture_call(print(emmeans(e12_mixed1_t2,
+#                                      c("congruency", "condition"),
+#                                      type = "response")))
+#  
+#  emm_e12_t2_red_inter_out <- capture_call(print(emmeans(e12_mixed1_t2_red,
+#                             c("congruency", "condition"),
+#                             type = "response")))
+#  
+#  emm_e12_t2_red_pairs_out <- capture_call(print(pairs(
+#    emmeans(e12_mixed1_t2_red, "congruency",
+#                                      by = "condition",
+#                                      type = "response"))))
+#  
+#  emm_e12_t2_pairs_out <- capture_call(print(pairs(
+#    emmeans(e12_mixed1_t2, "congruency",
+#                                  by = "condition", type = "response"))))
+#  
+#  emm_e12_t2_pairs_p_out <- capture_call(print(pairs(emmeans(e12_mixed1_t2, "congruency", by = "condition", type = "response",
+#          submodel = "minimal"))))
+#  
+#  pp_e12_inter_t3 <- ggplotGrob(afex_plot(e12_mixed1, "condition", "congruency",
+#                               data_geom = geom_violin))
+#  pp_e12_inter_t2 <- ggplotGrob(afex_plot(e12_mixed1_t2, "condition", "congruency",
+#                               data_geom = geom_violin))
+#  pp_e12_inter_t2_red <- ggplotGrob(afex_plot(e12_mixed1_t2_red, "condition", "congruency",
+#                                   data_geom = geom_violin))
+#  
+#  save(outp_e1_mixed1_v1, outp_e1_mixed1_v2,
+#       outp_e1_mixed1_v2_allfit,
+#       emm_2a_cong_out, emm_2a_cond_out,
+#       pp2a_main,
+#       emm_2a_inter1_out, emm_2a_inter2_out,
+#       emm_2a_pairs,
+#       pp2a_inter, pp2a_inter_v1,
+#  
+#       outp_e12_mixed1, outp_e12_mixed1_t2,
+#       outp_e12_mixed1_t2_red,
+#       emm_e12_inter_out, emm_e12_t2_inter_out,
+#       emm_e12_t2_red_inter_out,
+#       emm_e12_t2_red_pairs_out,
+#       emm_e12_t2_pairs_out,
+#       emm_e12_t2_pairs_p_out,
+#       pp_e12_inter_t3, pp_e12_inter_t2,
+#       pp_e12_inter_t2_red,
+#  
+#       file = "inst/extdata/outputs_glmm_vignette.rda",
+#       compress = "xz")
+#  
 

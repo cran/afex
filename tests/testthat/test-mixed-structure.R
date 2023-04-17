@@ -1,6 +1,4 @@
 
-context("Mixed: structural tests")
-
 # note: all calls with type 2 are wrapped in suppressWarnings()!
 
 test_that("mixed: Maxell & Delaney (2004), Table 16.4, p. 842: Type 2", {
@@ -173,9 +171,6 @@ test_that("mixed: anova with multiple mixed objexts", {
                  "some models fit with REML = TRUE, some not")
 })
 
-context("Mixed: Expand random effects")
-
-
 test_that("mixed: expand_re argument, return = 'merMod'", {
   data("ks2013.3")
   set_default_contrasts()
@@ -243,8 +238,8 @@ test_that("mixed: return=data, expand_re argument, and allFit", {
   #if (packageVersion("testthat") >= "0.9") {
   #testthat::skip_on_travis()
   testthat::skip_if_not_installed("optimx")
+  testthat::skip_if_not_installed("dfoptim")
   testthat::skip_on_cran()
-  skip_on_os("windows")
   require(optimx)
   data("ks2013.3")
   ks2013.3_tmp <- ks2013.3
@@ -252,20 +247,14 @@ test_that("mixed: return=data, expand_re argument, and allFit", {
               expand_re = TRUE, method = "LRT", 
               control = lmerControl(optCtrl = list(maxfun=1e6)), progress=FALSE,
               return = "merMod")
-  m6_all_1 <- all_fit(m6, verbose = FALSE, data = ks2013.3_tmp)
-  expect_output(print(m6_all_1$`bobyqa.`), 
-                "object 're1.believability1' not found")
+  m6_all_1 <- lme4::allFit(m6, verbose = FALSE, data = ks2013.3_tmp)
+  for (i in seq_along(m6_all_1)) expect_s4_class(m6_all_1[[i]], "lmerModLmerTest") 
   ks2013.3_tmp <- mixed(response ~ validity + (believability*validity||id), 
                         ks2013.3_tmp, expand_re = TRUE, method = "LRT", 
                         control = lmerControl(optCtrl = list(maxfun=1e6)), 
                         progress=FALSE, return = "data")
-  m6_all_2 <- suppressWarnings(all_fit(m6, verbose = FALSE, data = ks2013.3_tmp))
-  expect_is(m6_all_2$`bobyqa.`, "merMod")
-  expect_is(m6_all_2$`Nelder_Mead.`, "merMod") 
-  expect_is(m6_all_2$`nmkbw.`, "merMod")
-  expect_is(m6_all_2$optimx.nlminb, "merMod")
-  expect_is(m6_all_2$`optimx.L-BFGS-B`, "merMod")
-  expect_is(m6_all_2$nloptwrap.NLOPT_LN_NELDERMEAD, "merMod")
+  m6_all_2 <- suppressWarnings(lme4::allFit(m6, verbose = FALSE, data = ks2013.3_tmp))
+  for (i in seq_along(m6_all_2)) expect_s4_class(m6_all_1[[i]], "merMod")
 })
 
 test_that("mixed with all_fit = TRUE", {
@@ -273,7 +262,6 @@ test_that("mixed with all_fit = TRUE", {
   testthat::skip_if_not_installed("MEMSS")
   testthat::skip_if_not_installed("dfoptim")
   testthat::skip_on_cran()
-  skip_on_os("windows")
   require(optimx)
   data("Machines", package = "MEMSS") 
   aop <- afex_options()
@@ -359,7 +347,6 @@ test_that("mixed with all available methods", {
 test_that("mixed all_fit = TRUE works with old methods", {
   data("sk2011.2") # see example("mixed")
   testthat::skip_on_cran()
-  skip_on_os("windows")
   sk2_aff <- droplevels(sk2011.2[sk2011.2$what == "affirmation",])
   sk2_aff_b <- mixed(response ~ instruction+(inference*type||id), sk2_aff,
                expand_re = TRUE, all_fit = TRUE, method = "nested-KR", 
@@ -378,7 +365,6 @@ test_that("mixed all_fit = TRUE works with old methods", {
 
 
 test_that("mixed all_fit = TRUE works with new (KR) methods", {
-  skip_on_os("windows")
   data("sk2011.2") # see example("mixed")
   testthat::skip_on_cran()
   sk2_aff <- droplevels(sk2011.2[sk2011.2$what == "affirmation",])

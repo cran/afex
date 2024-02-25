@@ -162,7 +162,9 @@ test_that("afex_plot works with various geoms (from examples)", {
             data_geom = ggbeeswarm::geom_quasirandom,
             data_arg = list(
               dodge.width = 0.5,  ## needs to be same as dodge
-              cex = 0.8))
+              cex = 0.8,
+              width = 0.05  ## choose small value so data points are not overlapping 
+              ))
   expect_doppelganger("geoms work: ggbeeswarm::geom_quasirandom", g3)
   
   
@@ -329,8 +331,13 @@ test_that("relabeling of factors and legend works", {
   
   p2 <- afex_plot(aw, x = "noise", trace = "angle", error = "within",
                   legend_title = "Noise Condition")
-  expect_equal(p2$guides$shape$title, "Noise Condition")
-  expect_equal(p2$guides$linetype$title, "Noise Condition")
+  if (inherits(p2$guides, "Guides")) {
+    expect_equal(p2$guides$guides$shape$params$title, "Noise Condition")
+    expect_equal(p2$guides$guides$linetype$params$title, "Noise Condition")
+  } else {
+    expect_equal(p2$guides$shape$title, "Noise Condition")
+    expect_equal(p2$guides$linetype$title, "Noise Condition")
+  }
 })
 
 test_that("connecting individual points works", {
@@ -361,8 +368,13 @@ test_that("labels are correct in case variables are of lenth > 1", {
   p2 <- afex_plot(a1, c("phase", "hour"), error = "none")
   expect_match(p1$labels$x, "phase")
   expect_match(p1$labels$x, "hour")
-  expect_match(p1$guides$shape$title, "treatment")
-  expect_match(p1$guides$shape$title, "gender")
+  if (inherits(p1$guides, "Guides")) {
+    expect_match(p1$guides$guides$shape$params$title, "treatment")
+    expect_match(p1$guides$guides$shape$params$title, "gender")
+  } else {
+    expect_match(p1$guides$shape$title, "treatment")
+    expect_match(p1$guides$shape$title, "gender")
+  }
   expect_match(p2$labels$x, "phase")
   expect_match(p2$labels$x, "hour")
 })

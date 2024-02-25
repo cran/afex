@@ -12,7 +12,7 @@ if (any(!unlist(pcheck))) {
 op <- options(width = 90, dplyr.summarise.inform = FALSE)
 knitr::opts_chunk$set(dpi=72)
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 load(system.file("extdata/", "output_mixed_vignette.rda", package = "afex"))
 
 ## ----message=FALSE, warning=FALSE-------------------------------------------------------
@@ -56,14 +56,14 @@ fhch %>% group_by(id, stimulus) %>%
 
 
 
-## ---- fig.width=7, fig.height=4---------------------------------------------------------
+## ----fig.width=7, fig.height=4----------------------------------------------------------
 fhch_long <- fhch %>% 
   pivot_longer(cols = c(rt, log_rt), names_to = "rt_type", values_to = "rt")
 ggplot(fhch_long, aes(rt)) +
   geom_histogram(bins = 100) +
   facet_wrap(vars(rt_type), scales = "free_x")
 
-## ---- fig.width=7, fig.height=6, message=FALSE, out.width="90%"-------------------------
+## ----fig.width=7, fig.height=6, message=FALSE, out.width="90%"--------------------------
 agg_p <- fhch %>% 
   group_by(id, task, stimulus, density, frequency) %>%
   summarise(mean = mean(log_rt)) %>%
@@ -75,7 +75,7 @@ ggplot(agg_p, aes(x = interaction(density,frequency), y = mean)) +
   stat_summary(colour = "red") +
   facet_grid(cols = vars(task), rows = vars(stimulus))
 
-## ---- fig.width=7, fig.height=6, message=FALSE, out.width="90%"-------------------------
+## ----fig.width=7, fig.height=6, message=FALSE, out.width="90%"--------------------------
 agg_i <- fhch %>% group_by(item, task, stimulus, density, frequency) %>%
   summarise(mean = mean(log_rt)) %>%
   ungroup()
@@ -86,108 +86,108 @@ ggplot(agg_i, aes(x = interaction(density,frequency), y = mean)) +
   stat_summary(colour = "red") +
   facet_grid(cols = vars(task), rows = vars(stimulus))
 
-## ---- eval = FALSE----------------------------------------------------------------------
+## ----eval = FALSE-----------------------------------------------------------------------
 #  m1s <- mixed(log_rt ~ task*stimulus*density*frequency +
 #                 (stimulus*density*frequency|id)+
 #                 (task|item), fhch,
 #               control = lmerControl(optCtrl = list(maxfun = 1e6)))
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 message("boundary (singular) fit: see ?isSingular")
 
-## ---- eval = FALSE----------------------------------------------------------------------
+## ----eval = FALSE-----------------------------------------------------------------------
 #  m2s <- mixed(log_rt ~ task*stimulus*density*frequency +
 #                 (stimulus*density*frequency|id)+
 #                 (task||item), fhch,
 #               control = lmerControl(optCtrl = list(maxfun = 1e6)), expand_re = TRUE)
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 message("boundary (singular) fit: see ?isSingular")
 
-## ---- eval = FALSE----------------------------------------------------------------------
+## ----eval = FALSE-----------------------------------------------------------------------
 #  m3s <- mixed(log_rt ~ task*stimulus*density*frequency +
 #                 (stimulus*density*frequency||id)+
 #                 (task|item), fhch,
 #               control = lmerControl(optCtrl = list(maxfun = 1e6)), expand_re = TRUE)
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 message("boundary (singular) fit: see ?isSingular")
 
-## ---- eval = FALSE----------------------------------------------------------------------
+## ----eval = FALSE-----------------------------------------------------------------------
 #  m4s <- mixed(log_rt ~ task*stimulus*density*frequency +
 #                 (stimulus*density*frequency||id)+
 #                 (task||item), fhch,
 #               control = lmerControl(optCtrl = list(maxfun = 1e6)), expand_re = TRUE)
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 message("boundary (singular) fit: see ?isSingular")
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  summary(m4s)$varcor
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 cat(outp_m4s_vc$output, sep = "\n")
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  m5s <- mixed(log_rt ~ task*stimulus*density*frequency +
 #                 ((stimulus+density+frequency)^2||id)+
 #                 (task||item), fhch,
 #               control = lmerControl(optCtrl = list(maxfun = 1e6)), expand_re = TRUE)
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 message("boundary (singular) fit: see ?isSingular")
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  summary(m5s)$varcor
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 cat(outp_m5s_vc$output, sep = "\n")
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  m6s <- mixed(log_rt ~ task*stimulus*density*frequency +
 #                 (stimulus+density+frequency||id)+
 #                 (task||item), fhch,
 #               control = lmerControl(optCtrl = list(maxfun = 1e6)),
 #               expand_re = TRUE)
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 message("boundary (singular) fit: see ?isSingular")
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  summary(m6s)$varcor
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 cat(outp_m6s_vc$output, sep = "\n")
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  m7s <- mixed(log_rt ~ task*stimulus*density*frequency +
 #                 (stimulus+frequency||id)+
 #                 (task||item), fhch,
 #               control = lmerControl(optCtrl = list(maxfun = 1e6)), expand_re = TRUE)
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  m8s <- mixed(log_rt ~ task*stimulus*density*frequency +
 #                 (stimulus+frequency|id)+
 #                 (task||item), fhch,
 #               control = lmerControl(optCtrl = list(maxfun = 1e6)), expand_re = TRUE)
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 warning(fit_m8s$warnings, call. = FALSE)
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  m9s <- mixed(log_rt ~ task*stimulus*density*frequency +
 #                 (stimulus+frequency||id)+
 #                 (task|item), fhch,
 #               control = lmerControl(optCtrl = list(maxfun = 1e6)), expand_re = TRUE)
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  left_join(nice(m1s), nice(m9s), by = "Effect",
 #            suffix = c("_full", "_final"))
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 cat(outp_comb_anova$output, sep = "\n")
 
-## ---- eval = FALSE----------------------------------------------------------------------
+## ----eval = FALSE-----------------------------------------------------------------------
 #  m9lrt <- mixed(log_rt ~ task*stimulus*density*frequency +
 #                 (stimulus+frequency||id)+
 #                 (task|item), fhch, method = "LRT",
@@ -195,64 +195,65 @@ cat(outp_comb_anova$output, sep = "\n")
 #               expand_re = TRUE)
 #  m9lrt
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 cat(outp_m9lrt$output, sep = "\n")
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  emm_options(lmer.df = "asymptotic") # also possible: 'satterthwaite', 'kenward-roger'
 #  emm_i1 <- emmeans(m9s, "frequency", by = c("stimulus", "task"))
 #  emm_i1
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 message("NOTE: Results may be misleading due to involvement in interactions")
 cat(emm_o1$output, sep = "\n")
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  update(pairs(emm_i1), by = NULL, adjust = "holm")
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 message("NOTE: Results may be misleading due to involvement in interactions")
 cat(emm_o2$output, sep = "\n")
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  summary(as.glht(update(pairs(emm_i1), by = NULL)), test = adjusted("free"))
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 cat(emm_o3$output, sep = "\n")
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  emm_i1b <- update(emm_i1, tran = "log", type = "response", by = NULL)
 #  emm_i1b
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 cat(emm_o4$output, sep = "\n")
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 load(system.file("extdata/", "output_afex_plot_mixed_vignette_model.rda", package = "afex"))
 emm_options(lmer.df = "asymptotic") 
 
-## ---- eval=TRUE, fig.width=5, fig.height=4, out.width="90%"-----------------------------
+## ----eval=TRUE, fig.width=5, fig.height=4, out.width="90%"------------------------------
 afex_plot(m9s, "frequency", "stimulus", "task", id = "id",
           data_geom = ggbeeswarm::geom_quasirandom, 
           data_arg = list(
             dodge.width = 0.5,  ## needs to be same as dodge
             cex = 0.8,
+            width = 0.1,
             color = "darkgrey"))
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  joint_tests(m9s, by = c("stimulus", "task"))
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 cat(emm_o5$output, sep = "\n")
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  emm_i2 <- emmeans(m2s, c("density", "frequency"), by = c("stimulus", "task"))
 #  emm_i2
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 cat(emm_o6$output, sep = "\n")
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  # desired contrats:
 #  des_c <- list(
 #    ll_hl = c(1, -1, 0, 0),
@@ -260,9 +261,9 @@ cat(emm_o6$output, sep = "\n")
 #    )
 #  update(contrast(emm_i2, des_c), by = NULL, adjust = "holm")
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 cat(emm_o7$output, sep = "\n")
 
-## ---- include=FALSE-----------------------------------------------------------
+## ----include=FALSE------------------------------------------------------------
 options(op)
 

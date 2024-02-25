@@ -8,7 +8,7 @@ if (any(!unlist(pcheck))) {
    knitr::opts_chunk$set(eval = FALSE)
 }
 
-## ---- include = FALSE-------------------------------------------------------------------
+## ----include = FALSE--------------------------------------------------------------------
 op <- options(width = 90, dplyr.summarise.inform = FALSE)
 knitr::opts_chunk$set(
   collapse = TRUE
@@ -55,7 +55,7 @@ emmeans(e1_anova, "congruency")
 ## ---------------------------------------------------------------------------------------
 emmeans(e1_anova, "condition")
 
-## ---- fig.width=6, fig.height=3---------------------------------------------------------
+## ----fig.width=6, fig.height=3----------------------------------------------------------
 plot_grid(
   afex_plot(e1_anova, "congruency", error = "within", 
             data_geom = geom_quasirandom, data_alpha = 0.3) + 
@@ -65,10 +65,10 @@ plot_grid(
     coord_cartesian(ylim = c(0.25, 1))
 )
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 load(system.file("extdata/", "outputs_glmm_vignette.rda", package = "afex"))
 
-## ---- eval=FALSE, warning=FALSE---------------------------------------------------------
+## ----eval=FALSE, warning=FALSE----------------------------------------------------------
 #  e1_mixed1_v1 <- mixed(
 #    acc ~ congruency*condition + (congruency*condition|pno),
 #    data = stroop_e1,
@@ -82,7 +82,7 @@ stroop_e1_agg <- stroop_e1 %>%
   summarise(acc = mean(acc), 
             n = n())
 
-## ---- eval = FALSE----------------------------------------------------------------------
+## ----eval = FALSE-----------------------------------------------------------------------
 #  e1_mixed1_v2 <- mixed(
 #    acc ~ congruency*condition + (congruency*condition|pno),
 #    data = stroop_e1_agg,
@@ -91,15 +91,15 @@ stroop_e1_agg <- stroop_e1 %>%
 #    weight = n
 #  )
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 xxx <- lapply(outp_e1_mixed1_v1$warnings, 
               function(x) warning(x, call. = FALSE))
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 xxx <- lapply(outp_e1_mixed1_v2$warnings, 
               function(x) warning(x, call. = FALSE))
 
-## ---- eval = FALSE----------------------------------------------------------------------
+## ----eval = FALSE-----------------------------------------------------------------------
 #  e1_mixed1_v2_allfit <- mixed(
 #    acc ~ congruency*condition + (congruency*condition|pno),
 #    data = stroop_e1_agg,
@@ -110,43 +110,43 @@ xxx <- lapply(outp_e1_mixed1_v2$warnings,
 #  )
 #  
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 xxx <- lapply(outp_e1_mixed1_v2_allfit$warnings, 
               function(x) warning(x, call. = FALSE))
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  e1_mixed1_v1 ## variant 1
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 cat(outp_e1_mixed1_v1$output, sep = "\n")
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  e1_mixed1_v2  ## variant 2
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 cat(outp_e1_mixed1_v2$output, sep = "\n")
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  e1_mixed1_v2_allfit  ## variant 2 with all_fit = TRUE
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 cat(outp_e1_mixed1_v2_allfit$output, sep = "\n")
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  emmeans(e1_mixed1_v2_allfit, "congruency", type = "response")
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 message("NOTE: Results may be misleading due to involvement in interactions")
 cat(emm_2a_cong_out$output, sep = "\n")
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  emmeans(e1_mixed1_v2_allfit, "condition", type = "response")
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 message("NOTE: Results may be misleading due to involvement in interactions")
 cat(emm_2a_cond_out$output, sep = "\n")
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  plot_grid(
 #    afex_plot(e1_mixed1_v2_allfit, "congruency",
 #              data_geom = geom_quasirandom, data_alpha = 0.3) +
@@ -156,7 +156,7 @@ cat(emm_2a_cond_out$output, sep = "\n")
 #      coord_cartesian(ylim = c(0.25, 1))
 #  )
 
-## ---- echo=FALSE, fig.width=6, fig.height=3---------------------------------------------
+## ----echo=FALSE, fig.width=6, fig.height=3----------------------------------------------
 message("Aggregating data over: pno")
 message("NOTE: Results may be misleading due to involvement in interactions")
 message("Aggregating data over: pno")
@@ -164,40 +164,40 @@ message("NOTE: Results may be misleading due to involvement in interactions")
 grid::grid.newpage()
 grid::grid.draw(pp2a_main)
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  emmeans(e1_mixed1_v2_allfit, c("congruency", "condition"), type = "response")
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 cat(emm_2a_inter1_out$output, sep = "\n")
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  emm_inter_1 <- emmeans(e1_mixed1_v2_allfit, "congruency",
 #                         by = "condition", type = "response")
 #  emm_inter_1
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 cat(emm_2a_inter2_out$output, sep = "\n")
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  pairs(emm_inter_1)
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 cat(emm_2a_pairs$output, sep = "\n")
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  afex_plot(e1_mixed1_v2_allfit, "condition", "congruency",
 #            data_geom = geom_violin)
 
-## ---- echo=FALSE, fig.width=4.5, fig.height=3.5-----------------------------------------
+## ----echo=FALSE, fig.width=4.5, fig.height=3.5------------------------------------------
 message("Aggregating data over: pno")
 grid::grid.newpage()
 grid::grid.draw(pp2a_inter)
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  afex_plot(e1_mixed1_v1, "condition", "congruency",
 #            data_geom = geom_violin)
 
-## ---- echo=FALSE, fig.width=4.5, fig.height=3.5-----------------------------------------
+## ----echo=FALSE, fig.width=4.5, fig.height=3.5------------------------------------------
 message("Aggregating data over: pno")
 grid::grid.newpage()
 grid::grid.draw(pp2a_inter_v1)
@@ -220,12 +220,12 @@ stroop_e12_agg <- stroop_e12 %>%
   summarise(acc = mean(acc), 
             n = n())
 
-## ---- eval = FALSE----------------------------------------------------------------------
+## ----eval = FALSE-----------------------------------------------------------------------
 #  library("parallel")
 #  nc <- detectCores() # number of cores
 #  cl <- makeCluster(rep("localhost", nc)) # make cluster
 
-## ---- eval = FALSE----------------------------------------------------------------------
+## ----eval = FALSE-----------------------------------------------------------------------
 #  e12_mixed1 <- mixed(
 #    acc ~ congruency*condition*study + (congruency*condition|pno),
 #    data = stroop_e12_agg,
@@ -236,7 +236,7 @@ stroop_e12_agg <- stroop_e12 %>%
 #    cl = cl
 #  )
 
-## ---- eval = FALSE----------------------------------------------------------------------
+## ----eval = FALSE-----------------------------------------------------------------------
 #  e12_mixed1_t2 <- mixed(
 #    acc ~ congruency*condition*study + (congruency*condition|pno),
 #    data = stroop_e12_agg,
@@ -248,57 +248,57 @@ stroop_e12_agg <- stroop_e12 %>%
 #    type = 2
 #  )
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  stopCluster(cl)
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  e12_mixed1
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 cat(outp_e12_mixed1$output, sep = "\n")
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  e12_mixed1_t2
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 cat(outp_e12_mixed1_t2$output, sep = "\n")
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  afex_plot(e12_mixed1, "condition", "congruency",
 #            data_geom = geom_violin)
 
-## ---- echo=FALSE, fig.width=4.5, fig.height=3.5-----------------------------------------
+## ----echo=FALSE, fig.width=4.5, fig.height=3.5------------------------------------------
 message("Aggregating data over: pno")
 message("NOTE: Results may be misleading due to involvement in interactions")
 grid::grid.newpage()
 grid::grid.draw(pp_e12_inter_t3)
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  afex_plot(e12_mixed1_t2, "condition", "congruency",
 #            data_geom = geom_violin)
 
-## ---- echo=FALSE, fig.width=4.5, fig.height=3.5-----------------------------------------
+## ----echo=FALSE, fig.width=4.5, fig.height=3.5------------------------------------------
 message("Aggregating data over: pno")
 message("emmeans are based on full model which includes all effects.")
 message("NOTE: Results may be misleading due to involvement in interactions")
 grid::grid.newpage()
 grid::grid.draw(pp_e12_inter_t2)
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  emmeans(e12_mixed1, c("congruency", "condition"), type = "response")
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 message("NOTE: Results may be misleading due to involvement in interactions")
 cat(emm_e12_inter_out$output, sep = "\n")
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  emmeans(e12_mixed1_t2, c("congruency", "condition"), type = "response")
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 message("NOTE: Results may be misleading due to involvement in interactions")
 cat(emm_e12_t2_inter_out$output, sep = "\n")
 
-## ---- eval = FALSE----------------------------------------------------------------------
+## ----eval = FALSE-----------------------------------------------------------------------
 #  e12_mixed1_t2_red <- mixed(
 #    acc ~ (congruency+condition+study)^2 + (congruency*condition|pno),
 #    data = stroop_e12_agg,
@@ -310,67 +310,67 @@ cat(emm_e12_t2_inter_out$output, sep = "\n")
 #    type = 2
 #  )
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  e12_mixed1_t2_red
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 cat(outp_e12_mixed1_t2_red$output, sep = "\n")
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  emmeans(e12_mixed1_t2_red,  c("congruency", "condition"), type = "response")
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 message("emmeans are based on full model which includes all effects.")
 cat(emm_e12_t2_red_inter_out$output, sep = "\n")
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  emmeans(e12_mixed1_t2_red, "congruency", by = "condition",
 #          type = "response") %>%
 #    pairs()
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 message("emmeans are based on full model which includes all effects.")
 cat(emm_e12_t2_red_pairs_out$output, sep = "\n")
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  emmeans(e12_mixed1_t2, "congruency", by = "condition", type = "response") %>%
 #    pairs()
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 message("emmeans are based on full model which includes all effects.")
 message("NOTE: Results may be misleading due to involvement in interactions")
 cat(emm_e12_t2_pairs_out$output, sep = "\n")
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  emmeans(e12_mixed1_t2, "congruency", by = "condition", type = "response",
 #          submodel = "minimal") %>%
 #    pairs()
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 message("emmeans are based on full model which includes all effects.")
 message("NOTE: Results may be misleading due to involvement in interactions")
 cat(emm_e12_t2_pairs_p_out$output, sep = "\n")
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  afex_plot(e12_mixed1_t2_red, "condition", "congruency",
 #            data_geom = geom_violin)
 
-## ---- echo=FALSE, fig.width=4.5, fig.height=3.5-----------------------------------------
+## ----echo=FALSE, fig.width=4.5, fig.height=3.5------------------------------------------
 message("Aggregating data over: pno")
 message("emmeans are based on full model which includes all effects.")
 grid::grid.newpage()
 grid::grid.draw(pp_e12_inter_t2_red)
 
-## ---- include=FALSE-----------------------------------------------------------
+## ----include=FALSE------------------------------------------------------------
 options(op)
 
-## ---- eval=FALSE, include=FALSE-----------------------------------------------
+## ----eval=FALSE, include=FALSE------------------------------------------------
 #  save(e1_mixed1_v1, e1_mixed1_v2, e1_mixed1_v2_allfit,
 #       e12_mixed1_t2, e12_mixed1, e12_mixed1_t2_red,
 #       file = "development/stroop_mixed.rda", compress = "xz")
 #  load("development/stroop_mixed.rda")
 
-## ---- eval=FALSE, include=FALSE-----------------------------------------------
+## ----eval=FALSE, include=FALSE------------------------------------------------
 #  stroop_e1_agg <- stroop_e1 %>%
 #    group_by(condition, congruency, pno) %>%
 #    summarise(acc = mean(acc),

@@ -1,4 +1,4 @@
-## ---- echo=FALSE--------------------------------------------------------------
+## ----echo=FALSE---------------------------------------------------------------
 req_suggested_packages <- c("emmeans", "ggplot2", "cowplot",
                             "ggbeeswarm", "ggpol", 
                             "nlme", "glmmTMB", "rstanarm", "brms", 
@@ -82,14 +82,14 @@ plot_grid(
   labels = "AUTO"
 )
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  library("glmmTMB")
 #  tmb <- glmmTMB(count~spp * mined + (1|site),
 #                ziformula = ~spp * mined,
 #                family=nbinom2, Salamanders)
 #  
 
-## ---- eval=FALSE, include=FALSE---------------------------------------------------------
+## ----eval=FALSE, include=FALSE----------------------------------------------------------
 #  library("glmmTMB")
 #  set_sum_contrasts()
 #  tmb <- glmmTMB(count~spp * mined + (1|site),
@@ -97,7 +97,7 @@ plot_grid(
 #                family=nbinom2, Salamanders)
 #  save(tmb, file = "inst/extdata/tmb_example_fit.rda", compress = "xz")
 
-## ---- echo=FALSE, include=FALSE---------------------------------------------------------
+## ----echo=FALSE, include=FALSE----------------------------------------------------------
 library("glmmTMB")
 data(Salamanders, package = "glmmTMB")
 load(system.file("extdata/", "tmb_example_fit.rda", package = "afex"))
@@ -130,7 +130,7 @@ afex_plot(tmb, "spp", "mined", id = "site", data = Salamanders,
                           color = "darkgrey")
           )
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  library("rstanarm") ## requires resetting the ggplot2 theme
 #  theme_set(theme_bw(base_size = 14) +
 #              theme(legend.position="bottom",
@@ -142,7 +142,7 @@ afex_plot(tmb, "spp", "mined", id = "site", data = Salamanders,
 #                              data = cbpp, family = binomial, weight = size,
 #                              chains = 2, cores = 1, seed = 12345, iter = 500)
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  b1 <- afex_plot(example_model, "period")
 #  ## dv column detected: prob
 #  ## No id column passed. Assuming all rows are independent samples.
@@ -155,7 +155,7 @@ afex_plot(tmb, "spp", "mined", id = "site", data = Salamanders,
 load(system.file("extdata/", "plots_rstanarm.rda", package = "afex"))
 grid::grid.newpage(); grid::grid.draw(b12)
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  cbpp_l <- vector("list", nrow(cbpp))
 #  for (i in seq_along(cbpp_l)) {
 #    cbpp_l[[i]] <- data.frame(
@@ -172,7 +172,7 @@ grid::grid.newpage(); grid::grid.draw(b12)
 #                               data = cbpp_l, family = binomial,
 #                               chains = 2, cores = 1, seed = 12345, iter = 500)
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  b3 <- afex_plot(example_model2, "period")
 #  ## dv column detected: incidence
 #  ## No id column passed. Assuming all rows are independent samples.
@@ -183,12 +183,12 @@ grid::grid.newpage(); grid::grid.draw(b12)
 ## ----fig.width=7, fig.height=3, echo=FALSE----------------------------------------------
 grid::grid.newpage(); grid::grid.draw(b34)
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  data("Machines", package = "MEMSS")
 #  mm <- stan_lmer(score ~ Machine + (Machine|Worker), data=Machines,
 #                  chains = 2, cores = 1, seed = 12345, iter = 500)
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  b5 <- afex_plot(mm, "Machine")
 #  ## dv column detected: score
 #  ## No id column passed. Assuming all rows are independent samples.
@@ -199,7 +199,7 @@ grid::grid.newpage(); grid::grid.draw(b34)
 ## ----fig.width=7, fig.height=3, echo=FALSE----------------------------------------------
 grid::grid.newpage(); grid::grid.draw(b56)
 
-## ---- eval=FALSE, include=FALSE---------------------------------------------------------
+## ----eval=FALSE, include=FALSE----------------------------------------------------------
 #  library("rstanarm") ## requires resetting the ggplot2 theme
 #  library("ggplot2")
 #  theme_set(theme_bw(base_size = 14) +
@@ -244,13 +244,13 @@ grid::grid.newpage(); grid::grid.draw(b56)
 #  save(b12, b34, b56, file = "../inst/extdata/plots_rstanarm.rda",
 #       compress = "xz", version = 2)
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  library("brms")
 #  data("Machines", package = "MEMSS")
 #  mm2 <- brm(score ~ Machine + (Machine|Worker), data=Machines,
 #             chains = 2, cores = 1, seed = 12345, iter = 500)
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  bb1 <- afex_plot(mm2, "Machine", data = Machines, dv = "score")
 #  ## No id column passed. Assuming all rows are independent samples.
 #  bb2 <- afex_plot(mm2, "Machine", id = "Worker",
@@ -261,7 +261,7 @@ grid::grid.newpage(); grid::grid.draw(b56)
 load(system.file("extdata/", "plots_brms.rda", package = "afex"))
 grid::grid.newpage(); grid::grid.draw(bbout)
 
-## ---- eval=FALSE, include=FALSE---------------------------------------------------------
+## ----eval=FALSE, include=FALSE----------------------------------------------------------
 #  library("brms")
 #  data("Machines", package = "MEMSS")
 #  mm2 <- brm(score ~ Machine + (Machine|Worker), data=Machines,

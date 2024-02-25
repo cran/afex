@@ -30,14 +30,14 @@ a1 <- aov_ez("id", "response", sk2011.1, between = "instruction",
        within = c("inference", "plausibility"))
 a1 # the default print method prints a data.frame produced by nice 
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  aov_car(response ~ instruction + Error(id/inference*plausibility), sk2011.1)
 #  aov_4(response ~ instruction + (inference*plausibility|id), sk2011.1)
 
-## ---- results='asis'--------------------------------------------------------------------
+## ----results='asis'---------------------------------------------------------------------
 knitr::kable(nice(a1))
 
-## ---- results='asis'--------------------------------------------------------------------
+## ----results='asis'---------------------------------------------------------------------
 print(xtable::xtable(anova(a1), digits = c(rep(2, 5), 3, 4)), type = "html")
 
 ## ---------------------------------------------------------------------------------------
@@ -126,6 +126,6 @@ contrast(m4, c2, adjust = "holm")
 ## ---------------------------------------------------------------------------------------
 summary(as.glht(contrast(m4, c2)), test = adjusted("free"))
 
-## ---- include=FALSE-----------------------------------------------------------
+## ----include=FALSE------------------------------------------------------------
 options(op)
 

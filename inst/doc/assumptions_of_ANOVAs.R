@@ -11,7 +11,7 @@ if (any(!unlist(pcheck))) {
 options(width = 90)
 knitr::opts_chunk$set(dpi=72)
 
-## ---- message=FALSE---------------------------------------------------------------------
+## ----message=FALSE----------------------------------------------------------------------
 library(afex)
 library(performance) # for assumption checks
 
@@ -33,7 +33,7 @@ a1 <- aov_ez("id", "log_rt", fhch2010,
 ## ---------------------------------------------------------------------------------------
 check_sphericity(a1)
 
-## ---- eval = FALSE----------------------------------------------------------------------
+## ----eval = FALSE-----------------------------------------------------------------------
 #  afex_options(
 #    correction_aov = "GG", # or "HF"
 #    emmeans_model = "multivariate"

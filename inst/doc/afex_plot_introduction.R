@@ -57,12 +57,12 @@ theme_set(theme_bw(base_size = 15) +
             theme(legend.position="bottom", 
                   panel.grid.major.x = element_blank()))
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  ggsave("my_plot.png", device = "png",
 #         width = 9, height = 8, units = "cm",
 #         dpi = 600) ## the larger the dpi, the better the resolution
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  ggsave("my_plot.pdf", device = "pdf",
 #         width = 9, height = 8, units = "cm")
 
@@ -92,7 +92,10 @@ p5 <- afex_plot(aw, x = "noise", trace = "angle", error = "within", dodge = 0.5,
 p6 <- afex_plot(aw, x = "noise", trace = "angle", error = "within", dodge = 0.5,
                 data_geom = ggbeeswarm::geom_quasirandom,
                 data_arg = list(
-                  dodge.width = 0.5))
+                  dodge.width = 0.5,  ## needs to be same as dodge
+                  cex = 0.8,
+                  width = 0.05  ## choose small value so data points are not overlapping 
+                ))
 p7 <- afex_plot(aw, x = "noise", trace = "angle", error = "within", dodge = 0.7, 
                 data_geom = ggpol::geom_boxjitter, 
                 data_arg = list(
@@ -111,7 +114,7 @@ afex_plot(aw, x = "noise", trace = "angle", error = "within", dodge = 0.5,
           ),
           data_arg = list(
             list(draw_quantiles = c(0.25, 0.5, 0.75)),
-            list(dodge.width = 0.5)
+            list(dodge.width = 0.5, width = 0.05)
           ))
 
 ## ----fig.width=8.5, fig.height=8, dpi = 125---------------------------------------------
@@ -189,10 +192,10 @@ plot_grid(
   po2 + geom_line(aes(group = 1))
 ) 
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 load(system.file("extdata/", "output_afex_plot_mixed_vignette_model.rda", package = "afex"))
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  data("fhch2010") # load
 #  fhch <- droplevels(fhch2010[ fhch2010$correct,]) # remove errors
 #  m9s <- mixed(log_rt ~ task*stimulus*density*frequency +
@@ -204,7 +207,7 @@ load(system.file("extdata/", "output_afex_plot_mixed_vignette_model.rda", packag
 ## ---------------------------------------------------------------------------------------
 emmeans::emm_options(lmer.df = "asymptotic")
 
-## ---- eval=TRUE-------------------------------------------------------------------------
+## ----eval=TRUE--------------------------------------------------------------------------
 m9s
 
 ## ----fig.width=7, fig.height=3.5, eval=TRUE---------------------------------------------
@@ -232,10 +235,10 @@ plot_grid(
             error_arg = list(linewidth = 1.5, width = 0, linetype = 1))
 )
 
-## ---- eval=FALSE------------------------------------------------------------------------
+## ----eval=FALSE-------------------------------------------------------------------------
 #  pairs(emmeans::emmeans(mrt, c("stimulus", "frequency"), by = "task"))
 
-## ---- echo=FALSE------------------------------------------------------------------------
+## ----echo=FALSE-------------------------------------------------------------------------
 cat(aout_2$output, sep = "\n")
 
 ## ----fig.width=7, fig.height=3.5, eval=FALSE--------------------------------------------
@@ -248,6 +251,6 @@ cat(aout_2$output, sep = "\n")
 #              data_arg = list(width = 0.5))
 #  )
 
-## ---- include=FALSE-----------------------------------------------------------
+## ----include=FALSE------------------------------------------------------------
 options(op)
 

@@ -129,7 +129,7 @@ theme_set(theme_bw(base_size = 15) +
 
 ## Saving Plots and Plot Sizes  
 
-To get our plot into a publication, we need to export it as a graphics file. I would generally advise against exporting plots via the `RStudio` interface as this is not reproducible. Instead I would use some of the following functions which save the document in the current working directory. Note that following [Elsevier guidelines](https://www.elsevier.com/authors/policies-and-guidelines/artwork-and-media-instructions/artwork-sizing), a single column figure should have a width of 9 cm (~ 3 inch) and a two column figure should have a width of 19 cm (~ 7.5 inch).
+To get our plot into a publication, we need to export it as a graphics file. I would generally advise against exporting plots via the `RStudio` interface as this is not reproducible. Instead I would use some of the following functions which save the document in the current working directory. Note that following [Elsevier guidelines](https://www.elsevier.com/about/policies-and-standards/author/artwork-and-media-instructions/artwork-sizing), a single column figure should have a width of 9 cm (~ 3 inch) and a two column figure should have a width of 19 cm (~ 7.5 inch).
 
 For Word or similar documents I would export the plot as a `png` (never `jpg`):
 ```{r, eval=FALSE}
@@ -192,7 +192,10 @@ p5 <- afex_plot(aw, x = "noise", trace = "angle", error = "within", dodge = 0.5,
 p6 <- afex_plot(aw, x = "noise", trace = "angle", error = "within", dodge = 0.5,
                 data_geom = ggbeeswarm::geom_quasirandom,
                 data_arg = list(
-                  dodge.width = 0.5))
+                  dodge.width = 0.5,  ## needs to be same as dodge
+                  cex = 0.8,
+                  width = 0.05  ## choose small value so data points are not overlapping 
+                ))
 p7 <- afex_plot(aw, x = "noise", trace = "angle", error = "within", dodge = 0.7, 
                 data_geom = ggpol::geom_boxjitter, 
                 data_arg = list(
@@ -218,7 +221,7 @@ afex_plot(aw, x = "noise", trace = "angle", error = "within", dodge = 0.5,
           ),
           data_arg = list(
             list(draw_quantiles = c(0.25, 0.5, 0.75)),
-            list(dodge.width = 0.5)
+            list(dodge.width = 0.5, width = 0.05)
           ))
 ```
 

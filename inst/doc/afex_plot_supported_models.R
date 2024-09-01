@@ -91,7 +91,7 @@ plot_grid(
 
 ## ----eval=FALSE, include=FALSE----------------------------------------------------------
 #  library("glmmTMB")
-#  set_sum_contrasts()
+#  afex::set_sum_contrasts()
 #  tmb <- glmmTMB(count~spp * mined + (1|site),
 #                ziformula = ~spp * mined,
 #                family=nbinom2, Salamanders)
@@ -101,6 +101,7 @@ plot_grid(
 library("glmmTMB")
 data(Salamanders, package = "glmmTMB")
 load(system.file("extdata/", "tmb_example_fit.rda", package = "afex"))
+tmb <- up2date(tmb)
 
 ## ----fig.width=8, fig.height=3----------------------------------------------------------
 plot_grid(

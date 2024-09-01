@@ -42,11 +42,11 @@ Authors@R: c(person(given="Henrik", family="Singmann", role=c("aut", "cre"),
          person(given="Jonathon", family="Love", role=c("ctb")), 
          person(given="Russell", family="Lenth", role=c("ctb")), 
          person(given="Rune", family="Haubo Bojesen Christensen", role=c("ctb")))
-Version: 1.3-1
-RoxygenNote: 7.3.1
+Version: 1.4-1
+RoxygenNote: 7.3.2
 LazyData: true
 NeedsCompilation: no
-Packaged: 2024-02-25 13:36:03 UTC; singm
+Packaged: 2024-09-01 13:47:00 UTC; singm
 Author: Henrik Singmann [aut, cre] (<https://orcid.org/0000-0002-4842-3657>),
   Ben Bolker [aut],
   Jake Westfall [aut],
@@ -61,4 +61,4 @@ Author: Henrik Singmann [aut, cre] (<https://orcid.org/0000-0002-4842-3657>),
   Rune Haubo Bojesen Christensen [ctb]
 Maintainer: Henrik Singmann <singmann@gmail.com>
 Repository: CRAN
-Date/Publication: 2024-02-25 14:40:02 UTC
+Date/Publication: 2024-09-01 16:10:02 UTC

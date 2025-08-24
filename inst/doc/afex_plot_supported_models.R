@@ -2,7 +2,7 @@
 req_suggested_packages <- c("emmeans", "ggplot2", "cowplot",
                             "ggbeeswarm", "ggpol", 
                             "nlme", "glmmTMB", "rstanarm", "brms", 
-                            "MEMSS")
+                            "MEMSS", "GLMMadaptive")
 pcheck <- lapply(req_suggested_packages, requireNamespace, 
                  quietly = TRUE)
 if (any(!unlist(pcheck))) {
@@ -83,19 +83,19 @@ plot_grid(
 )
 
 ## ----eval=FALSE-------------------------------------------------------------------------
-#  library("glmmTMB")
-#  tmb <- glmmTMB(count~spp * mined + (1|site),
-#                ziformula = ~spp * mined,
-#                family=nbinom2, Salamanders)
-#  
+# library("glmmTMB")
+# tmb <- glmmTMB(count~spp * mined + (1|site),
+#               ziformula = ~spp * mined,
+#               family=nbinom2, Salamanders)
+# 
 
 ## ----eval=FALSE, include=FALSE----------------------------------------------------------
-#  library("glmmTMB")
-#  afex::set_sum_contrasts()
-#  tmb <- glmmTMB(count~spp * mined + (1|site),
-#                ziformula = ~spp * mined,
-#                family=nbinom2, Salamanders)
-#  save(tmb, file = "inst/extdata/tmb_example_fit.rda", compress = "xz")
+# library("glmmTMB")
+# afex::set_sum_contrasts()
+# tmb <- glmmTMB(count~spp * mined + (1|site),
+#               ziformula = ~spp * mined,
+#               family=nbinom2, Salamanders)
+# save(tmb, file = "inst/extdata/tmb_example_fit.rda", compress = "xz")
 
 ## ----echo=FALSE, include=FALSE----------------------------------------------------------
 library("glmmTMB")
@@ -132,152 +132,167 @@ afex_plot(tmb, "spp", "mined", id = "site", data = Salamanders,
           )
 
 ## ----eval=FALSE-------------------------------------------------------------------------
-#  library("rstanarm") ## requires resetting the ggplot2 theme
-#  theme_set(theme_bw(base_size = 14) +
-#              theme(legend.position="bottom",
-#                    panel.grid.major.x = element_blank(),
-#                    panel.grid.minor.x = element_blank()))
-#  cbpp <- lme4::cbpp
-#  cbpp$prob <- with(cbpp, incidence / size)
-#  example_model <- stan_glmer(prob ~ period + (1|herd),
-#                              data = cbpp, family = binomial, weight = size,
-#                              chains = 2, cores = 1, seed = 12345, iter = 500)
+# library("GLMMadaptive")
+# afex::set_sum_contrasts()
+# data(Salamanders, package = "glmmTMB")
+# gm1 <- mixed_model(count~spp * mined, random = ~ 1 | site, data = Salamanders,
+#                    family = zi.poisson(), zi_fixed = ~ ~spp * mined)
+
+## ----eval=FALSE, include=FALSE----------------------------------------------------------
+# library("GLMMadaptive")
+# afex::set_sum_contrasts()
+# gm1 <- mixed_model(count~spp * mined, random = ~ 1 | site, data = Salamanders,
+#                    family = zi.poisson(), zi_fixed = ~ ~spp * mined)
+# save(gm1, file = "inst/extdata/glmmadapt_example_fit.rda", compress = "xz")
+
+## ----echo=FALSE, include=FALSE----------------------------------------------------------
+library("GLMMadaptive")
+data(Salamanders, package = "glmmTMB")
+load(system.file("extdata/", "glmmadapt_example_fit.rda", package = "afex"))
+
+## ----fig.width=4, fig.height=3, eval = TRUE---------------------------------------------
+afex_plot(gm1, "spp", "mined", id = "site", 
+          data = Salamanders, data_geom = ggplot2::geom_count)
 
 ## ----eval=FALSE-------------------------------------------------------------------------
-#  b1 <- afex_plot(example_model, "period")
-#  ## dv column detected: prob
-#  ## No id column passed. Assuming all rows are independent samples.
-#  b2 <- afex_plot(example_model, "period", data_geom = geom_violin)
-#  ## dv column detected: prob
-#  ## No id column passed. Assuming all rows are independent samples.
-#  plot_grid(b1, b2, labels = "AUTO")
+# library("rstanarm") ## requires resetting the ggplot2 theme
+# theme_set(theme_bw(base_size = 14) +
+#             theme(legend.position="bottom",
+#                   panel.grid.major.x = element_blank(),
+#                   panel.grid.minor.x = element_blank()))
+# cbpp <- lme4::cbpp
+# cbpp$prob <- with(cbpp, incidence / size)
+# example_model <- stan_glmer(prob ~ period + (1|herd),
+#                             data = cbpp, family = binomial, weight = size,
+#                             chains = 2, cores = 1, seed = 12345, iter = 500)
+
+## ----eval=FALSE-------------------------------------------------------------------------
+# b1 <- afex_plot(example_model, "period")
+# ## dv column detected: prob
+# ## No id column passed. Assuming all rows are independent samples.
+# b2 <- afex_plot(example_model, "period", data_geom = geom_violin)
+# ## dv column detected: prob
+# ## No id column passed. Assuming all rows are independent samples.
+# plot_grid(b1, b2, labels = "AUTO")
 
 ## ----fig.width=7, fig.height=3, echo=FALSE----------------------------------------------
 load(system.file("extdata/", "plots_rstanarm.rda", package = "afex"))
 grid::grid.newpage(); grid::grid.draw(b12)
 
 ## ----eval=FALSE-------------------------------------------------------------------------
-#  cbpp_l <- vector("list", nrow(cbpp))
-#  for (i in seq_along(cbpp_l)) {
-#    cbpp_l[[i]] <- data.frame(
-#      herd = cbpp$herd[i],
-#      period = cbpp$period[i],
-#      incidence = rep(0, cbpp$size[i])
-#    )
-#    cbpp_l[[i]]$incidence[seq_len(cbpp$incidence[i])] <- 1
-#  }
-#  cbpp_l <- do.call("rbind", cbpp_l)
-#  cbpp_l$herd <- factor(cbpp_l$herd, levels = levels(cbpp$herd))
-#  cbpp_l$period <- factor(cbpp_l$period, levels = levels(cbpp$period))
-#  example_model2 <- stan_glmer(incidence ~ period + (1|herd),
-#                               data = cbpp_l, family = binomial,
-#                               chains = 2, cores = 1, seed = 12345, iter = 500)
+# cbpp_l <- vector("list", nrow(cbpp))
+# for (i in seq_along(cbpp_l)) {
+#   cbpp_l[[i]] <- data.frame(
+#     herd = cbpp$herd[i],
+#     period = cbpp$period[i],
+#     incidence = rep(0, cbpp$size[i])
+#   )
+#   cbpp_l[[i]]$incidence[seq_len(cbpp$incidence[i])] <- 1
+# }
+# cbpp_l <- do.call("rbind", cbpp_l)
+# cbpp_l$herd <- factor(cbpp_l$herd, levels = levels(cbpp$herd))
+# cbpp_l$period <- factor(cbpp_l$period, levels = levels(cbpp$period))
+# example_model2 <- stan_glmer(incidence ~ period + (1|herd),
+#                              data = cbpp_l, family = binomial,
+#                              chains = 2, cores = 1, seed = 12345, iter = 500)
 
 ## ----eval=FALSE-------------------------------------------------------------------------
-#  b3 <- afex_plot(example_model2, "period")
-#  ## dv column detected: incidence
-#  ## No id column passed. Assuming all rows are independent samples.
-#  b4 <- afex_plot(example_model2, "period", id = "herd")
-#  ## dv column detected: incidence
-#  plot_grid(b3, b4, labels = "AUTO")
+# b3 <- afex_plot(example_model2, "period")
+# ## dv column detected: incidence
+# ## No id column passed. Assuming all rows are independent samples.
+# b4 <- afex_plot(example_model2, "period", id = "herd")
+# ## dv column detected: incidence
+# plot_grid(b3, b4, labels = "AUTO")
 
 ## ----fig.width=7, fig.height=3, echo=FALSE----------------------------------------------
 grid::grid.newpage(); grid::grid.draw(b34)
 
 ## ----eval=FALSE-------------------------------------------------------------------------
-#  data("Machines", package = "MEMSS")
-#  mm <- stan_lmer(score ~ Machine + (Machine|Worker), data=Machines,
-#                  chains = 2, cores = 1, seed = 12345, iter = 500)
+# data("Machines", package = "MEMSS")
+# mm <- stan_lmer(score ~ Machine + (Machine|Worker), data=Machines,
+#                 chains = 2, cores = 1, seed = 12345, iter = 500)
 
 ## ----eval=FALSE-------------------------------------------------------------------------
-#  b5 <- afex_plot(mm, "Machine")
-#  ## dv column detected: score
-#  ## No id column passed. Assuming all rows are independent samples.
-#  b6 <- afex_plot(mm, "Machine", id = "Worker")
-#  ## dv column detected: score
-#  plot_grid(b5, b6, labels = "AUTO")
+# b5 <- afex_plot(mm, "Machine")
+# ## dv column detected: score
+# ## No id column passed. Assuming all rows are independent samples.
+# b6 <- afex_plot(mm, "Machine", id = "Worker")
+# ## dv column detected: score
+# plot_grid(b5, b6, labels = "AUTO")
 
 ## ----fig.width=7, fig.height=3, echo=FALSE----------------------------------------------
 grid::grid.newpage(); grid::grid.draw(b56)
 
 ## ----eval=FALSE, include=FALSE----------------------------------------------------------
-#  library("rstanarm") ## requires resetting the ggplot2 theme
-#  library("ggplot2")
-#  theme_set(theme_bw(base_size = 14) +
-#              theme(legend.position="bottom",
-#                    panel.grid.major.x = element_blank(),
-#                    panel.grid.minor.x = element_blank()))
-#  set_sum_contrasts()
-#  cbpp <- lme4::cbpp
-#  cbpp$prob <- with(cbpp, incidence / size)
-#  example_model <- stan_glmer(prob ~ period + (1|herd),
-#                              data = cbpp, family = binomial, weight = size,
+# library("rstanarm") ## requires resetting the ggplot2 theme
+# library("ggplot2")
+# theme_set(theme_bw(base_size = 14) +
+#             theme(legend.position="bottom",
+#                   panel.grid.major.x = element_blank(),
+#                   panel.grid.minor.x = element_blank()))
+# set_sum_contrasts()
+# cbpp <- lme4::cbpp
+# cbpp$prob <- with(cbpp, incidence / size)
+# example_model <- stan_glmer(prob ~ period + (1|herd),
+#                             data = cbpp, family = binomial, weight = size,
+#                             chains = 2, cores = 1, seed = 12345, iter = 500)
+# b1 <- afex_plot(example_model, "period")
+# b2 <- afex_plot(example_model, "period", data_geom = geom_violin)
+# b12 <- ggplotGrob(cowplot::plot_grid(b1, b2))
+# 
+# cbpp_l <- vector("list", nrow(cbpp))
+# for (i in seq_along(cbpp_l)) {
+#   cbpp_l[[i]] <- data.frame(
+#     herd = cbpp$herd[i],
+#     period = cbpp$period[i],
+#     incidence = rep(0, cbpp$size[i])
+#   )
+#   cbpp_l[[i]]$incidence[seq_len(cbpp$incidence[i])] <- 1
+# }
+# cbpp_l <- do.call("rbind", cbpp_l)
+# cbpp_l$herd <- factor(cbpp_l$herd, levels = levels(cbpp$herd))
+# cbpp_l$period <- factor(cbpp_l$period, levels = levels(cbpp$period))
+# example_model2 <- stan_glmer(incidence ~ period + (1|herd),
+#                              data = cbpp_l, family = binomial,
 #                              chains = 2, cores = 1, seed = 12345, iter = 500)
-#  b1 <- afex_plot(example_model, "period")
-#  b2 <- afex_plot(example_model, "period", data_geom = geom_violin)
-#  b12 <- ggplotGrob(plot_grid(b1, b2))
-#  
-#  cbpp_l <- vector("list", nrow(cbpp))
-#  for (i in seq_along(cbpp_l)) {
-#    cbpp_l[[i]] <- data.frame(
-#      herd = cbpp$herd[i],
-#      period = cbpp$period[i],
-#      incidence = rep(0, cbpp$size[i])
-#    )
-#    cbpp_l[[i]]$incidence[seq_len(cbpp$incidence[i])] <- 1
-#  }
-#  cbpp_l <- do.call("rbind", cbpp_l)
-#  cbpp_l$herd <- factor(cbpp_l$herd, levels = levels(cbpp$herd))
-#  cbpp_l$period <- factor(cbpp_l$period, levels = levels(cbpp$period))
-#  example_model2 <- stan_glmer(incidence ~ period + (1|herd),
-#                               data = cbpp_l, family = binomial,
-#                               chains = 2, cores = 1, seed = 12345, iter = 500)
-#  b3 <- afex_plot(example_model2, "period")
-#  b4 <- afex_plot(example_model2, "period", id = "herd")
-#  b34 <- plot_grid(b3, b4)
-#  
-#  data("Machines", package = "MEMSS")
-#  mm <- stan_lmer(score ~ Machine + (Machine|Worker), data=Machines,
-#                  chains = 2, cores = 1, seed = 12345, iter = 500)
-#  b5 <- afex_plot(mm, "Machine")
-#  b6 <- afex_plot(mm, "Machine", id = "Worker", data = Machines)
-#  b56 <- ggplotGrob(plot_grid(b5, b6))
-#  save(b12, b34, b56, file = "../inst/extdata/plots_rstanarm.rda",
-#       compress = "xz", version = 2)
+# b3 <- afex_plot(example_model2, "period")
+# b4 <- afex_plot(example_model2, "period", id = "herd")
+# b34 <- ggplotGrob(cowplot::plot_grid(b3, b4))
+# 
+# data("Machines", package = "MEMSS")
+# mm <- stan_lmer(score ~ Machine + (Machine|Worker), data=Machines,
+#                 chains = 2, cores = 1, seed = 12345, iter = 500)
+# b5 <- afex_plot(mm, "Machine")
+# b6 <- afex_plot(mm, "Machine", id = "Worker", data = Machines)
+# b56 <- ggplotGrob(cowplot::plot_grid(b5, b6))
+# save(b12, b34, b56, file = "../inst/extdata/plots_rstanarm.rda",
+#      compress = "xz", version = 2)
 
 ## ----eval=FALSE-------------------------------------------------------------------------
-#  library("brms")
-#  data("Machines", package = "MEMSS")
-#  mm2 <- brm(score ~ Machine + (Machine|Worker), data=Machines,
-#             chains = 2, cores = 1, seed = 12345, iter = 500)
+# library("brms")
+# data("Machines", package = "MEMSS")
+# mm2 <- brm(score ~ Machine + (Machine|Worker), data=Machines,
+#            chains = 2, cores = 1, seed = 12345, iter = 500)
 
 ## ----eval=FALSE-------------------------------------------------------------------------
-#  bb1 <- afex_plot(mm2, "Machine", data = Machines, dv = "score")
-#  ## No id column passed. Assuming all rows are independent samples.
-#  bb2 <- afex_plot(mm2, "Machine", id = "Worker",
-#            data = Machines, dv = "score")
-#  plot_grid(bb1, bb2)
+# bb1 <- afex_plot(mm2, "Machine", data = Machines, dv = "score")
+# ## No id column passed. Assuming all rows are independent samples.
+# bb2 <- afex_plot(mm2, "Machine", id = "Worker",
+#           data = Machines, dv = "score")
+# plot_grid(bb1, bb2)
 
 ## ----fig.width=7, fig.height=3, echo=FALSE----------------------------------------------
 load(system.file("extdata/", "plots_brms.rda", package = "afex"))
 grid::grid.newpage(); grid::grid.draw(bbout)
 
 ## ----eval=FALSE, include=FALSE----------------------------------------------------------
-#  library("brms")
-#  data("Machines", package = "MEMSS")
-#  mm2 <- brm(score ~ Machine + (Machine|Worker), data=Machines,
-#             chains = 2, cores = 1, seed = 12345, iter = 500)
-#  bb1 <- afex_plot(mm2, "Machine", data = Machines, dv = "score")
-#  bb2 <- afex_plot(mm2, "Machine", id = "Worker",
-#            data = Machines, dv = "score")
-#  bbout <- ggplotGrob(plot_grid(bb1, bb2))
-#  save(bbout, file = "../inst/extdata/plots_brms.rda", version = 2)
-
-## ----fig.width=4, fig.height=3, eval = FALSE--------------------------------------------
-#  library("GLMMadaptive")
-#  data(Salamanders, package = "glmmTMB")
-#  gm1 <- mixed_model(count~spp * mined, random = ~ 1 | site, data = Salamanders,
-#                     family = zi.poisson(), zi_fixed = ~ mined)
-#  
-#  afex_plot(gm1, "spp", data = Salamanders)
+# library("brms")
+# data("Machines", package = "MEMSS")
+# mm2 <- brm(score ~ Machine + (Machine|Worker), data=Machines,
+#            chains = 2, cores = 1, seed = 12345, iter = 500)
+# bb1 <- afex_plot(mm2, "Machine", data = Machines, dv = "score")
+# bb2 <- afex_plot(mm2, "Machine", id = "Worker",
+#           data = Machines, dv = "score")
+# bbout <- ggplotGrob(plot_grid(bb1, bb2))
+# save(bbout, file = "../inst/extdata/plots_brms.rda", version = 2)
 

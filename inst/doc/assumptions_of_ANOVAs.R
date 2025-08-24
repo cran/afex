@@ -34,10 +34,10 @@ a1 <- aov_ez("id", "log_rt", fhch2010,
 check_sphericity(a1)
 
 ## ----eval = FALSE-----------------------------------------------------------------------
-#  afex_options(
-#    correction_aov = "GG", # or "HF"
-#    emmeans_model = "multivariate"
-#  )
+# afex_options(
+#   correction_aov = "GG", # or "HF"
+#   emmeans_model = "multivariate"
+# )
 
 ## ---------------------------------------------------------------------------------------
 data("stroop", package = "afex")
@@ -49,13 +49,15 @@ s1 <- aov_ez("pno", "rt", stroop1,
              within = c("condition", "congruency"))
 
 is_norm <- check_normality(s1)
+is_norm
 
-plot(is_norm)
-
-plot(is_norm, type = "qq")
+## disabled to allow ggplot2 4.0.0 update (August 2025)
+# plot(is_norm)
+# 
+# plot(is_norm, type = "qq")
 
 ## ---------------------------------------------------------------------------------------
-plot(is_norm, type = "qq", detrend = TRUE)
+# plot(is_norm, type = "qq", detrend = TRUE)
 
 ## ---------------------------------------------------------------------------------------
 s2 <- aov_ez("pno", "rt", stroop1,
@@ -63,6 +65,7 @@ s2 <- aov_ez("pno", "rt", stroop1,
              within = c("condition", "congruency"))
 
 is_norm <- check_normality(s2)
+is_norm
 
-plot(is_norm, type = "qq", detrend = TRUE)
+# plot(is_norm, type = "qq", detrend = TRUE)
 

@@ -87,142 +87,142 @@ ggplot(agg_i, aes(x = interaction(density,frequency), y = mean)) +
   facet_grid(cols = vars(task), rows = vars(stimulus))
 
 ## ----eval = FALSE-----------------------------------------------------------------------
-#  m1s <- mixed(log_rt ~ task*stimulus*density*frequency +
-#                 (stimulus*density*frequency|id)+
-#                 (task|item), fhch,
-#               control = lmerControl(optCtrl = list(maxfun = 1e6)))
+# m1s <- mixed(log_rt ~ task*stimulus*density*frequency +
+#                (stimulus*density*frequency|id)+
+#                (task|item), fhch,
+#              control = lmerControl(optCtrl = list(maxfun = 1e6)))
 
 ## ----echo=FALSE-------------------------------------------------------------------------
 message("boundary (singular) fit: see ?isSingular")
 
 ## ----eval = FALSE-----------------------------------------------------------------------
-#  m2s <- mixed(log_rt ~ task*stimulus*density*frequency +
-#                 (stimulus*density*frequency|id)+
-#                 (task||item), fhch,
-#               control = lmerControl(optCtrl = list(maxfun = 1e6)), expand_re = TRUE)
+# m2s <- mixed(log_rt ~ task*stimulus*density*frequency +
+#                (stimulus*density*frequency|id)+
+#                (task||item), fhch,
+#              control = lmerControl(optCtrl = list(maxfun = 1e6)), expand_re = TRUE)
 
 ## ----echo=FALSE-------------------------------------------------------------------------
 message("boundary (singular) fit: see ?isSingular")
 
 ## ----eval = FALSE-----------------------------------------------------------------------
-#  m3s <- mixed(log_rt ~ task*stimulus*density*frequency +
-#                 (stimulus*density*frequency||id)+
-#                 (task|item), fhch,
-#               control = lmerControl(optCtrl = list(maxfun = 1e6)), expand_re = TRUE)
+# m3s <- mixed(log_rt ~ task*stimulus*density*frequency +
+#                (stimulus*density*frequency||id)+
+#                (task|item), fhch,
+#              control = lmerControl(optCtrl = list(maxfun = 1e6)), expand_re = TRUE)
 
 ## ----echo=FALSE-------------------------------------------------------------------------
 message("boundary (singular) fit: see ?isSingular")
 
 ## ----eval = FALSE-----------------------------------------------------------------------
-#  m4s <- mixed(log_rt ~ task*stimulus*density*frequency +
-#                 (stimulus*density*frequency||id)+
-#                 (task||item), fhch,
-#               control = lmerControl(optCtrl = list(maxfun = 1e6)), expand_re = TRUE)
+# m4s <- mixed(log_rt ~ task*stimulus*density*frequency +
+#                (stimulus*density*frequency||id)+
+#                (task||item), fhch,
+#              control = lmerControl(optCtrl = list(maxfun = 1e6)), expand_re = TRUE)
 
 ## ----echo=FALSE-------------------------------------------------------------------------
 message("boundary (singular) fit: see ?isSingular")
 
 ## ----eval=FALSE-------------------------------------------------------------------------
-#  summary(m4s)$varcor
+# summary(m4s)$varcor
 
 ## ----echo=FALSE-------------------------------------------------------------------------
 cat(outp_m4s_vc$output, sep = "\n")
 
 ## ----eval=FALSE-------------------------------------------------------------------------
-#  m5s <- mixed(log_rt ~ task*stimulus*density*frequency +
-#                 ((stimulus+density+frequency)^2||id)+
-#                 (task||item), fhch,
-#               control = lmerControl(optCtrl = list(maxfun = 1e6)), expand_re = TRUE)
+# m5s <- mixed(log_rt ~ task*stimulus*density*frequency +
+#                ((stimulus+density+frequency)^2||id)+
+#                (task||item), fhch,
+#              control = lmerControl(optCtrl = list(maxfun = 1e6)), expand_re = TRUE)
 
 ## ----echo=FALSE-------------------------------------------------------------------------
 message("boundary (singular) fit: see ?isSingular")
 
 ## ----eval=FALSE-------------------------------------------------------------------------
-#  summary(m5s)$varcor
+# summary(m5s)$varcor
 
 ## ----echo=FALSE-------------------------------------------------------------------------
 cat(outp_m5s_vc$output, sep = "\n")
 
 ## ----eval=FALSE-------------------------------------------------------------------------
-#  m6s <- mixed(log_rt ~ task*stimulus*density*frequency +
-#                 (stimulus+density+frequency||id)+
-#                 (task||item), fhch,
-#               control = lmerControl(optCtrl = list(maxfun = 1e6)),
-#               expand_re = TRUE)
+# m6s <- mixed(log_rt ~ task*stimulus*density*frequency +
+#                (stimulus+density+frequency||id)+
+#                (task||item), fhch,
+#              control = lmerControl(optCtrl = list(maxfun = 1e6)),
+#              expand_re = TRUE)
 
 ## ----echo=FALSE-------------------------------------------------------------------------
 message("boundary (singular) fit: see ?isSingular")
 
 ## ----eval=FALSE-------------------------------------------------------------------------
-#  summary(m6s)$varcor
+# summary(m6s)$varcor
 
 ## ----echo=FALSE-------------------------------------------------------------------------
 cat(outp_m6s_vc$output, sep = "\n")
 
 ## ----eval=FALSE-------------------------------------------------------------------------
-#  m7s <- mixed(log_rt ~ task*stimulus*density*frequency +
-#                 (stimulus+frequency||id)+
-#                 (task||item), fhch,
-#               control = lmerControl(optCtrl = list(maxfun = 1e6)), expand_re = TRUE)
+# m7s <- mixed(log_rt ~ task*stimulus*density*frequency +
+#                (stimulus+frequency||id)+
+#                (task||item), fhch,
+#              control = lmerControl(optCtrl = list(maxfun = 1e6)), expand_re = TRUE)
 
 ## ----eval=FALSE-------------------------------------------------------------------------
-#  m8s <- mixed(log_rt ~ task*stimulus*density*frequency +
-#                 (stimulus+frequency|id)+
-#                 (task||item), fhch,
-#               control = lmerControl(optCtrl = list(maxfun = 1e6)), expand_re = TRUE)
+# m8s <- mixed(log_rt ~ task*stimulus*density*frequency +
+#                (stimulus+frequency|id)+
+#                (task||item), fhch,
+#              control = lmerControl(optCtrl = list(maxfun = 1e6)), expand_re = TRUE)
 
 ## ----echo=FALSE-------------------------------------------------------------------------
 warning(fit_m8s$warnings, call. = FALSE)
 
 ## ----eval=FALSE-------------------------------------------------------------------------
-#  m9s <- mixed(log_rt ~ task*stimulus*density*frequency +
-#                 (stimulus+frequency||id)+
-#                 (task|item), fhch,
-#               control = lmerControl(optCtrl = list(maxfun = 1e6)), expand_re = TRUE)
+# m9s <- mixed(log_rt ~ task*stimulus*density*frequency +
+#                (stimulus+frequency||id)+
+#                (task|item), fhch,
+#              control = lmerControl(optCtrl = list(maxfun = 1e6)), expand_re = TRUE)
 
 ## ----eval=FALSE-------------------------------------------------------------------------
-#  left_join(nice(m1s), nice(m9s), by = "Effect",
-#            suffix = c("_full", "_final"))
+# left_join(nice(m1s), nice(m9s), by = "Effect",
+#           suffix = c("_full", "_final"))
 
 ## ----echo=FALSE-------------------------------------------------------------------------
 cat(outp_comb_anova$output, sep = "\n")
 
 ## ----eval = FALSE-----------------------------------------------------------------------
-#  m9lrt <- mixed(log_rt ~ task*stimulus*density*frequency +
-#                 (stimulus+frequency||id)+
-#                 (task|item), fhch, method = "LRT",
-#               control = lmerControl(optCtrl = list(maxfun = 1e6)),
-#               expand_re = TRUE)
-#  m9lrt
+# m9lrt <- mixed(log_rt ~ task*stimulus*density*frequency +
+#                (stimulus+frequency||id)+
+#                (task|item), fhch, method = "LRT",
+#              control = lmerControl(optCtrl = list(maxfun = 1e6)),
+#              expand_re = TRUE)
+# m9lrt
 
 ## ----echo=FALSE-------------------------------------------------------------------------
 cat(outp_m9lrt$output, sep = "\n")
 
 ## ----eval=FALSE-------------------------------------------------------------------------
-#  emm_options(lmer.df = "asymptotic") # also possible: 'satterthwaite', 'kenward-roger'
-#  emm_i1 <- emmeans(m9s, "frequency", by = c("stimulus", "task"))
-#  emm_i1
+# emm_options(lmer.df = "asymptotic") # also possible: 'satterthwaite', 'kenward-roger'
+# emm_i1 <- emmeans(m9s, "frequency", by = c("stimulus", "task"))
+# emm_i1
 
 ## ----echo=FALSE-------------------------------------------------------------------------
 message("NOTE: Results may be misleading due to involvement in interactions")
 cat(emm_o1$output, sep = "\n")
 
 ## ----eval=FALSE-------------------------------------------------------------------------
-#  update(pairs(emm_i1), by = NULL, adjust = "holm")
+# update(pairs(emm_i1), by = NULL, adjust = "holm")
 
 ## ----echo=FALSE-------------------------------------------------------------------------
 message("NOTE: Results may be misleading due to involvement in interactions")
 cat(emm_o2$output, sep = "\n")
 
 ## ----eval=FALSE-------------------------------------------------------------------------
-#  summary(as.glht(update(pairs(emm_i1), by = NULL)), test = adjusted("free"))
+# summary(as.glht(update(pairs(emm_i1), by = NULL)), test = adjusted("free"))
 
 ## ----echo=FALSE-------------------------------------------------------------------------
 cat(emm_o3$output, sep = "\n")
 
 ## ----eval=FALSE-------------------------------------------------------------------------
-#  emm_i1b <- update(emm_i1, tran = "log", type = "response", by = NULL)
-#  emm_i1b
+# emm_i1b <- update(emm_i1, tran = "log", type = "response", by = NULL)
+# emm_i1b
 
 ## ----echo=FALSE-------------------------------------------------------------------------
 cat(emm_o4$output, sep = "\n")
@@ -241,25 +241,25 @@ afex_plot(m9s, "frequency", "stimulus", "task", id = "id",
             color = "darkgrey"))
 
 ## ----eval=FALSE-------------------------------------------------------------------------
-#  joint_tests(m9s, by = c("stimulus", "task"))
+# joint_tests(m9s, by = c("stimulus", "task"))
 
 ## ----echo=FALSE-------------------------------------------------------------------------
 cat(emm_o5$output, sep = "\n")
 
 ## ----eval=FALSE-------------------------------------------------------------------------
-#  emm_i2 <- emmeans(m2s, c("density", "frequency"), by = c("stimulus", "task"))
-#  emm_i2
+# emm_i2 <- emmeans(m2s, c("density", "frequency"), by = c("stimulus", "task"))
+# emm_i2
 
 ## ----echo=FALSE-------------------------------------------------------------------------
 cat(emm_o6$output, sep = "\n")
 
 ## ----eval=FALSE-------------------------------------------------------------------------
-#  # desired contrats:
-#  des_c <- list(
-#    ll_hl = c(1, -1, 0, 0),
-#    lh_hh = c(0, 0, 1, -1)
-#    )
-#  update(contrast(emm_i2, des_c), by = NULL, adjust = "holm")
+# # desired contrats:
+# des_c <- list(
+#   ll_hl = c(1, -1, 0, 0),
+#   lh_hh = c(0, 0, 1, -1)
+#   )
+# update(contrast(emm_i2, des_c), by = NULL, adjust = "holm")
 
 ## ----echo=FALSE-------------------------------------------------------------------------
 cat(emm_o7$output, sep = "\n")

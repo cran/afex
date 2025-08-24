@@ -31,8 +31,8 @@ a1 <- aov_ez("id", "response", sk2011.1, between = "instruction",
 a1 # the default print method prints a data.frame produced by nice 
 
 ## ----eval=FALSE-------------------------------------------------------------------------
-#  aov_car(response ~ instruction + Error(id/inference*plausibility), sk2011.1)
-#  aov_4(response ~ instruction + (inference*plausibility|id), sk2011.1)
+# aov_car(response ~ instruction + Error(id/inference*plausibility), sk2011.1)
+# aov_4(response ~ instruction + (inference*plausibility|id), sk2011.1)
 
 ## ----results='asis'---------------------------------------------------------------------
 knitr::kable(nice(a1))

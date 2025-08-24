@@ -8,9 +8,9 @@ Suggests: emmeans (>= 1.4), coin, xtable, parallel, plyr, optimx,
         psychTools, ggplot2, MEMSS, effects, carData, ggbeeswarm, nlme,
         cowplot, jtools, ggpubr, ggpol, MASS, glmmTMB, brms, rstanarm,
         statmod, performance (>= 0.7.2), see (>= 0.6.4), ez,
-        ggResidpanel, grid, vdiffr
+        ggResidpanel, grid, vdiffr, GLMMadaptive
 Imports: pbkrtest (>= 0.4-1), lmerTest (>= 3.0-0), car, reshape2,
-        stats, methods, utils
+        stats, methods, utils, reformulas, rlang
 Description: Convenience functions for analyzing factorial experiments using ANOVA or
          mixed models. aov_ez(), aov_car(), and aov_4() allow specification of
          between, within (i.e., repeated-measures), or mixed (i.e., split-plot) 
@@ -42,15 +42,16 @@ Authors@R: c(person(given="Henrik", family="Singmann", role=c("aut", "cre"),
          person(given="Jonathon", family="Love", role=c("ctb")), 
          person(given="Russell", family="Lenth", role=c("ctb")), 
          person(given="Rune", family="Haubo Bojesen Christensen", role=c("ctb")))
-Version: 1.4-1
+Version: 1.5-0
 RoxygenNote: 7.3.2
 LazyData: true
 NeedsCompilation: no
-Packaged: 2024-09-01 13:47:00 UTC; singm
-Author: Henrik Singmann [aut, cre] (<https://orcid.org/0000-0002-4842-3657>),
+Packaged: 2025-08-24 14:25:29 UTC; singmann
+Author: Henrik Singmann [aut, cre] (ORCID:
+    <https://orcid.org/0000-0002-4842-3657>),
   Ben Bolker [aut],
   Jake Westfall [aut],
-  Frederik Aust [aut] (<https://orcid.org/0000-0003-4900-788X>),
+  Frederik Aust [aut] (ORCID: <https://orcid.org/0000-0003-4900-788X>),
   Mattan S. Ben-Shachar [aut],
   Søren Højsgaard [ctb],
   John Fox [ctb],
@@ -61,4 +62,4 @@ Author: Henrik Singmann [aut, cre] (<https://orcid.org/0000-0002-4842-3657>),
   Rune Haubo Bojesen Christensen [ctb]
 Maintainer: Henrik Singmann <singmann@gmail.com>
 Repository: CRAN
-Date/Publication: 2024-09-01 16:10:02 UTC
+Date/Publication: 2025-08-24 15:50:02 UTC

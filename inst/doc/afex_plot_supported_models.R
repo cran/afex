@@ -150,7 +150,7 @@ library("GLMMadaptive")
 data(Salamanders, package = "glmmTMB")
 load(system.file("extdata/", "glmmadapt_example_fit.rda", package = "afex"))
 
-## ----fig.width=4, fig.height=3, eval = TRUE---------------------------------------------
+## ----fig.width=4, fig.height=3----------------------------------------------------------
 afex_plot(gm1, "spp", "mined", id = "site", 
           data = Salamanders, data_geom = ggplot2::geom_count)
 

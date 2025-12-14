@@ -1,6 +1,6 @@
 ## ----echo=FALSE---------------------------------------------------------------
 req_suggested_packages <- c("emmeans", "ggplot2", "cowplot",
-                            "ggbeeswarm", "ggpol")
+                            "ggbeeswarm", "ggthemes")
 pcheck <- lapply(req_suggested_packages, requireNamespace, 
                  quietly = TRUE)
 if (any(!unlist(pcheck))) {
@@ -126,14 +126,28 @@ p2 <- afex_plot(aw, x = "noise", trace = "angle", error = "within", dodge = 0.5,
                 data_arg = list(
                   dodge.width = 0.5,  ## needs to be same as dodge
                   cex = 0.8))
+p2b <- afex_plot(aw, x = "noise", trace = "angle", error = "within", dodge = 0.5,
+                mapping = c("shape", "color"),
+                data_geom = ggbeeswarm::geom_beeswarm,
+                data_arg = list(
+                  colour = "darkgrey",
+                  dodge.width = 0.5,  ## needs to be same as dodge
+                  cex = 0.8)) +
+  ggthemes::scale_color_colorblind()
+p2c <- afex_plot(aw, x = "noise", trace = "angle", error = "within", dodge = 0.5,
+                mapping = c("shape", "color"),
+                data_geom = ggbeeswarm::geom_beeswarm,
+                data_arg = list(
+                  dodge.width = 0.5,  ## needs to be same as dodge
+                  cex = 0.8),
+                point_arg = list(colour = "black"),
+                line_arg = list(colour = "black"), 
+                error_arg = list(colour = "black", width = 0)) +
+  ggthemes::scale_color_colorblind()
 p3 <- afex_plot(aw, x = "noise", trace = "angle", error = "within", 
                 mapping = c("linetype", "shape", "fill"),
                 data_geom = ggplot2::geom_violin, 
                 data_arg = list(width = 0.5))
-p4 <- afex_plot(aw, x = "noise", trace = "angle", error = "within", 
-                mapping = c("shape", "fill"),
-                data_geom = ggplot2::geom_boxplot, 
-                data_arg = list(width = 0.3))
 # p5 <- afex_plot(aw, x = "noise", trace = "angle", error = "within", dodge = 0.7,
 #                 mapping = c("shape", "fill"),
 #                 data_geom = ggpol::geom_boxjitter, 
@@ -144,7 +158,7 @@ p4 <- afex_plot(aw, x = "noise", trace = "angle", error = "within",
 #                 point_arg = list(size = 2.5), 
 #                 line_arg = list(linetype = 0),
 #                 error_arg = list(linewidth = 1.5, width = 0))
-plot_grid(p2, p3, p4, ncol = 2) 
+plot_grid(p2, p2b, p2c, p3, ncol = 2) 
 
 ## ----fig.width=8.5, fig.height=4, dpi = 125, out.width='100%'---------------------------
 p1 <- afex_plot(aw, x = "noise", trace = "angle", mapping = c("color"), 
@@ -163,20 +177,10 @@ po1 <- afex_plot(aw, x = "angle", mapping = "color", error = "within",
                  point_arg = list(size = 2.5), 
                  error_arg = list(linewidth = 1.5, width = 0.05)) 
 po2 <- afex_plot(aw, x = "angle", mapping = "color", error = "within", 
+                 data_geom = geom_count,
                  point_arg = list(size = 2.5), 
                  error_arg = list(linewidth = 1.5, width = 0.05)) + 
   theme(legend.position="none")
-# po2 <- afex_plot(aw, x = "angle", error = "within", 
-#                  data_geom = ggpol::geom_boxjitter, 
-#                  mapping = "fill", data_alpha = 0.7, 
-#                  data_arg = list(
-#                    width = 0.6, 
-#                    jitter.params = list(width = 0.05, height = 10),
-#                    outlier.intersect = TRUE
-#                  ),
-#                  point_arg = list(size = 2.5), 
-#                  error_arg = list(linewidth = 1.5, width = 0.05)) +
-#   theme(legend.position="none")
 plot_grid(po1, po2) 
 
 ## ----fig.width=7, fig.height=3.5, message=FALSE-----------------------------------------
@@ -185,23 +189,32 @@ afex_plot(aw, x = "angle", panel = "noise", error = "within",
                  point_arg = list(size = 2.5), 
                  error_arg = list(linewidth = 1.5, width = 0.05)) + 
   theme(legend.position="none")
-# afex_plot(aw, x = "angle", panel = "noise", error = "within",
-#           data_geom = ggpol::geom_boxjitter,
-#           mapping = "fill", data_alpha = 0.7,
-#           data_arg = list(
-#             width = 0.6,
-#             jitter.params = list(width = 0.05, height = 10),
-#             outlier.intersect = TRUE
-#           ),
-#           point_arg = list(size = 2.5),
-#           error_arg = list(linewidth = 1.5, width = 0.05)) +
-#   theme(legend.position="none")
 
 ## ----fig.width=7, fig.height=3.5, message=FALSE-----------------------------------------
-plot_grid(
-  po1 + geom_line(aes(group = 1), color = "darkgrey", linewidth = 1.5), 
-  po2 + geom_line(aes(group = 1))
-) 
+pn1 <- po1 + geom_line(aes(group = 1), color = "darkgrey", linewidth = 1.5)
+pn2 <- afex_plot(
+  aw, x = "angle", mapping = "color", error = "within", 
+  point_arg = list(size = 2.5), 
+  error_arg = list(linewidth = 1.5, width = 0.05),
+  plot_first = geom_line(aes(group = 1), color = "darkgrey", linewidth = 1.5)) 
+plot_grid(pn1, pn2) 
+
+## ----fig.width=7, fig.height=3.5, message=FALSE-----------------------------------------
+ps1 <- afex_plot(aw, x = "angle", error = "within", 
+          data_geom = list(geom_count, geom_line),
+          data_arg = list(list(), list(aes(group = id)))) +
+  theme(legend.position="none")
+ps2 <- afex_plot(aw, x = "angle", error = "within", 
+                 mapping = c("shape", "colour"),
+          data_geom = list(geom_count, geom_line),
+          data_arg = list(list(colour = "darkgrey", shape = 19), 
+                          list(aes(group = id), colour = "darkgrey")),
+          point_arg = list(size = 2.5), 
+          error_arg = list(linewidth = 1.0, width = 0.05),
+          plot_first = geom_line(aes(group = 1), colour = "black")) +
+  theme(legend.position="none") +
+  ggthemes::scale_color_colorblind()
+plot_grid(ps1, ps2)
 
 ## ----echo=FALSE-------------------------------------------------------------------------
 load(system.file("extdata/", "output_afex_plot_mixed_vignette_model.rda", package = "afex"))
@@ -218,13 +231,13 @@ load(system.file("extdata/", "output_afex_plot_mixed_vignette_model.rda", packag
 ## ---------------------------------------------------------------------------------------
 emmeans::emm_options(lmer.df = "asymptotic")
 
-## ----eval=TRUE--------------------------------------------------------------------------
+## ---------------------------------------------------------------------------------------
 m9s
 
-## ----fig.width=7, fig.height=3.5, eval=TRUE---------------------------------------------
+## ----fig.width=7, fig.height=3.5--------------------------------------------------------
 afex_plot(m9s, x = "stimulus", trace = "frequency", panel = "task") 
 
-## ----fig.width=7, fig.height=3.5, eval=TRUE---------------------------------------------
+## ----fig.width=7, fig.height=3.5--------------------------------------------------------
 plot_grid( 
   afex_plot(m9s, x = "stimulus", trace = "frequency", panel = "task", 
             id = "id"), 
@@ -233,7 +246,7 @@ plot_grid(
   labels = c("ID", "Item") 
 )
 
-## ----fig.width=7, fig.height=3.5, eval=TRUE---------------------------------------------
+## ----fig.width=7, fig.height=3.5--------------------------------------------------------
 plot_grid( 
   afex_plot(m9s, x = "stimulus", trace = "frequency", panel = "task", 
             id = "item", dodge = 0.8,
@@ -252,15 +265,15 @@ plot_grid(
 ## ----echo=FALSE-------------------------------------------------------------------------
 cat(aout_2$output, sep = "\n")
 
-## ----fig.width=7, fig.height=3.5, eval=FALSE--------------------------------------------
-# plot_grid(
-#   afex_plot(m9s, x = "stimulus", trace = "frequency", panel = "task",
-#             id = "id", error = "within"),
-#   afex_plot(m9s, x = "stimulus", trace = "frequency", panel = "task",
-#             id = "item", dodge = 0.8, error = "within",
-#             data_geom = geom_violin,
-#             data_arg = list(width = 0.5))
-# )
+## ----fig.width=7, fig.height=3.5--------------------------------------------------------
+plot_grid( 
+  afex_plot(m9s, x = "stimulus", trace = "frequency", panel = "task", 
+            id = "id", error = "within"),
+  afex_plot(m9s, x = "stimulus", trace = "frequency", panel = "task", 
+            id = "item", dodge = 0.8, error = "within",
+            data_geom = geom_violin, 
+            data_arg = list(width = 0.5))
+)
 
 ## ----include=FALSE------------------------------------------------------------
 options(op)

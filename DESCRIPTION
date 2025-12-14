@@ -6,9 +6,9 @@ Suggests: emmeans (>= 1.4), coin, xtable, parallel, plyr, optimx,
         nloptr, knitr, rmarkdown, R.rsp, lattice, latticeExtra,
         multcomp, testthat, mlmRev, dplyr, tidyr, dfoptim, Matrix,
         psychTools, ggplot2, MEMSS, effects, carData, ggbeeswarm, nlme,
-        cowplot, jtools, ggpubr, ggpol, MASS, glmmTMB, brms, rstanarm,
+        cowplot, jtools, ggpubr, MASS, glmmTMB, brms, rstanarm,
         statmod, performance (>= 0.7.2), see (>= 0.6.4), ez,
-        ggResidpanel, grid, vdiffr, GLMMadaptive
+        ggResidpanel, grid, vdiffr, GLMMadaptive, ggthemes
 Imports: pbkrtest (>= 0.4-1), lmerTest (>= 3.0-0), car, reshape2,
         stats, methods, utils, reformulas, rlang
 Description: Convenience functions for analyzing factorial experiments using ANOVA or
@@ -42,11 +42,11 @@ Authors@R: c(person(given="Henrik", family="Singmann", role=c("aut", "cre"),
          person(given="Jonathon", family="Love", role=c("ctb")), 
          person(given="Russell", family="Lenth", role=c("ctb")), 
          person(given="Rune", family="Haubo Bojesen Christensen", role=c("ctb")))
-Version: 1.5-0
+Version: 1.5-1
 RoxygenNote: 7.3.2
 LazyData: true
 NeedsCompilation: no
-Packaged: 2025-08-24 14:25:29 UTC; singmann
+Packaged: 2025-12-14 15:40:19 UTC; singmann
 Author: Henrik Singmann [aut, cre] (ORCID:
     <https://orcid.org/0000-0002-4842-3657>),
   Ben Bolker [aut],
@@ -62,4 +62,4 @@ Author: Henrik Singmann [aut, cre] (ORCID:
   Rune Haubo Bojesen Christensen [ctb]
 Maintainer: Henrik Singmann <singmann@gmail.com>
 Repository: CRAN
-Date/Publication: 2025-08-24 15:50:02 UTC
+Date/Publication: 2025-12-14 16:40:02 UTC
